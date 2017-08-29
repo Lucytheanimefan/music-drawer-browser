@@ -1,17 +1,31 @@
 import mutagen
 import wave
 import numpy as np
+import subprocess
+import os
 
 import matplotlib.pyplot as plt
+
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')
 
 class SoundAnalyzer(object):
 
 	def __init__(self, filename):
 		self.filename = filename
 
+	def create_input_wav_file(self):
+		print os.path.dirname(os.path.abspath(__file__))
+		command_string = 'mpg123 -k 7000 -n 2400 -w input.wav {}'.format(UPLOAD_FOLDER + self.filename)
+		print command_string
+		commands = command_string.split()
+		print commands
+		p = subprocess.Popen(commands, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+		p.wait()
+
 	def process_file(self, should_filter=False):
-		wr = wave.open(self.filename, 'r')
-		print wr
+		self.create_input_wav_file()
+		wr = wave.open('input.wav', 'r')
 		sz = 44100 # Read and process 1 second at a time, 44.1 kHz
 		da = np.fromstring(wr.readframes(sz), dtype=np.int16)
 		wr.close()
@@ -21,6 +35,7 @@ class SoundAnalyzer(object):
 		lf, rf = np.fft.rfft(left), np.fft.rfft(right)
 
 		if should_filter:
+			print 'Filter'
 			lowpass = 21 # Remove lower frequencies below human hearing range
 			highpass = 9000 # Remove higher frequencies above human voice range
 
@@ -56,7 +71,7 @@ def graph_fft(sound_data, frequency_data):
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("static/uploads/Heavy.wav")
+	sound = SoundAnalyzer("Burn_It_Down.mp3")
 	data = sound.process_file()
 	graph_fft(data['sound']['left'], data['frequency']['left'])
 
