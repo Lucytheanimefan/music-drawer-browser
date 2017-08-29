@@ -1,3 +1,4 @@
 venv/*
 static/uploads/*
 *.pyc
+sample-graph.png
