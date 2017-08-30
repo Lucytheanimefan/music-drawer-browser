@@ -36,7 +36,7 @@ def upload():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        print filename
+        #print filename
         return redirect(url_for('uploaded_file',
                                 filename=filename))
     return "No allowed file"
