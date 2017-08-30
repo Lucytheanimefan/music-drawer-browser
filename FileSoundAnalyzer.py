@@ -7,7 +7,7 @@ import os
 import soundfile as sf
 import matplotlib.pyplot as plt
 import speech_recognition as sr
-from pocketsphinx import AudioFile, get_model_path, get_data_path
+#from pocketsphinx import AudioFile, get_model_path, get_data_path
 from multiprocessing import Process
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -86,7 +86,7 @@ class SoundAnalyzer(object):
 
 		# recognize speech using Google Speech Recognition
 		#self.run_google_speech_rec(audio)
-
+		'''
 		model_path = get_model_path()
 		data_path = get_data_path()
 
@@ -103,6 +103,7 @@ class SoundAnalyzer(object):
 		audio = AudioFile(**config)
 		for phrase in audio:
 		    print(phrase)
+		'''
 
 
 	def run_google_speech_rec(self, audio):
