@@ -1,33 +1,53 @@
 import mutagen
 import wave
 import numpy as np
+import struct
 import subprocess
 import os
-
+import soundfile as sf
 import matplotlib.pyplot as plt
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')
 
+SECOND = 44100
+MINUTE = 60 * SECOND
+THREE_MINUTE = 2 * MINUTE
+
 class SoundAnalyzer(object):
 
 	def __init__(self, filename):
 		self.filename = filename
+		self.seconds = None
 
 	def create_input_wav_file(self):
 		print os.path.dirname(os.path.abspath(__file__))
 		command_string = 'mpg123 -k 7000 -n 2400 -w input.wav {}'.format(UPLOAD_FOLDER + self.filename)
-		print command_string
 		commands = command_string.split()
-		print commands
 		p = subprocess.Popen(commands, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 		p.wait()
 
-	def process_file(self, should_filter=False):
-		self.create_input_wav_file()
-		wr = wave.open('input.wav', 'r')
-		sz = 44100 # Read and process 1 second at a time, 44.1 kHz
-		da = np.fromstring(wr.readframes(sz), dtype=np.int16)
+	def duration(self):
+		f = sf.SoundFile(UPLOAD_FOLDER + self.filename)
+		print('samples = {}'.format(len(f)))
+		print('sample rate = {}'.format(f.samplerate))
+		self.seconds = (len(f) / f.samplerate)
+		return self.seconds
+
+	def process_file(self, should_filter=False, preprocess = True):
+		wr = None
+		seconds = None
+		if preprocess:
+			print 'Preprocessing'
+			self.create_input_wav_file()
+			wr = wave.open('input.wav', 'r')
+		else:
+			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
+			seconds = self.duration()
+		sz = SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
+		data = wr.readframes(sz)
+		#print struct.unpack("<H", data)
+		da = np.fromstring(data, dtype=np.int16)
 		wr.close()
 		left, right = da[0::2], da[1::2]
 
@@ -51,14 +71,14 @@ class SoundAnalyzer(object):
 
 
 # for debugging, plot a figure of the sound and the frequencies 
-def graph_fft(sound_data, frequency_data):
+def graph_fft(sound_data, frequency_data, seconds):
 	plt.figure(1)
 	a = plt.subplot(211)
 	r = 2**16/2
 	a.set_ylim([-r, r])
 	a.set_xlabel('time [s]')
 	a.set_ylabel('sample value [-]')
-	x = np.arange(44100)/44100
+	x = np.arange(seconds)/(seconds)
 	plt.plot(x, sound_data)
 	b = plt.subplot(212)
 	b.set_xscale('log')
@@ -71,9 +91,10 @@ def graph_fft(sound_data, frequency_data):
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("Burn_It_Down.mp3")
-	data = sound.process_file()
-	graph_fft(data['sound']['left'], data['frequency']['left'])
+	sound = SoundAnalyzer("Heavy.wav")
+	data = sound.process_file(preprocess = False)
+	sound.duration()
+	graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
 
 
