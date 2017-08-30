@@ -25,7 +25,7 @@ class SoundAnalyzer(object):
 		self.seconds = None
 
 	def create_input_wav_file(self):
-		print os.path.dirname(os.path.abspath(__file__))
+		#print os.path.dirname(os.path.abspath(__file__))
 		command_string = 'mpg123 -k 7000 -n 2400 -w input.wav {}'.format(UPLOAD_FOLDER + self.filename)
 		commands = command_string.split()
 		p = subprocess.Popen(commands, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -42,7 +42,7 @@ class SoundAnalyzer(object):
 		wr = None
 		seconds = None
 		if preprocess:
-			print 'Preprocessing'
+			#print 'Preprocessing'
 			self.create_input_wav_file()
 			wr = wave.open('input.wav', 'r')
 		else:
@@ -59,7 +59,7 @@ class SoundAnalyzer(object):
 		lf, rf = np.fft.rfft(left), np.fft.rfft(right)
 
 		if should_filter:
-			print 'Filter'
+			#print 'Filter'
 			lowpass = 21 # Remove lower frequencies below human hearing range
 			highpass = 9000 # Remove higher frequencies above human voice range
 
@@ -111,7 +111,7 @@ class SoundAnalyzer(object):
 			# write text fo file
 			file = open('googlespeech.txt', 'w+')
 			text = "Google Speech Recognition thinks you said: \n" + str(r.recognize_google(audio))
-			print text
+			#print text
 			file.write(text)
 		except sr.UnknownValueError:
 		    print("Google Speech Recognition could not understand audio")
