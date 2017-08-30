@@ -1,7 +1,7 @@
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify
 import os
 from werkzeug.utils import secure_filename
-
+import FileSoundAnalyzer
 
 app = Flask(__name__)
 
@@ -49,6 +49,12 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
+@app.route('/analyzefile', methods=['GET'])
+def analyzeFile():
+	sound = FileSoundAnalyzer.SoundAnalyzer("Heavy.wav")
+	data = sound.process_file(preprocess = False)
+	return str(data)
 
 
 if __name__ == "__main__":

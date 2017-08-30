@@ -10,3 +10,4 @@ gevent
 mutagen
 numpy
 matplotlib
+soundfile

@@ -34,7 +34,7 @@ class SoundAnalyzer(object):
 		self.seconds = (len(f) / f.samplerate)
 		return self.seconds
 
-	def process_file(self, should_filter=False, preprocess = True):
+	def process_file(self, should_filter=False, preprocess = False):
 		wr = None
 		seconds = None
 		if preprocess:
@@ -92,7 +92,7 @@ def graph_fft(sound_data, frequency_data, seconds):
 
 if __name__ == '__main__':
 	sound = SoundAnalyzer("Heavy.wav")
-	data = sound.process_file(preprocess = False)
+	data = sound.process_file()
 	sound.duration()
 	graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
