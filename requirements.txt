@@ -10,5 +10,4 @@ gevent
 mutagen
 numpy
 matplotlib
-soundfile
 SpeechRecognition==3.7.1

@@ -4,14 +4,15 @@ import numpy as np
 import struct
 import subprocess
 import os
-import soundfile as sf
+#import soundfile as sf
 import matplotlib.pyplot as plt
 import speech_recognition as sr
 #from pocketsphinx import AudioFile, get_model_path, get_data_path
 from multiprocessing import Process
+import contextlib
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')
+UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads/')
 
 SECOND = 44100
 MINUTE = 60 * SECOND
@@ -32,11 +33,18 @@ class SoundAnalyzer(object):
 		p.wait()
 
 	def duration(self):
-		f = sf.SoundFile(UPLOAD_FOLDER + self.filename)
-		print('samples = {}'.format(len(f)))
-		print('sample rate = {}'.format(f.samplerate))
-		self.seconds = (len(f) / f.samplerate)
-		return self.seconds
+		with contextlib.closing(wave.open(UPLOAD_FOLDER + self.filename,'r')) as f:
+		    frames = f.getnframes()
+		    rate = f.getframerate()
+		    duration = frames / float(rate)
+		    print(duration)
+		    self.seconds = duration
+		    return duration
+		# f = sf.SoundFile(UPLOAD_FOLDER + self.filename)
+		# print('samples = {}'.format(len(f)))
+		# print('sample rate = {}'.format(f.samplerate))
+		# self.seconds = (len(f) / f.samplerate)
+		# return self.seconds
 
 	def process_file(self, should_filter=False, preprocess = False, aslist = False):
 		wr = None
