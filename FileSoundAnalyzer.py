@@ -6,6 +6,9 @@ import subprocess
 import os
 import soundfile as sf
 import matplotlib.pyplot as plt
+import speech_recognition as sr
+from pocketsphinx import AudioFile, get_model_path, get_data_path
+from multiprocessing import Process
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')
@@ -13,6 +16,7 @@ UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')
 SECOND = 44100
 MINUTE = 60 * SECOND
 THREE_MINUTE = 2 * MINUTE
+r = sr.Recognizer()
 
 class SoundAnalyzer(object):
 
@@ -34,7 +38,7 @@ class SoundAnalyzer(object):
 		self.seconds = (len(f) / f.samplerate)
 		return self.seconds
 
-	def process_file(self, should_filter=False, preprocess = False):
+	def process_file(self, should_filter=False, preprocess = False, aslist = False):
 		wr = None
 		seconds = None
 		if preprocess:
@@ -67,7 +71,78 @@ class SoundAnalyzer(object):
 			# combines the left and right channels again using the column_stack() function, interleaves the left and right samples using the ravel() method and finally converts them to 16-bit integers with the astype() method
 			ns = np.column_stack((nl,nr)).ravel().astype(np.int16)
 
+		if aslist:
+			return {'sound': { 'left':left.tolist(), 'right':right.tolist() }, 'frequency': {'left':lf.tolist(), 'right': rf.tolist()}}
+
 		return {'sound': { 'left':left, 'right':right }, 'frequency': {'left':lf, 'right': rf}}
+
+	def transcribe_file(self):
+		# use the audio file as the audio source
+		with sr.AudioFile(UPLOAD_FOLDER + self.filename) as source:
+			audio = r.record(source)  # read the entire audio file
+
+		#process_goog = Process(target=self.run_google_speech_rec, args=(audio,))
+		#process_goog.start()
+
+		# recognize speech using Google Speech Recognition
+		#self.run_google_speech_rec(audio)
+
+		model_path = get_model_path()
+		data_path = get_data_path()
+
+		config = {
+		    'verbose': False,
+		    'audio_file': os.path.join(UPLOAD_FOLDER, 'castle.raw'),
+		    'buffer_size': 2048,
+		    'no_search': False,
+		    'full_utt': False,
+		    'hmm': os.path.join(model_path, 'en-us'),
+		    'lm': os.path.join(model_path, 'en-us.lm.bin'),
+		    'dict': os.path.join(model_path, 'cmudict-en-us.dict')
+		    }
+		audio = AudioFile(**config)
+		for phrase in audio:
+		    print(phrase)
+
+
+	def run_google_speech_rec(self, audio):
+		try:
+			# write text fo file
+			file = open('googlespeech.txt', 'w+')
+			text = "Google Speech Recognition thinks you said: \n" + str(r.recognize_google(audio))
+			print text
+			file.write(text)
+		except sr.UnknownValueError:
+		    print("Google Speech Recognition could not understand audio")
+		except sr.RequestError as e:
+		    print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+	def run_sphinx_speech_rec(self, audio):
+		# recognize speech using Sphinx
+		try:
+		    return ("Sphinx thinks you said: \n" + r.recognize_sphinx(audio))
+		except sr.UnknownValueError:
+		    print("Sphinx could not understand audio")
+		except sr.RequestError as e:
+		    print("Sphinx error; {0}".format(e))
+
+	def run_wit_ai_speech_rec(self, wit_ai_key, audio):
+		# recognize speech using Wit.ai
+		try:
+			return ("Wit.ai thinks you said: \n" + r.recognize_wit(audio, key=wit_ai_key))
+		except sr.UnknownValueError:
+		    print("Wit.ai could not understand audio")
+		except sr.RequestError as e:
+		    print("Could not request results from Wit.ai service; {0}".format(e))
+
+	def run_bing_speech_rec(self, bing_key, audio):
+		# recognize speech using Microsoft Bing Voice Recognition
+		try:
+		    return ("Microsoft Bing Voice Recognition thinks you said: \n" + r.recognize_bing(audio, key=bing_key))
+		except sr.UnknownValueError:
+		    print("Microsoft Bing Voice Recognition could not understand audio")
+		except sr.RequestError as e:
+		    print("Could not request results from Microsoft Bing Voice Recognition service; {0}".format(e))
 
 
 # for debugging, plot a figure of the sound and the frequencies 
@@ -91,10 +166,11 @@ def graph_fft(sound_data, frequency_data, seconds):
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("Heavy.wav")
-	data = sound.process_file()
-	sound.duration()
-	graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
+	sound = SoundAnalyzer("input.wav")
+	sound.transcribe_file()
+	#ata = sound.process_file()
+	#sound.duration()
+	#graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
 
 
