@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session
 import os
 from werkzeug.utils import secure_filename
 import FileSoundAnalyzer
+import json
 
 app = Flask(__name__)
+app.secret_key = os.urandom(12)
+
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
@@ -35,14 +38,16 @@ def upload():
         # the upload folder we setup
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         # Do all of the analysis on the music
-        sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
-        data = sound.process_file(preprocess = False)
-        if data:
-        	return str(data)
+        
+        session['filename'] = filename
+        #print data
+
+        return render_template("musicpage.html", musicfile=str(url_for('uploaded_file',filename=filename)))
+        #if data:
+        #	return str(data)
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        return redirect(url_for('uploaded_file',
-                                filename=filename))
+        #return redirect(url_for('uploaded_file',filename=filename))
     return "No allowed file"
 
 # This route is expecting a parameter containing the name
@@ -54,13 +59,17 @@ def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
-@app.route('/analyzefile', methods=['GET'])
-def analyzeFile():
-	sound = FileSoundAnalyzer.SoundAnalyzer("Heavy.wav")
-	data = sound.process_file(preprocess = False)
-	return str(data)
+@app.route('/getMusicData', methods=['GET'])
+def getMusicData():
+	filename = request.args.get('filename')
+	start_index = int(request.args.get('start'))
+	end_index = int(request.args.get('end'))
+	sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
+	data = sound.process_file()['sound']['right']
+	data = data[start_index:end_index]
+	return jsonify(data)
 
 
 if __name__ == "__main__":
 	port = int(os.environ.get("PORT", 5000))
-	app.run(host='0.0.0.0', debug=True, port=port,threaded=True) 
+	app.run(host='0.0.0.0', debug=True, port=port, threaded=True) 

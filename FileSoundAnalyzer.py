@@ -17,6 +17,7 @@ UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads/')
 SECOND = 44100
 MINUTE = 60 * SECOND
 THREE_MINUTE = 2 * MINUTE
+sz = SECOND
 r = sr.Recognizer()
 
 class SoundAnalyzer(object):
@@ -56,7 +57,7 @@ class SoundAnalyzer(object):
 		else:
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
-		sz = SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
+		sz = seconds#SECOND# * seconds# Read and process 1 second at a time, 44.1 kHz
 		data = wr.readframes(sz)
 		#print struct.unpack("<H", data)
 		da = np.fromstring(data, dtype=np.int16)
@@ -82,7 +83,13 @@ class SoundAnalyzer(object):
 		if aslist:
 			return {'sound': { 'left':left.tolist(), 'right':right.tolist() }, 'frequency': {'left':lf.tolist(), 'right': rf.tolist()}}
 
-		return {'sound': { 'left':left, 'right':right }, 'frequency': {'left':lf, 'right': rf}}
+		print "Done processing audio file"
+
+		print len(left)
+
+		# For now, not returning frequency - need to figure out how to deal with frequency
+		#return {'sound': { 'left':left, 'right':right }, 'frequency': {'left':lf, 'right': rf}}
+		return {'sound': { 'left':left.tolist(), 'right':right.tolist() }} #, 'frequency': {'left':lf, 'right': rf}}
 
 	def transcribe_file(self):
 		# use the audio file as the audio source
@@ -178,8 +185,9 @@ def graph_fft(sound_data, frequency_data, seconds):
 
 if __name__ == '__main__':
 	sound = SoundAnalyzer("input.wav")
-	sound.transcribe_file()
-	#ata = sound.process_file()
+	#sound.transcribe_file()
+	data = sound.process_file()
+	print data
 	#sound.duration()
 	#graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
