@@ -37,12 +37,14 @@ def upload():
         # Do all of the analysis on the music
         sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
         data = sound.process_file(preprocess = False)
-        if data:
-        	return str(data)
+
+        return render_template("musicpage.html", musicfile = str(url_for('uploaded_file',
+                                filename=filename)))
+        #if data:
+        #	return str(data)
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        return redirect(url_for('uploaded_file',
-                                filename=filename))
+        #return redirect(url_for('uploaded_file', filename=filename))
     return "No allowed file"
 
 # This route is expecting a parameter containing the name

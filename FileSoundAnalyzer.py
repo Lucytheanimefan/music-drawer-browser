@@ -5,14 +5,14 @@ import struct
 import subprocess
 import os
 #import soundfile as sf
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import speech_recognition as sr
 #from pocketsphinx import AudioFile, get_model_path, get_data_path
 from multiprocessing import Process
 import contextlib
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads/')
+UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads/')#'/tmp/'#os.path.join(APP_ROOT, 'static/uploads/')
 
 SECOND = 44100
 MINUTE = 60 * SECOND
@@ -38,7 +38,7 @@ class SoundAnalyzer(object):
 		    rate = f.getframerate()
 		    duration = frames / float(rate)
 		    print(duration)
-		    self.seconds = duration
+		    self.seconds = int(duration)
 		    return int(duration)
 		# f = sf.SoundFile(UPLOAD_FOLDER + self.filename)
 		# print('samples = {}'.format(len(f)))
@@ -154,7 +154,7 @@ class SoundAnalyzer(object):
 		    print("Could not request results from Microsoft Bing Voice Recognition service; {0}".format(e))
 
 
-'''
+
 # for debugging, plot a figure of the sound and the frequencies 
 def graph_fft(sound_data, frequency_data, seconds):
 	plt.figure(1)
@@ -171,17 +171,17 @@ def graph_fft(sound_data, frequency_data, seconds):
 	b.set_ylabel('|amplitude|')
 	plt.plot(abs(frequency_data))
 	plt.savefig('sample-graph.png')
-'''
+
 
 
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("input.wav")
-	sound.transcribe_file()
-	#ata = sound.process_file()
+	sound = SoundAnalyzer("Shelter.wav")
+	#sound.transcribe_file()
+	data = sound.process_file()
 	#sound.duration()
-	#graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
+	graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
 
 
