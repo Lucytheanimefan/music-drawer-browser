@@ -1,0 +1,6 @@
+{% extends "layout.html" %} {% block css %}
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
+<audio id="myAudio" controls onplay="playMusic();">
+    <source src="{{ musicfile }}">
+</audio>
+{% endblock %}
