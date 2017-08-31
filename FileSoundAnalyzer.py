@@ -57,7 +57,7 @@ class SoundAnalyzer(object):
 		else:
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
-		sz = seconds#SECOND# * seconds# Read and process 1 second at a time, 44.1 kHz
+		sz = SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
 		data = wr.readframes(sz)
 		#print struct.unpack("<H", data)
 		da = np.fromstring(data, dtype=np.int16)

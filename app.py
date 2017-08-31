@@ -62,11 +62,11 @@ def uploaded_file(filename):
 @app.route('/getMusicData', methods=['GET'])
 def getMusicData():
 	filename = request.args.get('filename')
-	start_index = int(request.args.get('start'))
-	end_index = int(request.args.get('end'))
+	#start_index = int(request.args.get('start'))
+	#end_index = int(request.args.get('end'))
 	sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
-	data = sound.process_file()['sound']['right']
-	data = data[start_index:end_index]
+	data = sound.process_file()['sound']['left']
+	data = data[-100:]#data[start_index:end_index]
 	return jsonify(data)
 
 

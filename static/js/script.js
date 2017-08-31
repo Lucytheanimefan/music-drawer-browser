@@ -11,7 +11,7 @@ function playMusic(filename) {
     var songDuration = document.getElementById("myAudio").duration; // in seconds
     console.log("Song duration: " + songDuration);
 
-    $.get("/getMusicData", { start: 0, end: Math.floor(songDuration), filename: musicfile }, function(data) {
+    $.get("/getMusicData", { start: -100, end: null, filename: musicfile }, function(data) {
         console.log("Get music data return: ");
         console.log(data);
     });
