@@ -39,7 +39,7 @@ class SoundAnalyzer(object):
 		    duration = frames / float(rate)
 		    print(duration)
 		    self.seconds = duration
-		    return duration
+		    return int(duration)
 		# f = sf.SoundFile(UPLOAD_FOLDER + self.filename)
 		# print('samples = {}'.format(len(f)))
 		# print('sample rate = {}'.format(f.samplerate))

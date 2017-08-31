@@ -9,7 +9,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app.config['ALLOWED_EXTENSIONS'] = set(['wav', 'mp3'])
+app.config['ALLOWED_EXTENSIONS'] = set(['wav'])
 
 # For a given file, return whether it's an allowed type or not
 def allowed_file(filename):
@@ -23,7 +23,7 @@ def main():
 
 
 # Route that will process the file upload
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST', 'GET'])
 def upload():
     # Get the name of the uploaded file
     file = request.files['file']
@@ -34,9 +34,13 @@ def upload():
         # Move the file form the temporal folder to
         # the upload folder we setup
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # Do all of the analysis on the music
+        sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
+        data = sound.process_file(preprocess = False)
+        if data:
+        	return str(data)
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        #print filename
         return redirect(url_for('uploaded_file',
                                 filename=filename))
     return "No allowed file"
