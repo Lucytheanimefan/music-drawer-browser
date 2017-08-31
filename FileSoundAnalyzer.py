@@ -37,6 +37,7 @@ class SoundAnalyzer(object):
 		    frames = f.getnframes()
 		    rate = f.getframerate()
 		    duration = frames / float(rate)
+		    print("duration")
 		    print(duration)
 		    self.seconds = int(duration)
 		    return int(duration)
@@ -57,6 +58,8 @@ class SoundAnalyzer(object):
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
 		sz = SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
+		print("size: ")
+		print(sz)
 		data = wr.readframes(sz)
 		#print struct.unpack("<H", data)
 		da = np.fromstring(data, dtype=np.int16)
@@ -163,7 +166,10 @@ def graph_fft(sound_data, frequency_data, seconds):
 	a.set_ylim([-r, r])
 	a.set_xlabel('time [s]')
 	a.set_ylabel('sample value [-]')
+	print(seconds)
 	x = np.arange(seconds)/(seconds)
+	print "x range: "
+	print len(x)
 	plt.plot(x, sound_data)
 	b = plt.subplot(212)
 	b.set_xscale('log')
