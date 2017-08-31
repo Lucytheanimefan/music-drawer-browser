@@ -5,7 +5,7 @@ import struct
 import subprocess
 import os
 #import soundfile as sf
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import speech_recognition as sr
 #from pocketsphinx import AudioFile, get_model_path, get_data_path
 from multiprocessing import Process
@@ -154,6 +154,7 @@ class SoundAnalyzer(object):
 		    print("Could not request results from Microsoft Bing Voice Recognition service; {0}".format(e))
 
 
+'''
 # for debugging, plot a figure of the sound and the frequencies 
 def graph_fft(sound_data, frequency_data, seconds):
 	plt.figure(1)
@@ -170,6 +171,7 @@ def graph_fft(sound_data, frequency_data, seconds):
 	b.set_ylabel('|amplitude|')
 	plt.plot(abs(frequency_data))
 	plt.savefig('sample-graph.png')
+'''
 
 
 
