@@ -57,11 +57,19 @@ class SoundAnalyzer(object):
 		else:
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
-		sz = SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
+		sz = SECOND#seconds#SECOND * seconds# Read and process 1 second at a time, 44.1 kHz
 		print("size: ")
 		print(sz)
 		data = wr.readframes(sz)
-		#print struct.unpack("<H", data)
+		channels = wr.getnchannels()
+		frame_data = struct.unpack('{}h'.format(sz * channels), data)
+		print('Frame data length: ')
+		print(len(frame_data))
+		print(type(frame_data))
+		#print list(frame_data)
+		return list(frame_data)
+		
+		# ------- TODO
 		da = np.fromstring(data, dtype=np.int16)
 		wr.close()
 		left, right = da[0::2], da[1::2]
@@ -179,15 +187,25 @@ def graph_fft(sound_data, frequency_data, seconds):
 	plt.savefig('sample-graph.png')
 
 
+'''
+An audio frame, or sample, contains amplitude (loudness) information at that particular point in time. To produce sound, tens of thousands of frames are played in sequence to produce frequencies. In the case of CD quality audio or uncompressed wave audio, there are around 44,100 frames/samples per second.
+'''
+def graph(values):
+	plt.figure(1)
+	x = np.arange(SECOND * 2)/(SECOND * 2)
+	plt.plot(values)
+	plt.savefig('sample-graph1.png')
+
 
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("Shelter.wav")
+	sound = SoundAnalyzer("Castle_Of_Glass.wav")
 	#sound.transcribe_file()
 	data = sound.process_file()
+	graph(data)
 	#sound.duration()
-	graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
+	#graph_fft(data['sound']['left'], data['frequency']['left'], sound.seconds * SECOND)
 
 
 
