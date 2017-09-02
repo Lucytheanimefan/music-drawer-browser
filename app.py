@@ -67,7 +67,7 @@ def getMusicData():
 	#end_index = int(request.args.get('end'))  
     music = specgram.MusicNoteAnalyzer(filename)
     notes = music.generateGraphData()
-    print notes
+    print(notes)
     sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
     data = sound.process_file()['sound']['left']
     to_return = {'amplitude':data, 'notes':notes}
