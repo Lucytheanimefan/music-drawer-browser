@@ -8,6 +8,7 @@ Werkzeug==0.11.11
 gunicorn
 gevent
 mutagen
+xlrd
 numpy
 pandas
 scipy
