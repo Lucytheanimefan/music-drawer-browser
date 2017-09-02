@@ -21,7 +21,6 @@ sz = SECOND
 r = sr.Recognizer()
 
 class SoundAnalyzer(object):
-
 	def __init__(self, filename):
 		self.filename = filename
 		self.seconds = None
@@ -91,9 +90,9 @@ class SoundAnalyzer(object):
 		if aslist:
 			return {'sound': { 'left':left.tolist(), 'right':right.tolist() }, 'frequency': {'left':lf.tolist(), 'right': rf.tolist()}}
 
-		print "Done processing audio file"
+		print("Done processing audio file")
 
-		print len(left)
+		print(len(left))
 
 		# For now, not returning frequency - need to figure out how to deal with frequency
 		#return {'sound': { 'left':left, 'right':right }, 'frequency': {'left':lf, 'right': rf}}
