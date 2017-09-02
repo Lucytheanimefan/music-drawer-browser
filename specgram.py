@@ -2,6 +2,7 @@ from __future__ import division
 import scipy.io.wavfile as wavfile
 import numpy as np
 import matplotlib.pyplot as plt
+import xlrd
 import pandas as pd
 #import seaborn
 from scipy.signal import argrelextrema
