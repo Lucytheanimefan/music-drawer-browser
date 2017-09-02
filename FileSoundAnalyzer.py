@@ -66,7 +66,7 @@ class SoundAnalyzer(object):
 		channels = wr.getnchannels()
 		frame_data = struct.unpack('{}h'.format(sz * channels), data)
 		print('Frame data: ')
-		print list(frame_data)
+		print(list(frame_data))
 	
 		da = np.fromstring(data, dtype=np.int16)
 		wr.close()

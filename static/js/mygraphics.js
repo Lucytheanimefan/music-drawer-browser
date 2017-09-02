@@ -19,9 +19,6 @@ function lineBreak(numChars, line) {
             if (line.charAt(i + 1) == ' ') {
                 toRet = toRet + "<br>";
             }
-            /*else{
-                            toRet = toRet + "-<br>";
-                        }*/
         }
     }
     return toRet;
