@@ -167,7 +167,7 @@ class MusicNoteAnalyzer(object):
             maxPower = np.max(p)
             maxFrequency = f[np.where(p==max(p))][0]
 
-            for j in xrange(2,8):
+            for j in range(2,8):
                 harmonics = self.getHarmonics(p,f,maxPower,maxFrequency,harmonics,j)
 
             if harmonics==[]:
