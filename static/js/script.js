@@ -55,11 +55,18 @@ function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
     return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
 }
 
+function notZero(num)
+{
+    return num!=0;
+}
+
 function formatData(data = musicData) {
+    // First filter
+    data = data.filter(notZero);
     return data.map(function(x, index) {
         // Scale number to range
-        scaled_x = scaleBetween(x, 0, $(document).height(), minDataPoint, maxDataPoint);
-        scaled_index = scaleBetween(index, 0, $(document).width(), 0, musicData.length);
+        scaled_x = scaleBetween(x, 0, $("#musicCanvas").height(), minDataPoint, maxDataPoint);
+        scaled_index = scaleBetween(index, 0, $("#musicCanvas").width(), 0, musicData.length);
         return [scaled_index, scaled_x]
     });
 }
@@ -71,5 +78,7 @@ function beginArt(data = musicData)
     console.log("Scaled data:");
     console.log(data);
     // For now let's just do lines
-    animateLines('musicArt', ctx, data, width = 1, color = "white", opacity = 1, i = 0, callback = null);
+    animateLines('musicArt', ctx, data, width = 0.1, color = "white", opacity = 1, i = 0, function(){
+        console.log("Done animating at " + new Date().getTime() / 1000);
+    });
 }

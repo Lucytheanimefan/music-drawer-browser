@@ -57,7 +57,7 @@ class SoundAnalyzer(object):
 		else:
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
-		sz = SECOND # Read and process 1 second at a time, 44.1 kHz
+		sz = seconds * 60#SECOND # Read and process 1 second at a time, 44.1 kHz
 		print("Seconds of song")
 		print(seconds)
 		data = wr.readframes(sz)
