@@ -3,6 +3,7 @@ import os
 from werkzeug.utils import secure_filename
 import FileSoundAnalyzer
 import json
+import specgram
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -61,17 +62,17 @@ def uploaded_file(filename):
 
 @app.route('/getMusicData', methods=['GET'])
 def getMusicData():
-	filename = request.args.get('filename')
+    filename = request.args.get('filename')
 	#start_index = int(request.args.get('start'))
 	#end_index = int(request.args.get('end'))  
-    
-    # notes
-    #music = MusicNoteAnalyzer(filename)
-    
-	sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
-	data = sound.process_file()['sound']['left']
-	#data = data[-100:]#data[start_index:end_index]
-	return jsonify(data)
+    music = specgram.MusicNoteAnalyzer(filename)
+    notes = music.generateGraphData()
+    print notes
+    sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
+    data = sound.process_file()['sound']['left']
+    to_return = {'amplitude':data, 'notes':notes}
+    #data = data[-100:]#data[start_index:end_index]
+    return jsonify(to_return)
 
 
 if __name__ == "__main__":

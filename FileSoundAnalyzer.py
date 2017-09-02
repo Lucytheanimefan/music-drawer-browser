@@ -10,6 +10,7 @@ import speech_recognition as sr
 #from pocketsphinx import AudioFile, get_model_path, get_data_path
 from multiprocessing import Process
 import contextlib
+import specgram
 
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads/')

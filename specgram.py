@@ -3,7 +3,7 @@ import scipy.io.wavfile as wavfile
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import seaborn
+#import seaborn
 from scipy.signal import argrelextrema
 from scipy.interpolate import interp1d
 #import abjad
@@ -12,6 +12,7 @@ import re
 NoteFile = pd.read_excel('NoteFreq.xlsx',0)
 #staff = abjad.Staff()
 
+debug = False
 
 def fixNotes(letters):
 
@@ -62,13 +63,14 @@ def fixNotes(letters):
 
 class MusicNoteAnalyzer(object):
     def __init__(self, filename):
-        self.filename = filename
+        self.filename = '/tmp/' + filename
         self.rate, self.data = wavfile.read(self.filename)
         #print self.rate
         #print self.data[22100]
 
     def generateGraphData(self):
-        print(self.data[:,0])
+        if debug:
+            print(self.data[:,0])
         time = np.arange(len(self.data[:,0]))*1.0/self.rate
         nfft = 1024*6
         pxx, freq, bins, plot = plt.specgram(self.data[:,0],NFFT=nfft,noverlap=32, Fs=2,
@@ -102,8 +104,9 @@ class MusicNoteAnalyzer(object):
         notes = np.array([indMax,indMin]).T
         letterNotes, freqs, individualNotes = self.getFreq(notes, self.data)
 
-        print "Letter notes: "
-        print letterNotes
+        if debug:
+            print("Letter notes: ")
+            print(letterNotes)
 
         result = []
         # Format the notes

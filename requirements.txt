@@ -9,4 +9,7 @@ gunicorn
 gevent
 mutagen
 numpy
+pandas
+scipy
 SpeechRecognition==3.7.1
+matplotlib

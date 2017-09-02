@@ -24,7 +24,7 @@ function playMusic(filename) {
     $.get("/getMusicData", { start: -100, end: null, filename: musicfile }, function(data) {
         console.log("Get music data return: ");
         console.log(data);
-        musicData = data;
+        musicData = data['amplitude'];
         minDataPoint = Math.min.apply(null, data);
         maxDataPoint = Math.max.apply(null, data);
         console.log("minDataPoint: " + minDataPoint + ", maxDataPoint: " + maxDataPoint);
