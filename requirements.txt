@@ -12,4 +12,5 @@ numpy
 pandas
 scipy
 SpeechRecognition==3.7.1
+tkinter
 matplotlib
