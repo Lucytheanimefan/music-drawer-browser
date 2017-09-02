@@ -57,7 +57,7 @@ class SoundAnalyzer(object):
 		else:
 			wr = wave.open(UPLOAD_FOLDER + self.filename, 'r')
 			seconds = self.duration()
-		sz = seconds#SECOND # Read and process 1 second at a time, 44.1 kHz
+		sz = SECOND # Read and process 1 second at a time, 44.1 kHz
 		print("Seconds of song")
 		print(seconds)
 		data = wr.readframes(sz)
@@ -65,6 +65,7 @@ class SoundAnalyzer(object):
 		# the wave api of doing things: 
 		channels = wr.getnchannels()
 		frame_data = struct.unpack('{}h'.format(sz * channels), data)
+		print('Frame data: ')
 		print list(frame_data)
 	
 		da = np.fromstring(data, dtype=np.int16)
@@ -191,7 +192,7 @@ def graph_fft(sound_data, frequency_data, seconds):
 
 
 if __name__ == '__main__':
-	sound = SoundAnalyzer("input.wav")
+	sound = SoundAnalyzer("Burin_It_Down.wav")
 	#sound.transcribe_file()
 	data = sound.process_file()
 	#sound.duration()
