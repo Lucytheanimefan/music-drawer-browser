@@ -45,6 +45,7 @@ function playMusic() {
 
     // frequencyBinCount tells you how many values you'll receive from the analyser
     var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    var timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
     // we're ready to receive some data!
     // loop
@@ -55,7 +56,11 @@ function playMusic() {
             analyser.getByteFrequencyData(frequencyData);
             // render frame based on values in frequencyData
             //console.log(frequencyData);
-            beginArt(frequencyData);
+            
+            analyser.getByteTimeDomainData(timeDomainData); // fill the Uint8Array with data returned from getByteTimeDomainData()
+            //console.log(timeDomainData);
+            //beginArt(frequencyData);
+            beginArt(timeDomainData);
         }
     }
     //audio.play();
@@ -91,17 +96,24 @@ function formatData(data = musicData) {
 }
 
 function beginArt(data = musicData) {
-    console.log("Begin art");
+    //console.log("Begin art");
     //data = formatData(data);
     //console.log(data);
     // For now let's just do lines
-    //var color = (Math.random() > 0.5);
-    var opacity = Math.random()
-    ctx.fillStyle = "rgba(255, 255, 255, " + opacity + ")";
-
+    var color = (Math.random() > 0.5);
+    //console.log("Color: " + color)''
+    var opacity = Math.random();
+    if (color) {
+        ctx.fillStyle = "rgba(255, 255, 255, " + opacity + ")";
+    } else {
+        var col = Math.random() * 255;
+        //console.log("Col: " + col);
+        ctx.fillStyle = "rgba(" + col + ", " + col + ", " + col + ", 1)";
+    }
+    var pix = 0.3;
     for (var i = 0; i < data.length; i++) {
         //console.log(data[i]);
-        ctx.fillRect(data[i] + 50, Math.random() * canvasHeight,1,1);
+        ctx.fillRect(data[i] + 50, canvasHeight/2, pix, pix);
         //var update = (i%3 == 0) || (i == data.length - 1);
         //drawPixel(ctx, canvasData, canvasWidth, data[i] * 5, Math.random() * 50, 255, 255, 255, 1, update);
     }
