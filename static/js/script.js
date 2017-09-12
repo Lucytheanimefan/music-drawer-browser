@@ -19,6 +19,7 @@ var musicPlaying = false;
 
 function triggerMusic() {
     musicPlaying = true;
+    playMusic();
 }
 
 // Let's try to do this in javascript instead of python
