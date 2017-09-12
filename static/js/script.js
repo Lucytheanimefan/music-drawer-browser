@@ -30,14 +30,11 @@ function playMusic(filename) {
         console.log("minDataPoint: " + minDataPoint + ", maxDataPoint: " + maxDataPoint);
         beginArt();
     });
-    if (firstTimePlay) 
-    {
+    if (firstTimePlay) {
         startTime = new Date().getTime() / 1000; // seconds
         endTime = startTime + songDuration;
         firstTimePlay = false;
-    } 
-    else 
-    {
+    } else {
         endPauseTime = new Date().getTime() / 1000;
         console.log("End pause time: " + endPauseTime);
         endTime = endTime + (endPauseTime - startPauseTime);
@@ -55,9 +52,8 @@ function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
     return (maxAllowed - minAllowed) * (unscaledNum - min) / (max - min) + minAllowed;
 }
 
-function notZero(num)
-{
-    return num!=0;
+function notZero(num) {
+    return num != 0;
 }
 
 function formatData(data = musicData) {
@@ -71,14 +67,19 @@ function formatData(data = musicData) {
     });
 }
 
-function beginArt(data = musicData)
-{
+function beginArt(data = musicData) {
     console.log("Begin art");
     data = formatData(data);
     console.log("Scaled data:");
     console.log(data);
     // For now let's just do lines
-    animateLines('musicArt', ctx, data, width = 0.1, color = "white", opacity = 1, i = 0, function(){
+    animateLines('musicArt', ctx, data, width = 0.1, color = "white", opacity = 1, i = 0, function() {
         console.log("Done animating at " + new Date().getTime() / 1000);
     });
+}
+
+/* ---------------- Graphing visual only ---------------------- */
+function RefreshImage() {
+    document.pic0.src = "/tmp/pyaudioImage.png?a=" + String(Math.random() * 99999999);
+    setTimeout('RefreshImage()', 50);
 }
