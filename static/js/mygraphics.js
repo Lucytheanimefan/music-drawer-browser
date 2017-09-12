@@ -24,6 +24,21 @@ function lineBreak(numChars, line) {
     return toRet;
 }
 
+// That's how you define the value of a pixel //
+function drawPixel(ctx, canvasData, canvasWidth, x, y, r, g, b, a, update = true) {
+    console.log("Draw pixel");
+    var index = (x + y * canvasWidth) * 4;
+
+    canvasData.data[index + 0] = r;
+    canvasData.data[index + 1] = g;
+    canvasData.data[index + 2] = b;
+    canvasData.data[index + 3] = a;
+
+    if (update) {
+        ctx.putImageData(canvasData, 0, 0);
+    }
+}
+
 
 function drawLine(ctx, startx, starty, endx, endy, color = "black", width = 10) {
     // Stroked triangle
@@ -89,7 +104,7 @@ function generateCoordinates(start, end, step = 1, horizontal, extraCoord) {
  * @param  {Object} startEnd {"start":[x,y],"end":[x1,y1]}
  * @return {[type]}          [description]
  */
-function generateDiagonalCoordinates(startEnd, step = 1, keepXEnd = true, keepYEnd=true) {
+function generateDiagonalCoordinates(startEnd, step = 1, keepXEnd = true, keepYEnd = true) {
 
     var start = startEnd["start"];
     var end = startEnd["end"];

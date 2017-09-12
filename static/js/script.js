@@ -10,12 +10,21 @@ var musicData;
 var minDataPoint;
 var maxDataPoint;
 
-var canvas = document.getElementById('musicCanvas');
-//canvas.width = $(document).width();
-//canvas.height = $(document).height();
-var ctx = canvas.getContext('2d');
+var canvas;
+var canvasWidth;
+var canvasHeight;
+var ctx;
+var canvasData;
 
 var musicPlaying = false;
+
+function setCanvas() {
+    canvas = document.getElementById('musicCanvas');
+    canvasWidth = canvas.width;
+    canvasHeight = canvas.height;
+    ctx = canvas.getContext('2d');
+    canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+}
 
 function triggerMusic() {
     musicPlaying = true;
@@ -45,39 +54,13 @@ function playMusic() {
         if (musicPlaying) {
             analyser.getByteFrequencyData(frequencyData);
             // render frame based on values in frequencyData
-            console.log(frequencyData);
+            //console.log(frequencyData);
+            beginArt(frequencyData);
         }
     }
     //audio.play();
     renderFrame();
 }
-
-// function playMusic(filename) {
-//     var n = filename.lastIndexOf('/');
-//     var musicfile = filename.substring(n + 1);
-//     var songDuration = document.getElementById("myAudio").duration; // in seconds
-//     console.log("Song duration: " + songDuration);
-
-//     $.get("/getMusicData", { start: -100, end: null, filename: musicfile }, function(data) {
-//         console.log("Get music data return: ");
-//         console.log(data);
-//         musicData = data['amplitude'];
-//         minDataPoint = Math.min.apply(null, data);
-//         maxDataPoint = Math.max.apply(null, data);
-//         console.log("minDataPoint: " + minDataPoint + ", maxDataPoint: " + maxDataPoint);
-//         beginArt();
-//     });
-//     if (firstTimePlay) {
-//         startTime = new Date().getTime() / 1000; // seconds
-//         endTime = startTime + songDuration;
-//         firstTimePlay = false;
-//     } else {
-//         endPauseTime = new Date().getTime() / 1000;
-//         console.log("End pause time: " + endPauseTime);
-//         endTime = endTime + (endPauseTime - startPauseTime);
-//         console.log("New end time: " + endTime);
-//     }
-// }
 
 
 
@@ -98,7 +81,7 @@ function notZero(num) {
 
 function formatData(data = musicData) {
     // First filter
-    data = data.filter(notZero);
+    //data = data.filter(notZero);
     return data.map(function(x, index) {
         // Scale number to range
         scaled_x = scaleBetween(x, 0, $("#musicCanvas").height(), minDataPoint, maxDataPoint);
@@ -109,13 +92,22 @@ function formatData(data = musicData) {
 
 function beginArt(data = musicData) {
     console.log("Begin art");
-    data = formatData(data);
-    console.log("Scaled data:");
-    console.log(data);
+    //data = formatData(data);
+    //console.log(data);
     // For now let's just do lines
-    animateLines('musicArt', ctx, data, width = 0.1, color = "white", opacity = 1, i = 0, function() {
-        console.log("Done animating at " + new Date().getTime() / 1000);
-    });
+    //var color = (Math.random() > 0.5);
+    var opacity = Math.random()
+    ctx.fillStyle = "rgba(255, 255, 255, " + opacity + ")";
+
+    for (var i = 0; i < data.length; i++) {
+        //console.log(data[i]);
+        ctx.fillRect(data[i] + 50, Math.random() * canvasHeight,1,1);
+        //var update = (i%3 == 0) || (i == data.length - 1);
+        //drawPixel(ctx, canvasData, canvasWidth, data[i] * 5, Math.random() * 50, 255, 255, 255, 1, update);
+    }
+    // animateLines('musicArt', ctx, data, width = 0.1, color = "white", opacity = 1, i = 0, function() {
+    //     console.log("Done animating at " + new Date().getTime() / 1000);
+    // });
 }
 
 /* ---------------- Graphing visual only ---------------------- */
