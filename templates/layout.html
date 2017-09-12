@@ -13,10 +13,10 @@
 <body>
     {% block body %}{% endblock %}
     
-    {% block scripts %} {% endblock %}
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/mygraphics.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts %} {% endblock %}
 </body>
 
 </html>

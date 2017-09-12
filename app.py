@@ -13,7 +13,7 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app.config['ALLOWED_EXTENSIONS'] = set(['wav'])
+app.config['ALLOWED_EXTENSIONS'] = set(['wav', 'mp3'])
 
 # For a given file, return whether it's an allowed type or not
 def allowed_file(filename):
