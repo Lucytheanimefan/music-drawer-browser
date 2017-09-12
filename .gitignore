@@ -2,3 +2,5 @@ venv/*
 static/uploads/*
 *.pyc
 sample-graph.png
+audioData.txt
+03.png
