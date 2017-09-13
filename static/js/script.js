@@ -220,9 +220,7 @@ function visualize() {
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
 
-    analyser.fftSize = 2048;
     var bufferLength = analyser.fftSize;
-    console.log(bufferLength);
     var dataArray = new Uint8Array(bufferLength);
 
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
@@ -231,9 +229,10 @@ function visualize() {
 
         drawVisual = requestAnimationFrame(draw);
 
+        // Looks like this is still necessary even though called before
         analyser.getByteTimeDomainData(dataArray);
 
-        ctx.fillStyle = 'rgb(200, 200, 200)';
+        ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
         ctx.lineWidth = 2;
