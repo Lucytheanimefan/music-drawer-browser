@@ -1,9 +1,9 @@
 from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session
 import os
 from werkzeug.utils import secure_filename
-import FileSoundAnalyzer
+#import FileSoundAnalyzer
 import json
-import specgram
+#import specgram
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -59,7 +59,7 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
-
+'''
 @app.route('/getMusicData', methods=['GET'])
 def getMusicData():
     filename = request.args.get('filename')
@@ -73,7 +73,7 @@ def getMusicData():
     to_return = {'amplitude':data, 'notes':notes}
     #data = data[-100:]#data[start_index:end_index]
     return jsonify(to_return)
-
+'''
 
 if __name__ == "__main__":
 	port = int(os.environ.get("PORT", 5000))
