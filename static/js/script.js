@@ -18,11 +18,19 @@ var canvasData;
 
 var musicPlaying = false;
 
+var analyser;
 var frequencyData;
 var timeDomainData;
 var bufferLength;
 
 var colorScheme = [];
+
+var cursorX;
+var cursorY;
+
+var animationID;
+
+var red = "#ff0000";
 
 function setCanvas() {
     canvas = document.getElementById('musicCanvas');
@@ -39,6 +47,7 @@ function setCanvas() {
 
 function triggerMusic() {
     musicPlaying = true;
+    //trackMouseMovement();
     playMusic();
 }
 
@@ -48,7 +57,7 @@ function playMusic() {
     //$("#myAudio").attr("src", filename);
     var audio = document.getElementById('myAudio');
     var audioSrc = ctx.createMediaElementSource(audio);
-    var analyser = ctx.createAnalyser();
+    analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;
     audioSrc.connect(ctx.destination);
     // we have to connect the MediaElementSource with the analyser 
@@ -59,11 +68,16 @@ function playMusic() {
     frequencyData = new Uint8Array(analyser.frequencyBinCount);
     timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
+    visualize();
 
+    // drawGraph();
     // we're ready to receive some data!
     // loop
     function renderFrame() {
-        requestAnimationFrame(renderFrame);
+        // if (animationID && Math.random() < 0.3) {
+        //     cancelAnimationFrame(animationID);
+        // }
+        animationID = requestAnimationFrame(renderFrame);
         // update data in frequencyData
         if (musicPlaying) {
             analyser.getByteFrequencyData(frequencyData);
@@ -75,10 +89,16 @@ function playMusic() {
         }
     }
     //audio.play();
-    renderFrame();
+    //renderFrame();
 }
 
-
+function trackMouseMovement() {
+    $(document).mousemove(function(event) {
+        cursorX = event.pageX;
+        cursorY = event.pageY;
+        console.log(cursorX + "," + cursorY);
+    });
+}
 
 function setPause() {
     musicPlaying = false;
@@ -95,24 +115,18 @@ function notZero(num) {
     return num != 0;
 }
 
-function formatData(data = musicData) {
-    // First filter
-    //data = data.filter(notZero);
-    return data.map(function(x, index) {
-        // Scale number to range
-        scaled_x = scaleBetween(x, 0, $("#musicCanvas").height(), minDataPoint, maxDataPoint);
-        scaled_index = scaleBetween(index, 0, $("#musicCanvas").width(), 0, musicData.length);
-        return [scaled_index, scaled_x]
-    });
-}
+// function formatData(data = musicData) {
+//     return data.map(function(x, index) {
+//         // Scale number to range
+//         scaled_x = scaleBetween(x, 0, $("#musicCanvas").height(), minDataPoint, maxDataPoint);
+//         scaled_index = scaleBetween(index, 0, $("#musicCanvas").width(), 0, musicData.length);
+//         return [scaled_index, scaled_x]
+//     });
+// }
 
 function beginArt(lines = true) {
-    //console.log("Begin art");
-    //data = formatData(data);
-    //console.log(data);
     // For now let's just do lines
     var color = (Math.random() > 0.5);
-    //console.log("Color: " + color)''
     var opacity = Math.random();
     ctx.lineWidth = 0.1;
     var col = Math.round(Math.random() * 255);
@@ -121,8 +135,7 @@ function beginArt(lines = true) {
     ctx.strokeStyle = "#ffffff";
     ctx.fillStyle = "#ffffff";
 
-
-
+    // pixel size for dots only
     var pix = 0.3;
     for (var i = 0; i < frequencyData.length; i++) {
         var x = frequencyData[i];
@@ -137,14 +150,24 @@ function beginArt(lines = true) {
         } else {
             ctx.fillRect(x, y, pix, pix);
         }
-        //console.log(timeDomainData[i]);
-        if (Math.abs(timeDomainData[i] - timeDomainData[i - 30]) > 100) {
-            //console.log("Clear!!!!");
+
+        // TODO: react to big jumps in amplitude - find better way to do this
+        if (Math.abs(timeDomainData[i] - timeDomainData[i - 30]) > 50) {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             var index = Math.round(6 * Math.random());
             if (colorScheme.length > index) {
                 ctx.strokeStyle = colorScheme[index]["hex"]["value"];
                 ctx.fillStyle = colorScheme[index]["hex"]["value"];
+            }
+        }
+
+        if (cursorX && cursorY) {
+            console.log("Cursor stuff!");
+            var coords = generateCircleCoordinates(100, 50, cursorX, cursorY);
+            ctx.fillStyle = red; // Just so we can see it
+            for (var i = 0; i < coords.length; i++) {
+                var coordSet = coords[i];
+                ctx.fillRect(coordSet[0], coordSet[1], 2 * pix, 2 * pix);
             }
         }
     }
@@ -191,4 +214,55 @@ function drawGraph() {
     ctx.stroke();
 
     drawGraph();
+}
+
+function visualize() {
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
+
+    analyser.fftSize = 2048;
+    var bufferLength = analyser.fftSize;
+    console.log(bufferLength);
+    var dataArray = new Uint8Array(bufferLength);
+
+    ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    var draw = function() {
+
+        drawVisual = requestAnimationFrame(draw);
+
+        analyser.getByteTimeDomainData(dataArray);
+
+        ctx.fillStyle = 'rgb(200, 200, 200)';
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgb(255, 255, 255)';
+
+        ctx.beginPath();
+
+        var sliceWidth = WIDTH * 1.0 / bufferLength;
+        var x = 0;
+
+        for (var i = 0; i < bufferLength; i++) {
+
+            var v = dataArray[i] / 128.0;
+            var y = v * HEIGHT / 2;
+
+            if (i === 0) {
+                ctx.moveTo(x, y);
+            } else {
+                ctx.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+        }
+
+        ctx.lineTo(canvas.width, canvas.height / 2);
+        ctx.stroke();
+    };
+
+    draw();
+
+
 }
