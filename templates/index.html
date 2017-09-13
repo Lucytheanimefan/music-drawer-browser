@@ -1,9 +1,13 @@
 {% extends "layout.html" %} {% block body %}
-    <p>Volume</p>
-    <input id="volume" type="range" min="0" max="1" step="0.1" value="0.5"/>
-
-    <form action="upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file"><br /><br />
-        <input type="submit" value="Upload">
-      </form>
+<form action="upload" method="post" enctype="multipart/form-data">
+    <label class="btn btn-default btn-file">
+        Browse
+        <input type="file" name="file" style="display: none;">
+    </label>
+    <!--<label class="custom-file">
+        <input type="file" id="file" class="custom-file-input">
+        <span class="custom-file-control"></span>
+    </label>-->
+    <input type="submit" value="Upload">
+</form>
 {% endblock %}
