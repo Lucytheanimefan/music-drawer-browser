@@ -12,10 +12,11 @@ class MFCCAnalysis(object):
 		sample_rate, X = scipy.io.wavfile.read(self.filename)
 		X[X==0]=1
 		ceps, mspec, spec = mfcc(X)
-		print ceps
 		self.write_ceps(ceps)
 		plt.plot(ceps)
-		plt.show()
+		#plt.show()
+		plt.title(self.filename)
+		plt.savefig(os.path.splitext(self.filename)[0]+".png")
 
 	def write_ceps(self, ceps):
 	    """
