@@ -83,6 +83,7 @@ function playMusic() {
             analyser.getByteFrequencyData(frequencyData);
             // render frame based on values in frequencyData
 
+            //The byte values do range between 0-255, and yes, that maps to -1 to +1, so 128 is zero. (It's not volts, but full-range unitless values.)
             analyser.getByteTimeDomainData(timeDomainData); // fill the Uint8Array with data returned from getByteTimeDomainData()
 
             beginArt();
@@ -230,7 +231,11 @@ function visualize() {
         drawVisual = requestAnimationFrame(draw);
 
         // Looks like this is still necessary even though called before
+        // That array is at the current sampleRate exposed on the AudioContext, so if it's the default 2048 fftSize, frequencyBinCount will be 1024, and if your device is running at 44.1kHz, that will equate to around 23ms of data
         analyser.getByteTimeDomainData(dataArray);
+
+        console.log("Data array: ");
+        console.log(dataArray);
 
         ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
