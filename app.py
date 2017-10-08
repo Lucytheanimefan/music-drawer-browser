@@ -4,6 +4,11 @@ from werkzeug.utils import secure_filename
 #import FileSoundAnalyzer
 import json
 #import specgram
+#
+from pyAudioAnalysis import audioBasicIO
+from pyAudioAnalysis import audioFeatureExtraction
+import matplotlib.pyplot as plt
+from pyAudioAnalysis import audioTrainTest as aT
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
@@ -19,6 +24,11 @@ app.config['ALLOWED_EXTENSIONS'] = set(['wav', 'mp3'])
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+def classify_genre(filename):
+    print filename
+    return aT.fileClassification(filename, "pyAudioAnalysis/data/svmMusicGenre3","svm")
+
 
 @app.route("/")
 def main():
@@ -37,18 +47,22 @@ def upload():
         filename = secure_filename(file.filename)
         # Move the file form the temporal folder to
         # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(full_filename)
         # Do all of the analysis on the music
         
-        session['filename'] = filename
+        #session['filename'] = filename
         #print data
+        Result, probs, classNames = classify_genre(full_filename)
+        genre_data = {}
+        for i, name in enumerate(classNames):
+            genre_data[name] = probs[i]
 
-        return render_template("musicpage.html", musicfile=str(url_for('uploaded_file',filename=filename)))
-        #if data:
-        #	return str(data)
-        # Redirect the user to the uploaded_file route, which
-        # will basicaly show on the browser the uploaded file
-        #return redirect(url_for('uploaded_file',filename=filename))
+        print genre_data
+        # preprocessing audio analysis
+
+        return render_template("musicpage.html", genres = genre_data, musicfile=str(url_for('uploaded_file',filename=filename)))
+
     return "No allowed file"
 
 # This route is expecting a parameter containing the name
