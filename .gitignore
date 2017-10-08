@@ -4,3 +4,4 @@ static/uploads/*
 sample-graph.png
 audioData.txt
 03.png
+pyAudioAnalysis/data/*
