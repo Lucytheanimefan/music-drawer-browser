@@ -30,19 +30,23 @@ var cursorY;
 
 var animationID;
 
+var genreColor = "#ffffff";
+
 var red = "#ff0000";
 
 function setCanvas() {
+    genreColor = generateColorBasedOnGenre();
+    console.log(genreColor);
     canvas = document.getElementById('musicCanvas');
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
     canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-    generateColors("24B1E0", function(colors) {
-        console.log("COLORS: ");
-        console.log(colors);
-        colorScheme = colors;
-    });
+    // generateColors("24B1E0", function(colors) {
+    //     console.log("COLORS: ");
+    //     console.log(colors);
+    //     colorScheme = colors;
+    // });
 }
 
 function triggerMusic() {
@@ -133,8 +137,8 @@ function beginArt(lines = true) {
     var col = Math.round(Math.random() * 255);
 
     ctx.globalAlpha = 0.5;
-    ctx.strokeStyle = "#ffffff";
-    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = genreColor;
+    ctx.fillStyle = genreColor;
 
     // pixel size for dots only
     var pix = 0.3;
@@ -178,6 +182,28 @@ function beginArt(lines = true) {
 
 }
 
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+function generateColorBasedOnGenre(){
+    var genres = replaceAll(JSON.stringify($("#musicCanvas").data("genre")), "'", "\"" ).slice(1, -1);
+    genres = $.parseJSON(genres);
+    console.log(genres);
+    var genreString = "rgba(";
+    for (var genre in genres)
+    {
+        console.log(genre);
+        if (genres.hasOwnProperty(genre))
+        {
+            genreString += ((Math.round(genres[genre] * 265)) + ",");
+        }
+    }
+    //genreString = genreString.slice(0, -1);
+    genreString += "1)"
+    return genreString;
+}
+
 function generateColors(seedColor, callback) {
     var url = "http://thecolorapi.com/scheme?hex=" + seedColor + "&format=json&count=6";
     $.get(url, function(data) {
@@ -190,9 +216,9 @@ function generateColors(seedColor, callback) {
 function drawGraph() {
     drawVisual = requestAnimationFrame(drawGraph);
 
-    ctx.fillStyle = 'rgba(200, 200, 200, 1)';
+    ctx.fillStyle = genreColor;
     ctx.lineWidth = 2;
-    ctx.strokeStyle = 'rgba(255, 255, 255, 1)';
+    ctx.strokeStyle = genreColor;
     ctx.beginPath();
 
     var sliceWidth = canvasWidth * 1.0 / bufferLength;
@@ -241,7 +267,7 @@ function visualize() {
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgb(255, 255, 255)';
+        ctx.strokeStyle = genreColor;
 
         ctx.beginPath();
 
