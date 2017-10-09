@@ -186,21 +186,26 @@ function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
 
-function generateColorBasedOnGenre(){
-    var genres = replaceAll(JSON.stringify($("#musicCanvas").data("genre")), "'", "\"" ).slice(1, -1);
+function convertGenreProbToRGB(genreProb) {
+    return Math.round(genreProb * 265);
+}
+
+function generateColorBasedOnGenre() {
+    var genres = replaceAll(JSON.stringify($("#musicCanvas").data("genre")), "'", "\"").slice(1, -1);
     genres = $.parseJSON(genres);
     console.log(genres);
-    var genreString = "rgba(";
-    for (var genre in genres)
-    {
-        console.log(genre);
-        if (genres.hasOwnProperty(genre))
-        {
-            genreString += ((Math.round(genres[genre] * 265)) + ",");
-        }
-    }
-    //genreString = genreString.slice(0, -1);
-    genreString += "1)"
+    var genreString = "rgba(" + 
+    convertGenreProbToRGB(genres["Classical"]) + "," 
+    + convertGenreProbToRGB(genres["Electronic"]) + "," 
+    + convertGenreProbToRGB(genres["Jazz"]) + ", 1)";
+    // for (var genre in genres) {
+    //     console.log(genre);
+    //     if (genres.hasOwnProperty(genre)) {
+    //         genreString += ((Math.round(genres[genre] * 265)) + ",");
+    //     }
+    // }
+    // //genreString = genreString.slice(0, -1);
+    // genreString += "1)"
     return genreString;
 }
 
