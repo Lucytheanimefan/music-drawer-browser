@@ -26,7 +26,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 def classify_genre(filename):
-    print filename
+    #print filename
     return aT.fileClassification(filename, "pyAudioAnalysis/data/svmMusicGenre3","svm")
 
 
@@ -58,7 +58,7 @@ def upload():
         for i, name in enumerate(classNames):
             genre_data[name] = probs[i]
 
-        print genre_data
+        #print genre_data
         # preprocessing audio analysis
 
         return render_template("musicpage.html", genres = genre_data, musicfile=str(url_for('uploaded_file',filename=filename)))
