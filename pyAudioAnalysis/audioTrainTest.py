@@ -20,6 +20,11 @@ import sklearn.svm
 import sklearn.decomposition
 import sklearn.ensemble
 
+
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
+
+
 def signal_handler(signal, frame):
     print 'You pressed Ctrl+C! - EXIT'
     os.system("stty -cbreak echo")
@@ -524,11 +529,12 @@ def loadSVModel(SVMmodelName, isRegression=False):
         - isRegression:        a flag indigating whereas this model is regression or not
     '''
     print("DEBUG: loadSVModel - " + SVMmodelName)
-    print(open(SVMmodelName))
-    print(open(SVMmodelName+"MEANS", "rb"))
+    print("DEBUG: " + os.path.join(APP_DATA, SVMmodelName+"MEANS"))
+    #print(open(SVMmodelName))
+    #print(open(SVMmodelName+"MEANS", "rb"))
 
     try:
-        fo = open(SVMmodelName+"MEANS", "rb")
+        fo = open(os.path.join(APP_DATA, SVMmodelName+"MEANS"), "rb")
         print("DEBUG: " + str(fo))
     except IOError:
             print "Load SVM Model: Didn't find file"

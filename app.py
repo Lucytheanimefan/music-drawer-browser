@@ -29,7 +29,7 @@ def allowed_file(filename):
 
 def classify_genre(filename):
     #print filename
-    return aT.fileClassification(filename, os.path.join(APP_DATA, 'svmMusicGenre3'),"svm", CHUNK_SECONDS)
+    return aT.fileClassification(filename, 'svmMusicGenre3',"svm", CHUNK_SECONDS)
 
 
 @app.route("/")
