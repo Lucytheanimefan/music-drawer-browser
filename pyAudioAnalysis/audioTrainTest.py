@@ -524,9 +524,12 @@ def loadSVModel(SVMmodelName, isRegression=False):
         - isRegression:        a flag indigating whereas this model is regression or not
     '''
     print("DEBUG: loadSVModel - " + SVMmodelName)
-    
+    print(open(SVMmodelName))
+    print(open(SVMmodelName+"MEANS", "rb"))
+
     try:
         fo = open(SVMmodelName+"MEANS", "rb")
+        print("DEBUG: " + str(fo))
     except IOError:
             print "Load SVM Model: Didn't find file"
             return
