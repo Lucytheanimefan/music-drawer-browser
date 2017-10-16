@@ -22,7 +22,7 @@ import sklearn.ensemble
 
 
 APP_ROOT = os.path.dirname(__file__)
-APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
+APP_DATA = os.path.join(APP_ROOT, 'data')
 
 
 def signal_handler(signal, frame):
