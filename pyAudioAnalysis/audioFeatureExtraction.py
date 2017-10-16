@@ -12,7 +12,7 @@ from scipy.fftpack import fft
 from scipy.fftpack.realtransforms import dct
 from scipy.signal import fftconvolve
 from matplotlib.mlab import find
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from scipy import linalg as la
 import audioTrainTest as aT
 import audioBasicIO
@@ -342,6 +342,7 @@ def stChromagram(signal, Fs, Win, Step, PLOT=False):
     FreqAxis = chromaNames
     TimeAxis = [(t * Step) / Fs for t in range(chromaGram.shape[0])]
 
+    '''
     if (PLOT):
         fig, ax = plt.subplots()
         chromaGramToPlot = chromaGram.transpose()[::-1, :]
@@ -364,6 +365,7 @@ def stChromagram(signal, Fs, Win, Step, PLOT=False):
         imgplot.set_cmap('jet')
         plt.colorbar()
         plt.show()
+    '''
 
     return (chromaGram, TimeAxis, FreqAxis)
 
@@ -420,6 +422,7 @@ def beatExtraction(stFeatures, winSize, PLOT=False):
         HistCenters = (HistEdges[0:-1] + HistEdges[1::]) / 2.0
         HistTimes = HistTimes.astype(float) / stFeatures.shape[1]
         HistAll += HistTimes
+    '''
         if PLOT:
             plt.subplot(9, 2, ii + 1)
             plt.plot(stFeatures[i, :], 'k')
@@ -432,6 +435,7 @@ def beatExtraction(stFeatures, winSize, PLOT=False):
     if PLOT:
         plt.show(block=False)
         plt.figure()
+    '''
 
     # Get beat as the argmax of the agregated histogram:
     I = numpy.argmax(HistAll)
@@ -440,6 +444,7 @@ def beatExtraction(stFeatures, winSize, PLOT=False):
     # ... and the beat ratio:
     Ratio = HistAll[I] / HistAll.sum()
 
+    '''
     if PLOT:
         # filter out >500 beats from plotting:
         HistAll = HistAll[BPMs < 500]
@@ -449,6 +454,7 @@ def beatExtraction(stFeatures, winSize, PLOT=False):
         plt.xlabel('Beats per minute')
         plt.ylabel('Freq Count')
         plt.show(block=True)
+    '''
 
     return BPM, Ratio
 
@@ -496,6 +502,7 @@ def stSpectogram(signal, Fs, Win, Step, PLOT=False):
     FreqAxis = [((f + 1) * Fs) / (2 * nfft) for f in range(specgram.shape[1])]
     TimeAxis = [(t * Step) / Fs for t in range(specgram.shape[0])]
 
+    '''
     if (PLOT):
         fig, ax = plt.subplots()
         imgplot = plt.imshow(specgram.transpose()[::-1, :])
@@ -514,6 +521,7 @@ def stSpectogram(signal, Fs, Win, Step, PLOT=False):
         imgplot.set_cmap('jet')
         plt.colorbar()
         plt.show()
+    '''
 
     return (specgram, TimeAxis, FreqAxis)
 
