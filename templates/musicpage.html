@@ -2,7 +2,7 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
 <audio id="myAudio" src="{{ musicfile }}" controls onplay="triggerMusic();" onpause="setPause();">
 </audio>
-<canvas data-genre="{{ genres }}" id = "musicCanvas"></canvas>
+<canvas data-chunkSeconds = "{{ chunk_seconds }}" data-genre="{{ genres }}" id = "musicCanvas"></canvas>
 {% endblock %}
 
 {% block scripts %} 

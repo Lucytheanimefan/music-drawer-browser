@@ -17,6 +17,8 @@ var ctx;
 var canvasData;
 
 var musicPlaying = false;
+var duration; // in seconds
+var chunkIntervalSeconds;
 
 var analyser;
 var frequencyData;
@@ -30,18 +32,22 @@ var cursorY;
 
 var animationID;
 
+var genreColors;
 var genreColor = "#ffffff";
 
 var red = "#ff0000";
 
 function setCanvas() {
-    genreColor = generateColorBasedOnGenre();
-    console.log(genreColor);
+    genreColors = generateColorBasedOnGenre();
+    console.log(genreColors);
+    // Set the first color so it's not white
+    genreColor = genreColors.shift();
     canvas = document.getElementById('musicCanvas');
     canvasWidth = canvas.width;
     canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
     canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+    
     // generateColors("24B1E0", function(colors) {
     //     console.log("COLORS: ");
     //     console.log(colors);
@@ -60,6 +66,31 @@ function playMusic() {
     var ctx = new AudioContext();
     //$("#myAudio").attr("src", filename);
     var audio = document.getElementById('myAudio');
+    duration = audio.duration;
+    chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
+    //console.log(chunkIntervalSeconds);
+
+    //console.log(duration);
+
+    var oldTime = 0;
+    var i = 0;
+    audio.ontimeupdate = function() {
+        // Every chunk_seconds, update the color
+        // 
+        //console.log(Math.abs(oldTime - audio.currentTime));
+        //console.log(audio.currentTime);
+        if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds){
+
+            // Set the color
+            genreColor = genreColors.shift();//[i];
+            console.log("Update color to " + genreColor);
+            i+=1;
+            oldTime = audio.currentTime; 
+        }
+        
+        
+        
+    };
     var audioSrc = ctx.createMediaElementSource(audio);
     analyser = ctx.createAnalyser();
     analyser.fftSize = 2048;
@@ -191,13 +222,35 @@ function convertGenreProbToRGB(genreProb) {
 }
 
 function generateColorBasedOnGenre() {
-    var genres = replaceAll(JSON.stringify($("#musicCanvas").data("genre")), "'", "\"").slice(1, -1);
-    genres = $.parseJSON(genres);
+    var genres = $("#musicCanvas").data("genre");
     console.log(genres);
-    var genreString = "rgba(" + 
-    convertGenreProbToRGB(genres["Classical"]) + "," 
-    + convertGenreProbToRGB(genres["Electronic"]) + "," 
-    + convertGenreProbToRGB(genres["Jazz"]) + ", 1)";
+    var colors = [];
+    for (var i = 0; i < genres.length; i++) {
+        var genre = genres[i];
+        var probs = genre[1];
+        var classifiers = genre[2];
+
+        // Just print this once
+        if (i==0){
+            console.log(classifiers);
+            console.log(probs);
+        }
+        if (probs.length == 3) {
+            var genreString = "rgba(" +
+                convertGenreProbToRGB(probs[0]) + "," +
+                convertGenreProbToRGB(probs[1]) + "," +
+                convertGenreProbToRGB(probs[2]) + ", 1)";
+            colors.push(genreString);
+        }
+        // var genreString = "rgba(" + 
+        // for (var j=0; j<probs.length; j++){
+        //     genreString += convertGenreProbToRGB(pro) + ","
+        // }
+    }
+    // var genreString = "rgba(" +
+    //     convertGenreProbToRGB(genres["Classical"]) + "," +
+    //     convertGenreProbToRGB(genres["Electronic"]) + "," +
+    //     convertGenreProbToRGB(genres["Jazz"]) + ", 1)";
     // for (var genre in genres) {
     //     console.log(genre);
     //     if (genres.hasOwnProperty(genre)) {
@@ -206,7 +259,8 @@ function generateColorBasedOnGenre() {
     // }
     // //genreString = genreString.slice(0, -1);
     // genreString += "1)"
-    return genreString;
+    //return genreString;
+    return colors;
 }
 
 function generateColors(seedColor, callback) {

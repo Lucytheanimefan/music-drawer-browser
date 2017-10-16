@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session
+from flask import Flask, render_template, request, send_from_directory, redirect, url_for, jsonify, session, json
 import os
 from werkzeug.utils import secure_filename
 #import FileSoundAnalyzer
@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(12)
 
 
+CHUNK_SECONDS = 10
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -27,7 +28,7 @@ def allowed_file(filename):
 
 def classify_genre(filename):
     #print filename
-    return aT.fileClassification(filename, "pyAudioAnalysis/data/svmMusicGenre3","svm")
+    return aT.fileClassification(filename, "pyAudioAnalysis/data/svmMusicGenre3","svm", CHUNK_SECONDS)
 
 
 @app.route("/")
@@ -53,15 +54,15 @@ def upload():
         
         #session['filename'] = filename
         #print data
-        Result, probs, classNames = classify_genre(full_filename)
-        genre_data = {}
-        for i, name in enumerate(classNames):
-            genre_data[name] = probs[i]
+        genre_data = classify_genre(full_filename)
+        #genre_data = {}
+        #for i, name in enumerate(classNames):
+        #    genre_data[name] = probs[i]
 
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = genre_data, musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 
