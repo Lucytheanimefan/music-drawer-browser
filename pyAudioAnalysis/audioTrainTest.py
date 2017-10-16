@@ -21,7 +21,7 @@ import sklearn.decomposition
 import sklearn.ensemble
 
 
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+APP_ROOT = os.path.dirname(__file__)
 APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
 
 
@@ -530,7 +530,7 @@ def loadSVModel(SVMmodelName, isRegression=False):
     '''
     print("DEBUG: loadSVModel - " + SVMmodelName)
     print("DEBUG: " + os.path.join(APP_DATA, SVMmodelName+"MEANS"))
-    #print(open(SVMmodelName))
+    print(open(SVMmodelName))
     #print(open(SVMmodelName+"MEANS", "rb"))
 
     try:
