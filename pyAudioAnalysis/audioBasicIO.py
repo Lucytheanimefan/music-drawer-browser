@@ -37,7 +37,7 @@ def convertDirMP3ToWav(dirName, Fs, nC, useMp3TagsAsName = False):
         else:
             wavFileName = f.replace(".mp3",".wav")      
         command = "avconv -i \"" + f + "\" -ar " +str(Fs) + " -ac " + str(nC) + " \"" + wavFileName + "\"";
-        print command
+        print(command)
         os.system(command.decode('unicode_escape').encode('ascii','ignore').replace("\0",""))
 
 def convertFsDirWavToWav(dirName, Fs, nC):
@@ -63,7 +63,7 @@ def convertFsDirWavToWav(dirName, Fs, nC):
     for f in filesToProcess:    
         _, wavFileName = ntpath.split(f)    
         command = "avconv -i \"" + f + "\" -ar " +str(Fs) + " -ac " + str(nC) + " \"" + newDir + os.sep + wavFileName + "\"";
-        print command
+        print(command)
         os.system(command)
 
 def duration(path):
