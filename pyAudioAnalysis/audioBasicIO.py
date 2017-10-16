@@ -1,4 +1,4 @@
-import os, glob, eyed3, ntpath, shutil, numpy
+import os, glob, ntpath, shutil, numpy #,eyed3
 import scipy.io.wavfile as wavfile
 import pydub
 from pydub import AudioSegment
@@ -21,6 +21,7 @@ def convertDirMP3ToWav(dirName, Fs, nC, useMp3TagsAsName = False):
     for files in types:
         filesToProcess.extend(glob.glob(files))     
 
+    '''
     for f in filesToProcess:
         #tag.link(f)
         audioFile = eyed3.load(f)               
@@ -39,6 +40,7 @@ def convertDirMP3ToWav(dirName, Fs, nC, useMp3TagsAsName = False):
         command = "avconv -i \"" + f + "\" -ar " +str(Fs) + " -ac " + str(nC) + " \"" + wavFileName + "\"";
         print(command)
         os.system(command.decode('unicode_escape').encode('ascii','ignore').replace("\0",""))
+    '''
 
 def convertFsDirWavToWav(dirName, Fs, nC):
     '''

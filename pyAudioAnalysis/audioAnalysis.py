@@ -27,7 +27,7 @@ def dirMp3toWavWrapper(directory, samplerate, channels):
         raise Exception("Input path not found!")
 
     useMp3TagsAsNames = True
-    audioBasicIO.convertDirMP3ToWav(directory, samplerate, channels, useMp3TagsAsNames)
+    #audioBasicIO.convertDirMP3ToWav(directory, samplerate, channels, useMp3TagsAsNames)
 
 
 def dirWAVChangeFs(directory, samplerate, channels):
