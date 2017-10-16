@@ -2,6 +2,8 @@ import os, glob, eyed3, ntpath, shutil, numpy
 import scipy.io.wavfile as wavfile
 import pydub
 from pydub import AudioSegment
+#import contextlib
+import wave
 
 def convertDirMP3ToWav(dirName, Fs, nC, useMp3TagsAsName = False):
     '''
@@ -64,11 +66,21 @@ def convertFsDirWavToWav(dirName, Fs, nC):
         print command
         os.system(command)
 
-def readAudioFile(path):
+def duration(path):
+    with contextlib.closing(wave.open(UPLOAD_FOLDER + self.filename,'r')) as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        print(duration)
+        self.seconds = duration
+        return int(duration)
+
+def readAudioFile(path, chunk_seconds = None):
     '''
     This function returns a numpy array that stores the audio samples of a specified WAV of AIFF file
     '''
     extension = os.path.splitext(path)[1]
+    #print("------" + path)
 
     try:
         #if extension.lower() == '.wav':
@@ -79,9 +91,16 @@ def readAudioFile(path):
             strsig = s.readframes(nframes)
             x = numpy.fromstring(strsig, numpy.short).byteswap()
             Fs = s.getframerate()
-        elif extension.lower() == '.mp3' or extension.lower() == '.wav' or extension.lower() == '.au':            
+            duration = nframes / float(Fs)
+            print("Duration: " + duration)
+        elif extension.lower() == '.mp3' or extension.lower() == '.wav' or extension.lower() == '.au':         
             try:
+                print("Trying to make audio file")
                 audiofile = AudioSegment.from_file(path)
+                Fs = audiofile.frame_rate
+                duration = audiofile.duration_seconds
+                print("Duration: " + str(duration))
+                
             #except pydub.exceptions.CouldntDecodeError:
             except:
                 print "Error: file not found or other I/O error. (DECODING FAILED)"
@@ -93,11 +112,33 @@ def readAudioFile(path):
                 data = numpy.fromstring(audiofile._data, numpy.int32)
             else:
                 return (-1, -1)
-            Fs = audiofile.frame_rate
-            x = []
-            for chn in xrange(audiofile.channels):
-                x.append(data[chn::audiofile.channels])
-            x = numpy.array(x).T
+            #print("Audio data type: " + str(data.shape))
+            #print("Length: " + str(len(data)))
+
+            if chunk_seconds:
+                return_data = []
+                num_chunks = int(duration / chunk_seconds)
+                #print("Number of chunks: " + str(num_chunks))
+                chunk_length = int(len(data)/num_chunks)
+                for i in range(num_chunks):
+                    chunked_data = data[i*chunk_length: (i+1) * chunk_length]
+                    x = []
+                    for chn in xrange(audiofile.channels):
+                        x.append(chunked_data[chn::audiofile.channels])
+                    x = numpy.array(x).T
+                    if x.ndim==2:
+                        if x.shape[1]==1:
+                            x = x.flatten()
+                    return_data.append((Fs, x))
+
+                print("Return data length" + str(len(return_data)))
+                return return_data
+
+            else:
+                x = []
+                for chn in xrange(audiofile.channels):
+                    x.append(data[chn::audiofile.channels])
+                x = numpy.array(x).T
         else:
             print "Error in readAudioFile(): Unknown file type!"
             return (-1,-1)

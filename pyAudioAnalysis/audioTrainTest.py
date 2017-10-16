@@ -967,7 +967,7 @@ def pcaDimRed(features, nDims):
     return (featuresNew, coeff)
 
 
-def fileClassification(inputFile, modelName, modelType):
+def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     # Load classifier:
 
     if not os.path.isfile(modelName):
@@ -989,7 +989,33 @@ def fileClassification(inputFile, modelName, modelType):
     elif modelType == 'extratrees':
         [Classifier, MEAN, STD, classNames, mtWin, mtStep, stWin, stStep, computeBEAT] = loadExtraTreesModel(modelName)
 
-    [Fs, x] = audioBasicIO.readAudioFile(inputFile)        # read audio file and convert to mono
+    chunk_data = audioBasicIO.readAudioFile(inputFile, chunk_seconds)        # read audio file and convert to mono
+    if chunk_seconds:
+        classification_data = []
+        for chunk in chunk_data:
+            [Fs, x] = chunk
+            x = audioBasicIO.stereo2mono(x)
+            if isinstance(x, int):                                 # audio file IO problem
+                return (-1, -1, -1)
+            if x.shape[0] / float(Fs) <= mtWin:
+                return (-1, -1, -1)
+
+            # feature extraction:
+            [MidTermFeatures, s] = aF.mtFeatureExtraction(x, Fs, mtWin * Fs, mtStep * Fs, round(Fs * stWin), round(Fs * stStep))
+            MidTermFeatures = MidTermFeatures.mean(axis=1)        # long term averaging of mid-term statistics
+            if computeBEAT:
+                [beat, beatConf] = aF.beatExtraction(s, stStep)
+                MidTermFeatures = numpy.append(MidTermFeatures, beat)
+                MidTermFeatures = numpy.append(MidTermFeatures, beatConf)
+            curFV = (MidTermFeatures - MEAN) / STD                # normalization
+
+            [Result, P] = classifierWrapper(Classifier, modelType, curFV)    # classification 
+            print(classNames)
+            print(P)   
+            classification_data.append((Result, P, classNames))
+
+        return classification_data
+
     x = audioBasicIO.stereo2mono(x)
 
     if isinstance(x, int):                                 # audio file IO problem

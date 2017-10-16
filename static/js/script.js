@@ -265,8 +265,8 @@ function visualize() {
         // That array is at the current sampleRate exposed on the AudioContext, so if it's the default 2048 fftSize, frequencyBinCount will be 1024, and if your device is running at 44.1kHz, that will equate to around 23ms of data
         analyser.getByteTimeDomainData(dataArray);
 
-        console.log("Data array: ");
-        console.log(dataArray);
+        //console.log("Data array: ");
+        //console.log(dataArray);
 
         ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
