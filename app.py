@@ -50,7 +50,6 @@ def upload():
         # the upload folder we setup
         full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(full_filename)
-        # Do all of the analysis on the music
         
         #session['filename'] = filename
         #print data
