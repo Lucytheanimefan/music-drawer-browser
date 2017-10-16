@@ -28,7 +28,7 @@ def classifyFolderWrapper(inputFolder, modelType, modelName, outputMode=False):
 	wavFilesList.extend(glob.glob(strFilePattern))
 	wavFilesList = sorted(wavFilesList)
 	if len(wavFilesList)==0:
-		print "No WAV files found!"
+		print("No WAV files found!")
 		return 
 	
 	Results = []
@@ -40,14 +40,14 @@ def classifyFolderWrapper(inputFolder, modelType, modelName, outputMode=False):
 		Result = int(Result)
 		Results.append(Result)
 		if outputMode:
-			print "{0:s}\t{1:s}".format(wavFile,classNames[Result])
+			print("{0:s}\t{1:s}".format(wavFile,classNames[Result]))
 	Results = numpy.array(Results)
 	
 	# print distribution of classes:
 	[Histogram, _] = numpy.histogram(Results, bins=numpy.arange(len(classNames)+1))
 	if outputMode:	
 		for i,h in enumerate(Histogram):
-			print "{0:20s}\t\t{1:d}".format(classNames[i], h)
+			print("{0:20s}\t\t{1:d}".format(classNames[i], h))
 	PsAll = PsAll / numpy.sum(PsAll)
 
 
