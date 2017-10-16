@@ -17,4 +17,3 @@ matplotlib
 hmmlearn
 Simplejson
 pydub
-cPickle
