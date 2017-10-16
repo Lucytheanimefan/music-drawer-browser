@@ -7,7 +7,7 @@ import json
 #
 from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioFeatureExtraction
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from pyAudioAnalysis import audioTrainTest as aT
 
 app = Flask(__name__)
