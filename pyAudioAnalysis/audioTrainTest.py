@@ -524,6 +524,7 @@ def loadSVModel(SVMmodelName, isRegression=False):
         - isRegression:        a flag indigating whereas this model is regression or not
     '''
     print("DEBUG: loadSVModel - " + SVMmodelName)
+    
     try:
         fo = open(SVMmodelName+"MEANS", "rb")
     except IOError:
