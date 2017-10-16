@@ -969,7 +969,9 @@ def pcaDimRed(features, nDims):
 
 def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     # Load classifier:
+    print "DEBUG: fileClassification - inputFile: " + inputFile
 
+    '''
     if not os.path.isfile(modelName):
         print "fileClassification: input modelName not found!"
         return (-1, -1, -1)
@@ -977,6 +979,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     if not os.path.isfile(inputFile):
         print "fileClassification: wav file not found!"
         return (-1, -1, -1)
+    '''
 
     if (modelType) == 'svm' or (modelType == 'svm_rbf'):
         [Classifier, MEAN, STD, classNames, mtWin, mtStep, stWin, stStep, computeBEAT] = loadSVModel(modelName)
