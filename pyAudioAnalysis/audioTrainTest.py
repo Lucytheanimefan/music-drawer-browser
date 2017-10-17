@@ -534,7 +534,7 @@ def loadSVModel(SVMmodelName, isRegression=False):
     #print(open(SVMmodelName+"MEANS", "rb"))
 
     try:
-        fo = open(SVMmodelName+"MEANS", "rb")
+        fo = open(os.path.join(APP_DATA, SVMmodelName+"MEANS"), "rb")
         print("DEBUG: " + str(fo))
     except IOError:
             print "Load SVM Model: Didn't find file"
