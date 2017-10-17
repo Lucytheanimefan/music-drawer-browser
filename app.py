@@ -18,6 +18,7 @@ CHUNK_SECONDS = 10
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
+APP_STATIC = os.path.join(APP_ROOT, 'static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.config['ALLOWED_EXTENSIONS'] = set(['wav', 'mp3'])
@@ -29,7 +30,7 @@ def allowed_file(filename):
 
 def classify_genre(filename):
     #print filename
-    return aT.fileClassification(filename, 'svmMusicGenre3',"svm", CHUNK_SECONDS)
+    return aT.fileClassification(filename, os.path.join(APP_STATIC, 'models/svmMusicGenre3'),"svm", CHUNK_SECONDS)
 
 
 @app.route("/")
