@@ -37,8 +37,11 @@ var genreColor = "#ffffff";
 
 var red = "#ff0000";
 
+var musicFeatures;
+
 function setCanvas() {
     genreColors = generateColorBasedOnGenre();
+    processFeatures();
     console.log(genreColors);
     // Set the first color so it's not white
     genreColor = genreColors.shift();
@@ -47,12 +50,7 @@ function setCanvas() {
     canvasHeight = canvas.height;
     ctx = canvas.getContext('2d');
     canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-    
-    // generateColors("24B1E0", function(colors) {
-    //     console.log("COLORS: ");
-    //     console.log(colors);
-    //     colorScheme = colors;
-    // });
+
 }
 
 function triggerMusic() {
@@ -68,17 +66,12 @@ function playMusic() {
     var audio = document.getElementById('myAudio');
     duration = audio.duration;
     chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
-    //console.log(chunkIntervalSeconds);
-
-    //console.log(duration);
 
     var oldTime = 0;
     var i = 0;
     audio.ontimeupdate = function() {
         // Every chunk_seconds, update the color
-        // 
-        //console.log(Math.abs(oldTime - audio.currentTime));
-        //console.log(audio.currentTime);
+
         if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds){
 
             // Set the color
@@ -87,9 +80,7 @@ function playMusic() {
             i+=1;
             oldTime = audio.currentTime; 
         }
-        
-        
-        
+
     };
     var audioSrc = ctx.createMediaElementSource(audio);
     analyser = ctx.createAnalyser();
@@ -109,9 +100,7 @@ function playMusic() {
     // we're ready to receive some data!
     // loop
     function renderFrame() {
-        // if (animationID && Math.random() < 0.3) {
-        //     cancelAnimationFrame(animationID);
-        // }
+
         animationID = requestAnimationFrame(renderFrame);
         // update data in frequencyData
         if (musicPlaying) {
@@ -124,8 +113,7 @@ function playMusic() {
             beginArt();
         }
     }
-    //audio.play();
-    //renderFrame();
+
 }
 
 function trackMouseMovement() {
@@ -151,14 +139,6 @@ function notZero(num) {
     return num != 0;
 }
 
-// function formatData(data = musicData) {
-//     return data.map(function(x, index) {
-//         // Scale number to range
-//         scaled_x = scaleBetween(x, 0, $("#musicCanvas").height(), minDataPoint, maxDataPoint);
-//         scaled_index = scaleBetween(index, 0, $("#musicCanvas").width(), 0, musicData.length);
-//         return [scaled_index, scaled_x]
-//     });
-// }
 
 function beginArt(lines = true) {
     // For now let's just do lines
@@ -242,24 +222,8 @@ function generateColorBasedOnGenre() {
                 convertGenreProbToRGB(probs[2]) + ", 1)";
             colors.push(genreString);
         }
-        // var genreString = "rgba(" + 
-        // for (var j=0; j<probs.length; j++){
-        //     genreString += convertGenreProbToRGB(pro) + ","
-        // }
     }
-    // var genreString = "rgba(" +
-    //     convertGenreProbToRGB(genres["Classical"]) + "," +
-    //     convertGenreProbToRGB(genres["Electronic"]) + "," +
-    //     convertGenreProbToRGB(genres["Jazz"]) + ", 1)";
-    // for (var genre in genres) {
-    //     console.log(genre);
-    //     if (genres.hasOwnProperty(genre)) {
-    //         genreString += ((Math.round(genres[genre] * 265)) + ",");
-    //     }
-    // }
-    // //genreString = genreString.slice(0, -1);
-    // genreString += "1)"
-    //return genreString;
+
     return colors;
 }
 
@@ -268,6 +232,12 @@ function generateColors(seedColor, callback) {
     $.get(url, function(data) {
         callback(data["colors"]);
     });
+}
+
+/* ---------------- Features ------------------- */
+function processFeatures(){
+    musicFeatures = $("#musicCanvas").data("features");
+    console.log(musicFeatures);
 }
 
 
@@ -318,9 +288,6 @@ function visualize() {
         // Looks like this is still necessary even though called before
         // That array is at the current sampleRate exposed on the AudioContext, so if it's the default 2048 fftSize, frequencyBinCount will be 1024, and if your device is running at 44.1kHz, that will equate to around 23ms of data
         analyser.getByteTimeDomainData(dataArray);
-
-        //console.log("Data array: ");
-        //console.log(dataArray);
 
         ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);

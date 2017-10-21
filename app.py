@@ -86,7 +86,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename, musicfeatures = json.dumps(stFeatures))))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(stFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 
