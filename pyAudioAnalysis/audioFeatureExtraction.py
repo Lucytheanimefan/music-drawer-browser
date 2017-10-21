@@ -614,6 +614,8 @@ def mtFeatureExtraction(signal, Fs, mtWin, mtStep, stWin, stStep):
     """
     Mid-term feature extraction
     Returns mtFeatures and stFeatures
+    In the mtFeatures, returns mean and standard deviation per short term feature. ie. the array is [mean, mean, std, std]
+    The first 34 arrays contain mean values, the latter 34 entries contain stddev values
     """
 
     mtWinRatio = int(round(mtWin / stStep))
@@ -626,7 +628,7 @@ def mtFeatureExtraction(signal, Fs, mtWin, mtStep, stWin, stStep):
     numOfStatistics = 2
 
     mtFeatures = []
-    #for i in range(numOfStatistics * numOfFeatures + 1):
+    # 2 * 34 = 68
     for i in range(numOfStatistics * numOfFeatures):
         mtFeatures.append([])
 
@@ -640,11 +642,21 @@ def mtFeatureExtraction(signal, Fs, mtWin, mtStep, stWin, stStep):
                 N2 = N
             curStFeatures = stFeatures[i][N1:N2]
 
+            # append the mean to the first half of the array
             mtFeatures[i].append(numpy.mean(curStFeatures))
+
+            # std dev to the second half, numOfFeatures = 34
             mtFeatures[i+numOfFeatures].append(numpy.std(curStFeatures))
+            if i == numOfFeatures:
+                print "mtFeatures[i]"
+                print mtFeatures[i]
+                print "mtFeatures[i+numOfFeatures]"
+                print mtFeatures[i+numOfFeatures]
             #mtFeatures[i+2*numOfFeatures].append(numpy.std(curStFeatures) / (numpy.mean(curStFeatures)+0.00000010))
             curPos += mtStepRatio
 
+    #print "numpy.array(mtFeatures)"
+    #print numpy.array(mtFeatures)
     return numpy.array(mtFeatures), stFeatures
 
 

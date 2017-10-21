@@ -1026,7 +1026,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
             #     print stFeatures[33]
             #     print len(stFeatures)
             #     print "---------------"
-            
+            #features.append(MidTermFeatures.tolist())
             MidTermFeatures = MidTermFeatures.mean(axis=1)        # long term averaging of mid-term statistics
             features.append(MidTermFeatures.tolist())
             if computeBEAT:

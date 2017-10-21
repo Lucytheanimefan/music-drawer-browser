@@ -41,6 +41,7 @@ var musicFeatures;
 
 function setCanvas() {
     genreColors = generateColorBasedOnGenre();
+    musicFeatures = $("#musicCanvas").data("features");
     processFeatures();
     console.log(genreColors);
     // Set the first color so it's not white
@@ -211,10 +212,10 @@ function generateColorBasedOnGenre() {
         var classifiers = genre[2];
 
         // Just print this once
-        if (i==0){
-            console.log(classifiers);
-            console.log(probs);
-        }
+        // if (i==0){
+        //     console.log(classifiers);
+        //     console.log(probs);
+        // }
         if (probs.length == 3) {
             var genreString = "rgba(" +
                 convertGenreProbToRGB(probs[0]) + "," +
@@ -236,8 +237,18 @@ function generateColors(seedColor, callback) {
 
 /* ---------------- Features ------------------- */
 function processFeatures(){
-    musicFeatures = $("#musicCanvas").data("features");
-    console.log(musicFeatures);
+    if (musicFeatures == null){
+        return;
+    }
+    for (var i=0; i<musicFeatures.length; i++){
+        var featureVector = musicFeatures[i];
+        var zcr = featureVector[0];
+        var energy = featureVector[1];
+        var entropy = featureVector[2]; // measure of abrupt changes
+        var centroid = featureVector[3];
+        var spread = featureVector[4];
+        console.log(zcr+ "," + energy + "," + entropy + "," + centroid + "," + spread);  
+    }
 }
 
 

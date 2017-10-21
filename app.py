@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(12)
 #socketio = SocketIO(app)
 
-CHUNK_SECONDS = 10
+CHUNK_SECONDS = 2
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
@@ -75,8 +75,8 @@ def upload():
         
         #session['filename'] = filename
         #print data
-        [genre_data, stFeatures] = classify_genre(full_filename)
-        print stFeatures
+        [genre_data, features] = classify_genre(full_filename)
+        #print stFeatures
 
         #features = extract_other_features(full_filename).tolist()
         #genre_data = {}
@@ -86,7 +86,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(stFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 
