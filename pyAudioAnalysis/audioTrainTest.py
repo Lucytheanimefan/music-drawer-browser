@@ -9,6 +9,7 @@ import audioop
 import signal
 import csv
 import ntpath
+import json
 import audioFeatureExtraction as aF
 import audioBasicIO
 from matplotlib.mlab import find
@@ -19,7 +20,7 @@ from scipy.spatial import distance
 import sklearn.svm
 import sklearn.decomposition
 import sklearn.ensemble
-
+import NumpyEncoder
 
 APP_ROOT = os.path.dirname(__file__)
 APP_DATA = os.path.join(APP_ROOT, 'data')
@@ -991,6 +992,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
         print "fileClassification: wav file not found!"
         return (-1, -1, -1)
     '''
+    #print "computeBeat"
 
     if (modelType) == 'svm' or (modelType == 'svm_rbf'):
         [Classifier, MEAN, STD, classNames, mtWin, mtStep, stWin, stStep, computeBEAT] = loadSVModel(modelName)
@@ -1003,9 +1005,11 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     elif modelType == 'extratrees':
         [Classifier, MEAN, STD, classNames, mtWin, mtStep, stWin, stStep, computeBEAT] = loadExtraTreesModel(modelName)
 
+    #print computeBEAT
     chunk_data = audioBasicIO.readAudioFile(inputFile, chunk_seconds)        # read audio file and convert to mono
     if chunk_seconds:
         classification_data = []
+        features = []
         for i, chunk in enumerate(chunk_data):
             print str(i) + " of " + str(len(chunk_data))
             [Fs, x] = chunk
@@ -1017,10 +1021,12 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
 
             # feature extraction:
             [MidTermFeatures, stFeatures] = aF.mtFeatureExtraction(x, Fs, mtWin * Fs, mtStep * Fs, round(Fs * stWin), round(Fs * stStep))
-            #print "stTermFeatures"
-            #print stFeatures[33]
-            #print len(stFeatures)
-            #print "---------------"
+            # if i == (len(chunk_data)-1):
+            #     print "stTermFeatures"
+            #     print stFeatures[33]
+            #     print len(stFeatures)
+            #     print "---------------"
+            features.append(stFeatures.tolist())
             MidTermFeatures = MidTermFeatures.mean(axis=1)        # long term averaging of mid-term statistics
             if computeBEAT:
                 [beat, beatConf] = aF.beatExtraction(stFeatures, stStep)
@@ -1033,7 +1039,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
             #print(type(P.tolist()))   
             classification_data.append([Result, P.tolist(), classNames])
 
-        return [classification_data, stFeatures]
+        return [classification_data, features]
 
     x = audioBasicIO.stereo2mono(x)
 

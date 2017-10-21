@@ -10,7 +10,7 @@ from pyAudioAnalysis import audioFeatureExtraction
 #import matplotlib.pyplot as plt
 from pyAudioAnalysis import audioTrainTest as aT
 from pyAudioAnalysis import audioFeatureExtraction as aF
-
+from pyAudioAnalysis import NumpyEncoder
 
 # for faster communication
 #from flask_socketio import SocketIO
@@ -76,6 +76,7 @@ def upload():
         #session['filename'] = filename
         #print data
         [genre_data, stFeatures] = classify_genre(full_filename)
+        print stFeatures
 
         #features = extract_other_features(full_filename).tolist()
         #genre_data = {}
@@ -85,7 +86,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename, features = json.dumps(stFeatures, default=set_default))))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename)))#, features = stFeatures)))
 
     return "No allowed file"
 
