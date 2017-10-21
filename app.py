@@ -9,10 +9,15 @@ from pyAudioAnalysis import audioBasicIO
 from pyAudioAnalysis import audioFeatureExtraction
 #import matplotlib.pyplot as plt
 from pyAudioAnalysis import audioTrainTest as aT
+from pyAudioAnalysis import audioFeatureExtraction as aF
+
+
+# for faster communication
+#from flask_socketio import SocketIO
 
 app = Flask(__name__)
 app.secret_key = os.urandom(12)
-
+#socketio = SocketIO(app)
 
 CHUNK_SECONDS = 10
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -32,6 +37,21 @@ def classify_genre(filename):
     #print filename
     return aT.fileClassification(filename, os.path.join(APP_STATIC, 'models/svmMusicGenre3'),"svm", CHUNK_SECONDS)
 
+
+def extract_other_features(filename):
+    features = []
+    chunk_data = audioBasicIO.readAudioFile(filename, CHUNK_SECONDS)
+    for data in chunk_data:
+        [Fs, x] = data
+        F = audioFeatureExtraction.stFeatureExtraction(x, Fs, 0.050*Fs, 0.025*Fs);
+        features.append(F)
+        #rint F              # normalization
+    return F
+
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
 
 @app.route("/")
 def main():
@@ -55,7 +75,9 @@ def upload():
         
         #session['filename'] = filename
         #print data
-        genre_data = classify_genre(full_filename)
+        [genre_data, stFeatures] = classify_genre(full_filename)
+
+        #features = extract_other_features(full_filename).tolist()
         #genre_data = {}
         #for i, name in enumerate(classNames):
         #    genre_data[name] = probs[i]
@@ -63,7 +85,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS, musicfile=str(url_for('uploaded_file',filename=filename, features = json.dumps(stFeatures, default=set_default))))
 
     return "No allowed file"
 

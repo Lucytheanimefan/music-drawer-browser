@@ -613,6 +613,7 @@ def stFeatureExtraction(signal, Fs, Win, Step):
 def mtFeatureExtraction(signal, Fs, mtWin, mtStep, stWin, stStep):
     """
     Mid-term feature extraction
+    Returns mtFeatures and stFeatures
     """
 
     mtWinRatio = int(round(mtWin / stStep))

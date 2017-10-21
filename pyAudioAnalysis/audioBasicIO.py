@@ -133,7 +133,7 @@ def readAudioFile(path, chunk_seconds = None):
                             x = x.flatten()
                     return_data.append((Fs, x))
 
-                print("Return data length" + str(len(return_data)))
+                #print("Return data length: " + str(len(return_data)))
                 return return_data
 
             else:
