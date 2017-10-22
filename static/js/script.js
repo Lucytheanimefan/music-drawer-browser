@@ -37,13 +37,20 @@ var genreColor = "#ffffff";
 
 var red = "#ff0000";
 
+// features
 var musicFeatures;
+var zcr = 0;
+var energy = 0;
+var entropy = 0; // measure of abrupt changes
+var centroid = 0;
+var spread = 0;
+
 
 function setCanvas() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
-    processFeatures();
-    console.log(genreColors);
+    //console.log(genreColors);
+    console.log(musicFeatures);
     // Set the first color so it's not white
     genreColor = genreColors.shift();
     canvas = document.getElementById('musicCanvas');
@@ -72,15 +79,21 @@ function playMusic() {
     var i = 0;
     audio.ontimeupdate = function() {
         // Every chunk_seconds, update the color
-
-        if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds){
+        if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds) {
 
             // Set the color
-            genreColor = genreColors.shift();//[i];
+            genreColor = genreColors.shift(); //[i];
             console.log("Update color to " + genreColor);
-            i+=1;
-            oldTime = audio.currentTime; 
+            i += 1;
+            oldTime = audio.currentTime;
+
+            // Process features
+            processFeature(i);
         }
+
+
+
+        // Update other visual stuff
 
     };
     var audioSrc = ctx.createMediaElementSource(audio);
@@ -97,7 +110,6 @@ function playMusic() {
 
     visualize();
 
-    // drawGraph();
     // we're ready to receive some data!
     // loop
     function renderFrame() {
@@ -211,11 +223,6 @@ function generateColorBasedOnGenre() {
         var probs = genre[1];
         var classifiers = genre[2];
 
-        // Just print this once
-        // if (i==0){
-        //     console.log(classifiers);
-        //     console.log(probs);
-        // }
         if (probs.length == 3) {
             var genreString = "rgba(" +
                 convertGenreProbToRGB(probs[0]) + "," +
@@ -236,52 +243,25 @@ function generateColors(seedColor, callback) {
 }
 
 /* ---------------- Features ------------------- */
-function processFeatures(){
-    if (musicFeatures == null){
+function processFeature(index = 0) {
+    if (musicFeatures == null) {
         return;
     }
-    for (var i=0; i<musicFeatures.length; i++){
-        var featureVector = musicFeatures[i];
-        var zcr = featureVector[0];
-        var energy = featureVector[1];
-        var entropy = featureVector[2]; // measure of abrupt changes
-        var centroid = featureVector[3];
-        var spread = featureVector[4];
-        console.log(zcr+ "," + energy + "," + entropy + "," + centroid + "," + spread);  
-    }
+
+    var featureVector = musicFeatures[index];
+    zcr = featureVector[0]; // number of times signal crosses the axis
+    energy = featureVector[1];
+    entropy = featureVector[2]; // measure of abrupt changes
+    centroid = featureVector[3];
+    spread = featureVector[4];
+    //console.log(zcr + "," + energy + "," + entropy + "," + centroid + "," + spread);
+
 }
 
 
 /* ---------------- Graphing visual only ---------------------- */
-function drawGraph() {
-    drawVisual = requestAnimationFrame(drawGraph);
-
-    ctx.fillStyle = genreColor;
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = genreColor;
-    ctx.beginPath();
-
-    var sliceWidth = canvasWidth * 1.0 / bufferLength;
-    var x = 0;
-    for (var i = 0; i < bufferLength; i++) {
-
-        var v = timeDomainData[i] / 128.0;
-        var y = v * canvasHeight / 2;
-
-        if (i === 0) {
-            ctx.moveTo(x, y);
-        } else {
-            ctx.lineTo(x, y);
-        }
-
-        x += sliceWidth;
-    }
-
-    ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.stroke();
-
-    drawGraph();
-}
+doCircles = true;
+experimental = false;
 
 function visualize() {
     WIDTH = canvas.width;
@@ -290,6 +270,7 @@ function visualize() {
     var bufferLength = analyser.fftSize;
     var dataArray = new Uint8Array(bufferLength);
 
+    console.log("Clear rect: ");
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
     var draw = function() {
@@ -311,22 +292,69 @@ function visualize() {
         var sliceWidth = WIDTH * 1.0 / bufferLength;
         var x = 0;
 
-        for (var i = 0; i < bufferLength; i++) {
+        var numLines = zcr * 50;
 
-            var v = dataArray[i] / 128.0;
-            var y = v * HEIGHT / 2;
+        // Circles
+        if (doCircles) {
+            for (var i = 0; i < numLines; i++) {
+                ctx.beginPath();
+                var r = energy * 100;
 
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
+
+                var v = dataArray[i] / 128.0;
+                var y = v * (HEIGHT / 3) // * HEIGHT / 2;
+                var entropyDecimal = (entropy - Math.floor(entropy));
+                var x = v * HEIGHT * (entropyDecimal ^ 1.5);
+                //context.arc(x,y,r,sAngle,eAngle,counterclockwise);
+                ctx.arc(x, y, r, 0, 2 * Math.PI);
+                ctx.stroke();
             }
-
-            x += sliceWidth;
         }
 
-        ctx.lineTo(canvas.width, canvas.height / 2);
+        // Experimental
+        if (experimental) {
+            for (var j = 0; j < bufferLength; j++) {
+
+                var v = dataArray[j] / 128.0;
+                var y = v * (HEIGHT / 3) // * HEIGHT / 2;
+                //var x = energy * 100;
+                //context.arc(x,y,r,sAngle,eAngle,counterclockwise);
+                // ctx.arc(x, y, r, 0, 2 * Math.PI);
+                // ctx.stroke();
+
+                if (j === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+        }
+
+        // Return to center
+        //ctx.lineTo(x + 50, y+50);
+        //ctx.lineTo(canvas.width, canvas.height / 2);
         ctx.stroke();
+
+        // Old graphing visual
+
+        // for (var i = 0; i < bufferLength; i++) {
+
+        //     var v = dataArray[i] / 128.0;
+        //     var y = v + (HEIGHT / 2) // * HEIGHT / 2;
+
+        //     if (i === 0) {
+        //         ctx.moveTo(x, y);
+        //     } else {
+        //         ctx.lineTo(x, y);
+        //     }
+
+        //     x += sliceWidth;
+        // }
+
+        //ctx.lineTo(canvas.width, canvas.height / 2);
+        //ctx.stroke();
     };
 
     draw();
