@@ -45,6 +45,7 @@ var entropy = 0; // measure of abrupt changes
 var centroid = 0;
 var spread = 0;
 
+var roseCoordinates = [];
 
 function setCanvas() {
     genreColors = generateColorBasedOnGenre();
@@ -260,8 +261,10 @@ function processFeature(index = 0) {
 
 
 /* ---------------- Graphing visual only ---------------------- */
-doCircles = true;
+doCircles = false;
 experimental = false;
+rose = true;
+var roseCount = 0;
 
 function visualize() {
     WIDTH = canvas.width;
@@ -284,7 +287,7 @@ function visualize() {
         ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        ctx.lineWidth = 2;
+        ctx.lineWidth = entropy;
         ctx.strokeStyle = genreColor;
 
         ctx.beginPath();
@@ -293,6 +296,65 @@ function visualize() {
         var x = 0;
 
         var numLines = zcr * 50;
+
+        //ctx.moveTo(WIDTH/2, HEIGHT/2);
+        // Rose
+        if (rose) {
+            var entropyDecimal = (entropy - Math.floor(entropy));
+            var v = dataArray[0] / 128.0;
+            var a = v * HEIGHT / 2;
+            //v + (HEIGHT / 2)
+            var b = entropyDecimal * 10;
+            //console.log(a + ", " + b);
+            updateRoseGraphCoordinates(a, a, true);
+            // var coords = roseCoordinates[roseCount];
+            // var x = coords[0];
+            // var y = coords[1];
+            // var nextCoords = roseCoordinates[0];
+            // var nextX = nextCoords[0];
+            // var nextY = nextCoords[1];
+            //ctx.beginPath();
+            // ctx.moveTo(x,y);
+            // ctx.lineTo(nextX, nextY);
+
+            // ctx.stroke();
+            console.log("length: " + roseCoordinates.length);
+            if (roseCount > roseCoordinates.length){
+                roseCount = 0;
+            }
+            //if (roseCount <= roseCoordinates.length) {
+                for (var i = 0; i < roseCount; i++) {
+                    console.log("draw");
+                    var coords = roseCoordinates[i];
+                    var x = coords[0];
+                    var y = coords[1];
+                    if (i == 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+                roseCount += 1;
+            //}
+
+            // for (var i = roseCount; i < roseCoordinates.length; i++) {
+            //     var coords = roseCoordinates[i];
+            //     //console.log(coords);
+            //     var x = coords[0];
+            //     var y = coords[1];
+
+            //     if (i == 0) {
+            //         ctx.moveTo(x, y);
+            //     } else {
+            //         ctx.lineTo(x, y);
+            //     }
+            //     ctx.stroke();
+            //     if (i == roseCoordinates.length - 1) {
+            //         roseCount = i;
+            //     }
+            // }
+        }
 
         // Circles
         if (doCircles) {
@@ -335,7 +397,7 @@ function visualize() {
         // Return to center
         //ctx.lineTo(x + 50, y+50);
         //ctx.lineTo(canvas.width, canvas.height / 2);
-        ctx.stroke();
+        //ctx.stroke();
 
         // Old graphing visual
 
@@ -358,6 +420,21 @@ function visualize() {
     };
 
     draw();
+}
 
+function updateRoseGraphCoordinates(a, b, clearOriginal = false) {
+    if (clearOriginal) {
+        roseCoordinates = [];
+        //roseCount = 0;
+    }
+
+    for (var i = 0; i < (2 * Math.PI); i += 0.1) {
+        //console.log(Math.cos(i))
+        var y = (a * Math.cos(b * i)) * Math.cos(i) + HEIGHT/2;
+
+        var x = (a * Math.cos(b * i)) * Math.sin(i) + WIDTH / 2;
+        //console.log(x + ", " + y);
+        roseCoordinates.push([x, y]);
+    }
 
 }
