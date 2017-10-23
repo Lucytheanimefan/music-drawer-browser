@@ -33,9 +33,9 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-def classify_genre(filename):
+def classify_genre(filename, chunk_seconds = CHUNK_SECONDS):
     #print filename
-    return aT.fileClassification(filename, os.path.join(APP_STATIC, 'models/svmMusicGenre3'),"svm", CHUNK_SECONDS)
+    return aT.fileClassification(filename, os.path.join(APP_STATIC, 'models/svmMusicGenre3'),"svm", chunk_seconds)
 
 
 def extract_other_features(filename):
@@ -76,6 +76,7 @@ def upload():
         #session['filename'] = filename
         #print data
         [genre_data, features] = classify_genre(full_filename)
+        [Result, P, classNames, MidTermFeatures] = classify_genre(full_filename, None)
         #print stFeatures
 
         #features = extract_other_features(full_filename).tolist()
@@ -86,7 +87,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 

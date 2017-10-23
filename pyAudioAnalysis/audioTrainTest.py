@@ -1042,6 +1042,8 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
 
         return [classification_data, features]
 
+    [Fs, x] = chunk_data#audioBasicIO.readAudioFile(inputFile) 
+
     x = audioBasicIO.stereo2mono(x)
 
     if isinstance(x, int):                                 # audio file IO problem
@@ -1060,7 +1062,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     curFV = (MidTermFeatures - MEAN) / STD                # normalization
 
     [Result, P] = classifierWrapper(Classifier, modelType, curFV)    # classification        
-    return [Result, P, classNames]
+    return [Result, P, classNames, MidTermFeatures]
 
 
 def fileRegression(inputFile, modelName, modelType):
