@@ -12,24 +12,44 @@ var increment = 0.01;
 
 
 function animate3d() {
-	if (!do3d){
-		return;
-	}
+    if (!do3d) {
+        return;
+    }
     var bufferLength = analyser.fftSize;
     var dataArray = new Uint8Array(bufferLength);
+    var frequencyArray = new Uint8Array(analyser.frequencyBinCount);
 
     analyser.getByteTimeDomainData(dataArray);
     cube.material.color.set(genreColor);
+    //analyser.getByteFrequencyData(frequencyArray);
+    //var maxFreq = Math.max(frequencyArray);
+    var rotEnergy = energy;//10*energy;
 
     for (var i = 0; i < bufferLength; i++) {
 
         var v = dataArray[i] / 128.0;
-        var y = v * (HEIGHT / 2) // * HEIGHT / 2;
-        //console.log("Size: " + v);
-        cube.scale.x = v; // SCALE
-        cube.scale.y = v; // SCALE
-        cube.scale.z = v; // SCALE
+        var y = v; // ^ 1.5; //(HEIGHT / ) // * HEIGHT / 2;
+        //console.log("rot: " + y);
+        cube.scale.x = y; // SCALE
+        cube.scale.y = y; // SCALE
+        cube.scale.z = y; // SCALE
+
+        // rotate cube
+        // cube.rotation.x += y //rotEnergy;
+        // cube.rotation.y += y //rotEnergy;
+        // cube.rotation.z += y //rotEnergy;
     }
+
+
+    // // rotate cube
+    cube.rotation.x += rotEnergy;
+    cube.rotation.y += rotEnergy;
+    cube.rotation.z += rotEnergy;
+    // cube.scale.x = rotEnergy; // SCALE
+    // cube.scale.y = rotEnergy; // SCALE
+    // cube.scale.z = rotEnergy; // SCALE
+
+    //console.log("rotEnergy: " + rotEnergy);
 
     requestAnimationFrame(animate3d);
     renderer.render(scene, camera);
