@@ -10,7 +10,7 @@ scene.add(cube);
 camera.position.z = 950;
 var increment = 0.01;
 
-var doRotation = true;
+var doRotation = false;
 
 var doMovement = false; //true;
 
@@ -34,22 +34,46 @@ function animate3d() {
         var rotEnergy = energy; //10*energy;
 
         var prevNum = 0;
+        var amplitudeCumulativeAverage = 0;
+
+        var prevRotateCount = 50;
+        var prevRotateRate = 0;
+
         for (var i = 0; i < bufferLength; i++) {
 
             var v = dataArray[i] / 128.0;
             //var y;
-            //
+            // 
             //Magnify the effect
-            var rounded = Math.round(v);
-            if (rounded != 1 || prevNum != 1) {
+            var rounded = 1.1*Math.round(v);
+            amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
+
+            if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                 var y = rounded * v;
                 cube.scale.x = y; // SCALE
                 cube.scale.y = y; // SCALE
                 cube.scale.z = y; // SCALE
                 prevNum = rounded;
+
             }
 
+            if (v > 1.5 * amplitudeCumulativeAverage) {
+                prevRotateRate = v / 50
+                cube.rotateX(prevRotateRate);
+
+                // Reset the rotate count
+                prevRotateCount = 0;
+
+
+            } else if (prevRotateCount < 50) {
+                // If we were previously rotating, rotate on for a bit more just so we can see it
+                cube.rotateX(prevRotateRate - 0.01);
+                prevRotateCount += 1;
+            }
+            
+
         }
+        console.log("Cumulative average: " + amplitudeCumulativeAverage);
 
         // // rotate cube
         if (doRotation) {
