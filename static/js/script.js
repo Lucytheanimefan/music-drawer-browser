@@ -45,6 +45,8 @@ var energy = 0;
 var entropy = 0; // measure of abrupt changes
 var centroid = 0;
 var spread = 0;
+var spectralEntropy = 0;
+var mfcc = [];
 
 var roseCoordinates = [];
 
@@ -58,6 +60,7 @@ function setCanvas() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
+    console.log(musicFeatures);
     //console.log(genreColors);
     //console.log(singleMusicFeatures);
     // Set the first color so it's not white
@@ -71,51 +74,58 @@ function setCanvas() {
 
 }
 
+var firstTime = true;
+
 function triggerMusic() {
     musicPlaying = true;
     //trackMouseMovement();
+
     playMusic();
+
 }
 
 // Let's try to do this in javascript instead of python
 function playMusic() {
-    var ctx = new AudioContext();
-    //$("#myAudio").attr("src", filename);
-    var audio = document.getElementById('myAudio');
-    duration = audio.duration;
-    chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
+    if (firstTime) {
+        var ctx = new AudioContext();
+        //$("#myAudio").attr("src", filename);
+        var audio = document.getElementById('myAudio');
+        duration = audio.duration;
+        chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
 
-    var oldTime = 0;
-    var i = 0;
-    audio.ontimeupdate = function() {
-        // Every chunk_seconds, update the color
-        if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds) {
+        var oldTime = 0;
+        var i = 0;
+        audio.ontimeupdate = function() {
+            // Every chunk_seconds, update the color
+            if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds) {
 
-            // Set the color
-            genreColor = genreColors.shift(); //[i];
-            console.log("Update color to " + genreColor);
-            i += 1;
-            oldTime = audio.currentTime;
+                // Set the color
+                genreColor = genreColors.shift(); //[i];
+                //console.log("Update color to " + genreColor);
+                i += 1;
+                oldTime = audio.currentTime;
 
-            // Process features
-            processFeature(i);
-        }
+                // Process features
+                processFeature(i);
+            }
 
-        // Update other visual stuff
+            // Update other visual stuff
 
-    };
-    var audioSrc = ctx.createMediaElementSource(audio);
-    analyser = ctx.createAnalyser();
-    analyser.fftSize = 2048;
-    audioSrc.connect(ctx.destination);
-    // we have to connect the MediaElementSource with the analyser 
-    audioSrc.connect(analyser);
-    // we could configure the analyser: e.g. analyser.fftSize (for further infos read the spec)
-    bufferLength = analyser.frequencyBinCount;
-    // frequencyBinCount tells you how many values you'll receive from the analyser
-    frequencyData = new Uint8Array(analyser.frequencyBinCount);
-    timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
+        };
+        var audioSrc = ctx.createMediaElementSource(audio);
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = 2048;
+        audioSrc.connect(ctx.destination);
+        // we have to connect the MediaElementSource with the analyser 
+        audioSrc.connect(analyser);
+        // we could configure the analyser: e.g. analyser.fftSize (for further infos read the spec)
+        bufferLength = analyser.frequencyBinCount;
+        // frequencyBinCount tells you how many values you'll receive from the analyser
+        frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
+        firstTime = false;
+    }
     if (do3d) {
         animate3d();
     }
@@ -265,6 +275,8 @@ function processFeature(index = 0) {
     entropy = featureVector[2]; // measure of abrupt changes
     centroid = featureVector[3];
     spread = featureVector[4];
+    spectralEntropy = featureVector[5];
+    mfcc = featureVector.slice(8, 20); // from 9 to 21
     //console.log(zcr + "," + energy + "," + entropy + "," + centroid + "," + spread);
 
 }

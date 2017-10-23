@@ -5,9 +5,9 @@ import audioTrainTest as aT
 
 
 plot = False
-model = False
-extractFeatures = True
-readFile = True
+model = True
+extractFeatures = False
+readFile = False
 
 genre_models = ["svmMusicGenre3", "svmMusicGenre6"]
 songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
@@ -41,10 +41,9 @@ if model:
 		print("--------")
 		for song in songs:
 			print("--------" + song + "-----------")
-			data = aT.fileClassification("data/mono/" + song, "data/" + genre,"svm", 30)
-			#print(song)
-			#print(P)
-			#print(classNames)
+			data = aT.fileClassification("data/mono/" + song, "data/" + genre,"svm")
+			print(song)
+			print(data)
 
 
 # print "svmMusicGenre 1"
