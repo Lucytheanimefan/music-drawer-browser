@@ -33,26 +33,21 @@ function animate3d() {
         //var maxFreq = Math.max(frequencyArray);
         var rotEnergy = energy; //10*energy;
 
+        var prevNum = 0;
         for (var i = 0; i < bufferLength; i++) {
 
             var v = dataArray[i] / 128.0;
             //var y;
             //
             //Magnify the effect
-            var y = Math.round(v) * v;
-
-            // if (v > 2) {
-            //     y = 2 * v;
-            // } else if (v > 1.5) {
-            //     y = 1.5 * v;
-
-            // } else {
-            //     y = v;
-            // }
-            //console.log(y);
-            cube.scale.x = y; // SCALE
-            cube.scale.y = y; // SCALE
-            cube.scale.z = y; // SCALE
+            var rounded = Math.round(v);
+            if (rounded != 1 || prevNum != 1) {
+                var y = rounded * v;
+                cube.scale.x = y; // SCALE
+                cube.scale.y = y; // SCALE
+                cube.scale.z = y; // SCALE
+                prevNum = rounded;
+            }
 
         }
 
