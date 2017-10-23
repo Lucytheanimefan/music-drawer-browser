@@ -10,6 +10,7 @@ scene.add(cube);
 camera.position.z = 950;
 var increment = 0.01;
 
+var doRotation = false;
 
 function animate3d() {
     if (!do3d) {
@@ -23,7 +24,7 @@ function animate3d() {
     cube.material.color.set(genreColor);
     //analyser.getByteFrequencyData(frequencyArray);
     //var maxFreq = Math.max(frequencyArray);
-    var rotEnergy = energy;//10*energy;
+    var rotEnergy = energy; //10*energy;
 
     for (var i = 0; i < bufferLength; i++) {
 
@@ -42,9 +43,11 @@ function animate3d() {
 
 
     // // rotate cube
-    cube.rotation.x += rotEnergy;
-    cube.rotation.y += rotEnergy;
-    cube.rotation.z += rotEnergy;
+    if (doRotation) {
+        cube.rotation.x += rotEnergy;
+        cube.rotation.y += rotEnergy;
+        cube.rotation.z += rotEnergy;
+    }
     // cube.scale.x = rotEnergy; // SCALE
     // cube.scale.y = rotEnergy; // SCALE
     // cube.scale.z = rotEnergy; // SCALE
