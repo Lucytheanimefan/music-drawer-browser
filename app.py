@@ -87,7 +87,7 @@ def upload():
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = MidTermFeatures, musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 
@@ -99,21 +99,7 @@ def upload():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
-'''
-@app.route('/getMusicData', methods=['GET'])
-def getMusicData():
-    filename = request.args.get('filename')
-	#start_index = int(request.args.get('start'))
-	#end_index = int(request.args.get('end'))  
-    music = specgram.MusicNoteAnalyzer(filename)
-    notes = music.generateGraphData()
-    print(notes)
-    sound = FileSoundAnalyzer.SoundAnalyzer(filename) 
-    data = sound.process_file()['sound']['left']
-    to_return = {'amplitude':data, 'notes':notes}
-    #data = data[-100:]#data[start_index:end_index]
-    return jsonify(to_return)
-'''
+
 
 if __name__ == "__main__":
 	port = int(os.environ.get("PORT", 5000))

@@ -11,8 +11,8 @@ var minDataPoint;
 var maxDataPoint;
 
 var canvas;
-var canvasWidth;
-var canvasHeight;
+var WIDTH;
+var HEIGHT;
 var ctx;
 var canvasData;
 
@@ -48,19 +48,26 @@ var spread = 0;
 
 var roseCoordinates = [];
 
+// 3d stuff
+var scene;
+var camera;
+var renderer;
+var cube;
+
 function setCanvas() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
     //console.log(genreColors);
-    console.log(singleMusicFeatures);
+    //console.log(singleMusicFeatures);
     // Set the first color so it's not white
     genreColor = genreColors.shift();
     canvas = document.getElementById('musicCanvas');
-    canvasWidth = canvas.width;
-    canvasHeight = canvas.height;
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
     ctx = canvas.getContext('2d');
-    canvasData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+    canvasData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+
 
 }
 
@@ -94,8 +101,6 @@ function playMusic() {
             processFeature(i);
         }
 
-
-
         // Update other visual stuff
 
     };
@@ -111,7 +116,10 @@ function playMusic() {
     frequencyData = new Uint8Array(analyser.frequencyBinCount);
     timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
-    visualize();
+    if (do3d) {
+        animate3d();
+    }
+    //visualize();
 
     // we're ready to receive some data!
     // loop
@@ -270,8 +278,6 @@ doOld = true;
 var roseCount = 0;
 
 function visualize() {
-    WIDTH = canvas.width;
-    HEIGHT = canvas.height;
 
     var bufferLength = analyser.fftSize;
     var dataArray = new Uint8Array(bufferLength);
@@ -290,7 +296,7 @@ function visualize() {
         ctx.fillStyle = 'rgb(0, 0, 0)';
         ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        ctx.lineWidth = 1;//entropy;
+        ctx.lineWidth = 1; //entropy;
         //ctx.strokeStyle = genreColor;
 
         ctx.beginPath();
@@ -409,16 +415,60 @@ function visualize() {
 function updateRoseGraphCoordinates(a, b, clearOriginal = false) {
     if (clearOriginal) {
         roseCoordinates = [];
-        //roseCount = 0;
     }
 
     for (var i = 0; i < (2 * Math.PI); i += 0.1) {
         //console.log(Math.cos(i))
         var y = (a * Math.cos(b * i)) * Math.cos(i) + HEIGHT / 2;
-
         var x = (a * Math.cos(b * i)) * Math.sin(i) + WIDTH / 2;
         //console.log(x + ", " + y);
         roseCoordinates.push([x, y]);
     }
+}
+
+/* ------------------- 3d visual effects -------------------------- */
+var scene;
+var camera;
+var renderer;
+var cube;
+
+function init3d() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById("3dStuff").appendChild(renderer.domElement);
+
+
+    // setup the shape
+    var geometry = new THREE.BoxGeometry(500, 500, 500);
+    var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3 });
+    cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    console.log("Added cube to scene");
+    console.log(scene);
 
 }
+
+
+function animate3d() {
+    var bufferLength = analyser.fftSize;
+    var dataArray = new Uint8Array(bufferLength);
+
+    analyser.getByteTimeDomainData(dataArray);
+    cube.material.color.set(genreColor);
+
+    for (var i = 0; i < bufferLength; i++) {
+
+        var v = dataArray[i] / 128.0;
+        var y = v * (HEIGHT / 2) // * HEIGHT / 2;
+        //console.log("Size: " + v);
+        cube.scale.x = v; // SCALE
+        cube.scale.y = v; // SCALE
+        cube.scale.z = v; // SCALE
+    }
+
+    requestAnimationFrame(animate3d);
+    renderer.render(scene, camera);
+}
+//animate();

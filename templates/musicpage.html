@@ -2,6 +2,7 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
 <audio id="myAudio" src="{{ musicfile }}" controls onplay="triggerMusic();" onpause="setPause();">
 </audio>
+<div id="3dStuff"></div>
 <canvas data-chunkSeconds = "{{ chunk_seconds }}" data-genre="{{ genres }}" data-features="{{ musicfeatures }}" data-singleFeatures = "{{ singleFeatures }}" id = "musicCanvas"></canvas>
 {% endblock %}
 
@@ -9,5 +10,9 @@
 <script type="text/javascript">
 	var features = "{{ musicfeatures }}";
 	setCanvas();
+	var do3d = true;
+	if (do3d){
+        $("#musicCanvas").css("display", "none");
+    }
 </script>
 {% endblock %}
