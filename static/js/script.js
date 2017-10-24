@@ -58,7 +58,7 @@ var camera;
 var renderer;
 var cube;
 
-function setCanvas() {
+function generalSetup() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
@@ -67,6 +67,10 @@ function setCanvas() {
     console.log(singleMusicFeatures);
     // Set the first color so it's not white
     genreColor = genreColors[0];
+}
+
+function setCanvas() {
+
     canvas = document.getElementById('musicCanvas');
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
@@ -113,11 +117,7 @@ function playMusic() {
                 processFeature(i);
             }
             // Update other visual stuff....maybe
-            if (do3d) {
-                // Update the vertices
-                console.log("Update vertices");
-                updateVertices(energy, energy);
-            }
+
 
         };
         var audioSrc = ctx.createMediaElementSource(audio);
@@ -461,30 +461,3 @@ function updateRoseGraphCoordinates(a, b, clearOriginal = false) {
         roseCoordinates.push([x, y]);
     }
 }
-
-/* ------------------- 3d visual effects -------------------------- */
-var scene;
-var camera;
-var renderer;
-var cube;
-
-function init3d() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById("3dStuff").appendChild(renderer.domElement);
-
-
-    // setup the shape
-    var geometry = new THREE.BoxGeometry(500, 500, 500);
-    var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3 });
-    cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-    console.log("Added cube to scene");
-    console.log(scene);
-
-}
-
-
-//animate();

@@ -8,11 +8,16 @@
 
 {% block scripts %} 
 <script type="text/javascript">
+	generalSetup();
 	var features = "{{ musicfeatures }}";
-	setCanvas();
 	var do3d = true;
 	if (do3d){
+		init3d();
         $("#musicCanvas").css("display", "none");
+    }
+    else
+    {
+    	setCanvas();
     }
 </script>
 {% endblock %}

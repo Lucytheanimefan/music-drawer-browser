@@ -1,25 +1,39 @@
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.getElementById("3dStuff").appendChild(renderer.domElement);
-var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
+var scene;
+var camera;
+var renderer;
+var geometry;
+var material;
+var cube;
 
-prepareExplosion();
-var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-camera.position.z = 950;
-var increment = 0.01;
 
-var doRotation = true;//false;
 
+// Settings
+var doScale = true;
+var doRotation = true;
 var doMovement = false; //true;
-
 var doExplosion = false;
+var doVertexUpdate = false; //true;
+
 
 var threeDAnimateID;
 
+function init3d() {
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+    renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.getElementById("3dStuff").appendChild(renderer.domElement);
+    geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
+
+    if (doExplosion) {
+        prepareExplosion();
+    }
+
+    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
+    cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+    camera.position.z = 950;
+}
 
 
 function prepareExplosion() {
@@ -34,10 +48,14 @@ function resetCube() {
 }
 
 function updateVertices(xChange, yChange) {
+    if (!doVertexUpdate) {
+        return;
+    }
     // update cube vertices
     for (var i = 0; i < geometry.vertices.length; i++) {
-        geometry.vertices[i].x += -10 + Math.random()*20//xChange;
-        geometry.vertices[i].y += -10 + Math.random()*20//yChange;
+        //console.log("Update vertex: " + i);
+        geometry.vertices[i].x += energy; //-10 + Math.random() * 20 //xChange;
+        geometry.vertices[i].y += energy; //-10 + Math.random() * 20 //yChange;
     }
 }
 
@@ -61,7 +79,10 @@ function explode(explodeScale) {
     }
 }
 
+
+
 function animate3d() {
+    //console.log("ANIMATE 3D");
     var docHeight = $(document).height();
     var docWidth = $(document).width();
 
@@ -82,24 +103,33 @@ function animate3d() {
         var prevRotateCount = 50;
         var prevRotateRate = 0;
 
+
+
+
         for (var i = 0; i < bufferLength; i++) {
 
             var v = dataArray[i] / 128.0;
-            //var y;
-            // 
+
             //Magnify the effect
             var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
 
             //console.log("v: " + v + ", CumAvg: " + amplitudeCumulativeAverage);
-            if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
-                //console.log("Update scale");
-                var y = rounded * v;
-                cube.scale.x = y; // SCALE
-                cube.scale.y = y; // SCALE
-                cube.scale.z = y; // SCALE
-                prevNum = rounded;
+            if (doScale) {
+                if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
+                    //console.log("Update scale");
+                    var y = rounded * v;
+                    cube.scale.x = y; // SCALE
+                    cube.scale.y = y; // SCALE
+                    cube.scale.z = y; // SCALE
+                    prevNum = rounded;
 
+                }
+            }
+
+            // This is not working
+            if (doVertexUpdate) {
+                updateVertices(v * 3, v * 2);
             }
 
             // Explode modifier
@@ -110,29 +140,27 @@ function animate3d() {
                 }
             }
 
+            if (doRotation) {
+                if (v >= 2 * amplitudeCumulativeAverage) {
 
-            if (v >= 4 * amplitudeCumulativeAverage) {
-
-                prevRotateRate = v// / 50;
-                cube.rotateX(prevRotateRate);
-
-                // Reset the rotate count
-                prevRotateCount = 0;
-
-
-            } else if (prevRotateCount < 50) {
-                // If we were previously rotating, rotate on for a bit more just so we can see it
-                cube.rotateX(prevRotateRate - 0.01);
-                prevRotateCount += 1;
+                    prevRotateRate = v // / 50;
+                    cube.rotateX(prevRotateRate);
+                    // Reset the rotate count
+                    prevRotateCount = 0;
+                } else if (prevRotateCount < 50) {
+                    // If we were previously rotating, rotate on for a bit more just so we can see it
+                    cube.rotateX(prevRotateRate - 0.01);
+                    prevRotateCount += 1;
+                }
             }
-
-
         }
         //console.log("Cumulative average: " + amplitudeCumulativeAverage);
 
+        //updateVertices(energy, energy);
+
         // // rotate cube
         if (doRotation) {
-            console.log("rotEnergy: " + energy);
+            console.log("----rotEnergy: " + energy);
             cube.rotation.x += energy;
             //cube.rotation.y += spectralEntropy;
             //cube.rotation.z += rotEnergy;
