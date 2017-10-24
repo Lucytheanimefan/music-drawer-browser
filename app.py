@@ -80,14 +80,14 @@ def upload():
         #print stFeatures
 
         #features = extract_other_features(full_filename).tolist()
-        #genre_data = {}
-        #for i, name in enumerate(classNames):
-        #    genre_data[name] = probs[i]
+        genre_dat = {}
+        for i, name in enumerate(classNames):
+           genre_dat[name] = P[i]
 
         #print genre_data
         # preprocessing audio analysis
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = MidTermFeatures, musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", genres = json.dumps(genre_dat), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 

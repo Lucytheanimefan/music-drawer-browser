@@ -4,7 +4,9 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById("3dStuff").appendChild(renderer.domElement);
 var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
-var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
+
+prepareExplosion();
+var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: false });
 var cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 camera.position.z = 950;
@@ -16,6 +18,19 @@ var doMovement = false; //true;
 
 var threeDAnimateID;
 
+var explosionReady = true;
+var backToNormal = false;
+
+function prepareExplosion() {
+    var explodeModifier = new THREE.ExplodeModifier();
+    explodeModifier.modify(geometry);
+    geometry.verticesNeedUpdate = true;
+}
+
+function resetCube() {
+    var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
+    cube = new THREE.Mesh(geometry, material);
+}
 
 function animate3d() {
     var docHeight = $(document).height();
@@ -45,7 +60,7 @@ function animate3d() {
             //var y;
             // 
             //Magnify the effect
-            var rounded = 1.1*Math.round(v);
+            var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
 
             if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
@@ -54,6 +69,40 @@ function animate3d() {
                 cube.scale.y = y; // SCALE
                 cube.scale.z = y; // SCALE
                 prevNum = rounded;
+            }
+
+            // if (rounded<1 && explosionReady) {
+            //     resetCube();
+            //     explosionReady = false;
+            //     backToNormal = true;
+            // }
+
+
+            // Explode modifier
+            if (v > (4 * amplitudeCumulativeAverage)) {
+                // if (backToNormal) {
+                //     prepareExplosion();
+                //     explosionReady = true;
+                //     backToNormal = false;
+                // }
+                for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
+                    var rand = energy * (Math.random() > 0.5 ? 1 : -1);
+                    //var rand = 1;
+
+                    geometry.vertices[i].x += rand * 0.005;
+                    geometry.vertices[i].y += rand * 0.0005;
+                    geometry.vertices[i].z += rand * 0.00005;
+                    geometry.verticesNeedUpdate = true;
+                    var A = geometry.vertices[i + 0]
+                    var B = geometry.vertices[i + 1]
+                    var C = geometry.vertices[i + 2]
+
+                    var scale = 1 + Math.random() * 0.05;
+                    A.multiplyScalar(scale);
+                    B.multiplyScalar(scale);
+                    C.multiplyScalar(scale);
+
+                }
 
             }
 
@@ -70,10 +119,10 @@ function animate3d() {
                 cube.rotateX(prevRotateRate - 0.01);
                 prevRotateCount += 1;
             }
-            
+
 
         }
-        console.log("Cumulative average: " + amplitudeCumulativeAverage);
+        //console.log("Cumulative average: " + amplitudeCumulativeAverage);
 
         // // rotate cube
         if (doRotation) {
@@ -104,7 +153,7 @@ function animate3d() {
 
             // Off screen in the y direction
             // if (((y > 0 && cube.position.y > 0) || (y < 0 && cube.position.y < 0)) 
-            // 	&& (Math.abs(cube.position.y) >= docHeight / 2)) {
+            //  && (Math.abs(cube.position.y) >= docHeight / 2)) {
             //     console.log("Move in other y direction: cube y: " + cube.position.y);
             //     cube.translateY(-1 * y);
             // } else {
@@ -118,4 +167,98 @@ function animate3d() {
     }
     threeDAnimateID = requestAnimationFrame(animate3d);
     renderer.render(scene, camera);
+}
+
+
+
+
+/* ---------------- Particles --------------------- */
+
+function initParticles() {
+    // create the particle variables
+    var particleCount = 1800,
+        particles = new THREE.Geometry(),
+        pMaterial = new THREE.ParticleBasicMaterial({
+            color: 0xFFFFFF,
+            size: 20,
+            map: THREE.ImageUtils.loadTexture(
+                "images/particle.png"
+            ),
+            blending: THREE.AdditiveBlending,
+            transparent: true
+        });
+
+    // also update the particle system to
+    // sort the particles which enables
+    // the behaviour we want
+    particleSystem.sortParticles = true;
+
+    // now create the individual particles
+    for (var p = 0; p < particleCount; p++) {
+
+        // create a particle with random
+        // position values, -250 -> 250
+        var pX = Math.random() * 500 - 250,
+            pY = Math.random() * 500 - 250,
+            pZ = Math.random() * 500 - 250,
+            particle = new THREE.Vertex(
+                new THREE.Vector3(pX, pY, pZ)
+            );
+        // create a velocity vector
+        particle.velocity = new THREE.Vector3(
+            0, // x
+            -Math.random(), // y: random vel
+            0); // z
+        
+        // add it to the geometry
+        particles.vertices.push(particle);
+    }
+
+    // create the particle system
+    var particleSystem = new THREE.ParticleSystem(
+        particles,
+        pMaterial);
+
+    // add it to the scene
+    scene.addChild(particleSystem);
+}
+// animation loop
+function particleUpdate() {
+
+    // add some rotation to the system
+    particleSystem.rotation.y += 0.01;
+
+    var pCount = particleCount;
+    while (pCount--) {
+
+        // get the particle
+        var particle =
+            particles.vertices[pCount];
+
+        // check if we need to reset
+        if (particle.position.y < -200) {
+            particle.position.y = 200;
+            particle.velocity.y = 0;
+        }
+
+        // update the velocity with
+        // a splat of randomniz
+        particle.velocity.y -= Math.random() * .1;
+
+        // and the position
+        particle.position.addSelf(
+            particle.velocity);
+    }
+
+    // flag to the particle system
+    // that we've changed its vertices.
+    particleSystem.
+    geometry.
+    __dirtyVertices = true;
+
+    // draw
+    renderer.render(scene, camera);
+
+    // set up the next call
+    requestAnimFrame(particleUpdate);
 }

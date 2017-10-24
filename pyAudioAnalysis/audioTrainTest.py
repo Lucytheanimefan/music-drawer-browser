@@ -1062,7 +1062,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
     curFV = (MidTermFeatures - MEAN) / STD                # normalization
 
     [Result, P] = classifierWrapper(Classifier, modelType, curFV)    # classification        
-    return [Result, P, classNames, MidTermFeatures]
+    return [Result, P, classNames, MidTermFeatures.tolist()]
 
 
 def fileRegression(inputFile, modelName, modelType):
