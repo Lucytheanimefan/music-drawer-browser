@@ -41,6 +41,7 @@ var red = "#ff0000";
 
 // features
 var singleMusicFeatures;
+var overallMusicFeatDict;
 var musicFeatures;
 var zcr = 0;
 var energy = 0;
@@ -62,9 +63,11 @@ function generalSetup() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
+    overallMusicFeatDict = { "ZCR": singleMusicFeatures[0], "energy": singleMusicFeatures[1], "entropyOfEnergy": singleMusicFeatures[2], "spectralCentroid": singleMusicFeatures[3], "spectralSpread": singleMusicFeatures[4], "spectralEntropy": singleMusicFeatures[5], "spectralFlux": singleMusicFeatures[6], "spectralRolloff": singleMusicFeatures[7] };
+    // set up singleFeatures
     console.log(musicFeatures);
-    //console.log(genreColors);
-    console.log(singleMusicFeatures);
+    console.log(overallMusicFeatDict);
+
     // Set the first color so it's not white
     genreColor = genreColors[0];
 }

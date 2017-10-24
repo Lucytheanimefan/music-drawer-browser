@@ -12,6 +12,8 @@ from pyAudioAnalysis import audioTrainTest as aT
 from pyAudioAnalysis import audioFeatureExtraction as aF
 from pyAudioAnalysis import NumpyEncoder
 
+import csv
+
 # for faster communication
 #from flask_socketio import SocketIO
 
@@ -84,8 +86,13 @@ def upload():
         for i, name in enumerate(classNames):
            genre_dat[name] = P[i]
 
-        #print genre_data
-        # preprocessing audio analysis
+
+        print type(MidTermFeatures)
+        # Write single feature to CSV
+        with open('music_features.csv', 'wb') as csvfile:
+            wr = csv.writer(csvfile)
+            wr.writerows([MidTermFeatures])
+
 
         return render_template("musicpage.html", genres = json.dumps(genre_data), single_genre = json.dumps(genre_dat), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 

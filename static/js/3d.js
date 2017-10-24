@@ -17,6 +17,8 @@ var doVertexUpdate = false; //true;
 
 var threeDAnimateID;
 
+var magnitudeFactor = 1.3;
+
 function init3d() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
@@ -35,6 +37,14 @@ function init3d() {
     camera.position.z = 950;
 }
 
+function setUpParametersFromFeatures() {
+    var zcr = overallMusicFeatDict["ZCR"];
+    if (zcr < 0.5) {
+        // Probably soft instrumental
+    } else {
+
+    }
+}
 
 function prepareExplosion() {
     var explodeModifier = new THREE.ExplodeModifier();
@@ -118,12 +128,12 @@ function animate3d() {
             if (doScale) {
                 if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                     //console.log("Update scale");
-                    
+
                     var y = rounded * v;
                     // NEED this 1.3 to determine larger magnitude changes!
-                     if (v > 1.3*amplitudeCumulativeAverage){
-                        y = rounded^2 * v;
-                     }
+                    if (v > magnitudeFactor * amplitudeCumulativeAverage) {
+                        y = rounded ^ 2 * v;
+                    }
                     cube.scale.x = y; // SCALE
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
@@ -165,7 +175,7 @@ function animate3d() {
 
         // // rotate cube
         if (doRotation) {
-            console.log("----rotEnergy: " + energy);
+            //console.log("----rotEnergy: " + energy);
             cube.rotation.x += energy;
             //cube.rotation.y += spectralEntropy;
             //cube.rotation.z += rotEnergy;
