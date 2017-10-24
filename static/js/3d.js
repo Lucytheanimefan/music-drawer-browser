@@ -6,20 +6,21 @@ document.getElementById("3dStuff").appendChild(renderer.domElement);
 var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
 
 prepareExplosion();
-var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: false });
+var material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
 var cube = new THREE.Mesh(geometry, material);
 scene.add(cube);
 camera.position.z = 950;
 var increment = 0.01;
 
-var doRotation = false;
+var doRotation = true;//false;
 
 var doMovement = false; //true;
 
+var doExplosion = false;
+
 var threeDAnimateID;
 
-var explosionReady = true;
-var backToNormal = false;
+
 
 function prepareExplosion() {
     var explodeModifier = new THREE.ExplodeModifier();
@@ -30,6 +31,34 @@ function prepareExplosion() {
 function resetCube() {
     var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
     cube = new THREE.Mesh(geometry, material);
+}
+
+function updateVertices(xChange, yChange) {
+    // update cube vertices
+    for (var i = 0; i < geometry.vertices.length; i++) {
+        geometry.vertices[i].x += -10 + Math.random()*20//xChange;
+        geometry.vertices[i].y += -10 + Math.random()*20//yChange;
+    }
+}
+
+function explode(explodeScale) {
+    for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
+        //var rand = energy * (Math.random() > 0.5 ? 1 : -1);
+        //var rand = 1;
+
+        geometry.vertices[i].x += explodeScale * 0.005;
+        geometry.vertices[i].y += explodeScale * 0.0005;
+        geometry.vertices[i].z += explodeScale * 0.00005;
+        geometry.verticesNeedUpdate = true;
+        var A = geometry.vertices[i + 0]
+        var B = geometry.vertices[i + 1]
+        var C = geometry.vertices[i + 2]
+
+        var scale = 1 + Math.random() * 0.05;
+        A.multiplyScalar(scale);
+        B.multiplyScalar(scale);
+        C.multiplyScalar(scale);
+    }
 }
 
 function animate3d() {
@@ -46,7 +75,6 @@ function animate3d() {
         cube.material.color.set(genreColor);
         analyser.getByteFrequencyData(frequencyArray);
         //var maxFreq = Math.max(frequencyArray);
-        var rotEnergy = energy; //10*energy;
 
         var prevNum = 0;
         var amplitudeCumulativeAverage = 0;
@@ -63,51 +91,29 @@ function animate3d() {
             var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
 
+            //console.log("v: " + v + ", CumAvg: " + amplitudeCumulativeAverage);
             if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
+                //console.log("Update scale");
                 var y = rounded * v;
                 cube.scale.x = y; // SCALE
                 cube.scale.y = y; // SCALE
                 cube.scale.z = y; // SCALE
                 prevNum = rounded;
+
             }
-
-            // if (rounded<1 && explosionReady) {
-            //     resetCube();
-            //     explosionReady = false;
-            //     backToNormal = true;
-            // }
-
 
             // Explode modifier
-            if (v > (4 * amplitudeCumulativeAverage)) {
-                // if (backToNormal) {
-                //     prepareExplosion();
-                //     explosionReady = true;
-                //     backToNormal = false;
-                // }
-                for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
+            if (doExplosion) {
+                if (v > (4 * amplitudeCumulativeAverage)) {
                     var rand = energy * (Math.random() > 0.5 ? 1 : -1);
-                    //var rand = 1;
-
-                    geometry.vertices[i].x += rand * 0.005;
-                    geometry.vertices[i].y += rand * 0.0005;
-                    geometry.vertices[i].z += rand * 0.00005;
-                    geometry.verticesNeedUpdate = true;
-                    var A = geometry.vertices[i + 0]
-                    var B = geometry.vertices[i + 1]
-                    var C = geometry.vertices[i + 2]
-
-                    var scale = 1 + Math.random() * 0.05;
-                    A.multiplyScalar(scale);
-                    B.multiplyScalar(scale);
-                    C.multiplyScalar(scale);
-
+                    explode(rand);
                 }
-
             }
 
-            if (v > 1.5 * amplitudeCumulativeAverage) {
-                prevRotateRate = v / 50
+
+            if (v >= 4 * amplitudeCumulativeAverage) {
+
+                prevRotateRate = v// / 50;
                 cube.rotateX(prevRotateRate);
 
                 // Reset the rotate count
@@ -126,8 +132,8 @@ function animate3d() {
 
         // // rotate cube
         if (doRotation) {
-            //console.log("rotEnergy: " + rotEnergy);
-            cube.rotation.x += rotEnergy;
+            console.log("rotEnergy: " + energy);
+            cube.rotation.x += energy;
             //cube.rotation.y += spectralEntropy;
             //cube.rotation.z += rotEnergy;
         }
@@ -172,11 +178,14 @@ function animate3d() {
 
 
 
-/* ---------------- Particles --------------------- */
+/* ---------------- Particles - Not being used right now --------------- */
+var particleCount;
+var particles;
+var pMaterial;
 
 function initParticles() {
     // create the particle variables
-    var particleCount = 1800,
+    particleCount = 1800,
         particles = new THREE.Geometry(),
         pMaterial = new THREE.ParticleBasicMaterial({
             color: 0xFFFFFF,
@@ -209,7 +218,7 @@ function initParticles() {
             0, // x
             -Math.random(), // y: random vel
             0); // z
-        
+
         // add it to the geometry
         particles.vertices.push(particle);
     }

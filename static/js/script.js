@@ -32,6 +32,8 @@ var cursorY;
 
 var animationID;
 
+// Genres
+var useChunkedGenres = true;
 var genreColors;
 var genreColor = "#ffffff";
 
@@ -57,14 +59,14 @@ var renderer;
 var cube;
 
 function setCanvas() {
-    genreColor = generateColorBasedOnGenre();
+    genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
     console.log(musicFeatures);
     //console.log(genreColors);
     console.log(singleMusicFeatures);
     // Set the first color so it's not white
-    //genreColor = genreColors[0] //.shift();
+    genreColor = genreColors[0];
     canvas = document.getElementById('musicCanvas');
     WIDTH = canvas.width;
     HEIGHT = canvas.height;
@@ -100,7 +102,9 @@ function playMusic() {
             if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds) {
 
                 // Set the color
-                //genreColor = genreColors.shift(); //[i];
+                if (useChunkedGenres) {
+                    genreColor = genreColors[i];
+                }
                 //console.log("Update color to " + genreColor);
                 i += 1;
                 oldTime = audio.currentTime;
@@ -108,8 +112,12 @@ function playMusic() {
                 // Process features
                 processFeature(i);
             }
-
-            // Update other visual stuff
+            // Update other visual stuff....maybe
+            if (do3d) {
+                // Update the vertices
+                console.log("Update vertices");
+                updateVertices(energy, energy);
+            }
 
         };
         var audioSrc = ctx.createMediaElementSource(audio);
@@ -238,27 +246,31 @@ function convertGenreProbToRGB(genreProb) {
 function generateColorBasedOnGenre() {
     var genres = $("#musicCanvas").data("genre");
     console.log(genres);
-    var genreString = "rgba(" +
-        convertGenreProbToRGB(genres["Classical"]) + "," +
-        convertGenreProbToRGB(genres["Electronic"]) + "," +
-        convertGenreProbToRGB(genres["Jazz"]) + ", 1)";
+    var colors = [];
+
     // For multiple colors
-    // var colors = [];
-    // for (var i = 0; i < genres.length; i++) {
-    //     var genre = genres[i];
-    //     var probs = genre[1];
-    //     var classifiers = genre[2];
+    if (useChunkedGenres) {
+        for (var i = 0; i < genres.length; i++) {
+            var genre = genres[i];
+            var probs = genre[1];
+            var classifiers = genre[2];
 
-    //     if (probs.length == 3) {
-    //         var genreString = "rgba(" +
-    //             convertGenreProbToRGB(probs[0]) + "," +
-    //             convertGenreProbToRGB(probs[1]) + "," +
-    //             convertGenreProbToRGB(probs[2]) + ", 1)";
-    //         colors.push(genreString);
-    //     }
-    // }
+            if (probs.length == 3) {
+                var genreString = "rgba(" +
+                    convertGenreProbToRGB(probs[0]) + "," +
+                    convertGenreProbToRGB(probs[1]) + "," +
+                    convertGenreProbToRGB(probs[2]) + ", 1)";
+                colors.push(genreString);
+            }
+        }
+    } else {
+        colors = [convertGenreProbToRGB(genres["Classical"]) + "," +
+            convertGenreProbToRGB(genres["Electronic"]) + "," +
+            convertGenreProbToRGB(genres["Jazz"]) + ", 1)"
+        ];
+    }
 
-    return genreString//colors;
+    return colors;
 }
 
 function generateColors(seedColor, callback) {
@@ -282,15 +294,14 @@ function processFeature(index = 0) {
     spread = featureVector[4];
     spectralEntropy = featureVector[5];
     mfcc = featureVector.slice(8, 20); // from 9 to 21
-    console.log(
-        /*"ZCR: " + zcr + 
-                ", Energy: " + energy + 
-                ", Entropy of energy: " + entropy + 
-                ", Spectral centroid: " + centroid + */
-        ", Spectral spread: " + spread
-        /*+ 
-               ", Spectral entropy: " + spectralEntropy*/
-    );
+    //     console.log(
+    //     "ZCR: " + zcr +
+    //         ", Energy: " + energy +
+    //         ", Entropy of energy: " + entropy +
+    //         ", Spectral centroid: " + centroid +
+    //         ", Spectral spread: " + spread +
+    //         ", Spectral entropy: " + spectralEntropy
+    // );
 
 }
 
@@ -476,24 +487,4 @@ function init3d() {
 }
 
 
-function animate3d() {
-    var bufferLength = analyser.fftSize;
-    var dataArray = new Uint8Array(bufferLength);
-
-    analyser.getByteTimeDomainData(dataArray);
-    cube.material.color.set(genreColor);
-
-    for (var i = 0; i < bufferLength; i++) {
-
-        var v = dataArray[i] / 128.0;
-        var y = v * (HEIGHT / 2) // * HEIGHT / 2;
-        //console.log("Size: " + v);
-        cube.scale.x = v; // SCALE
-        cube.scale.y = v; // SCALE
-        cube.scale.z = v; // SCALE
-    }
-
-    requestAnimationFrame(animate3d);
-    renderer.render(scene, camera);
-}
 //animate();
