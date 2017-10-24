@@ -118,7 +118,12 @@ function animate3d() {
             if (doScale) {
                 if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                     //console.log("Update scale");
+                    
                     var y = rounded * v;
+                    // NEED this 1.3 to determine larger magnitude changes!
+                     if (v > 1.3*amplitudeCumulativeAverage){
+                        y = rounded^2 * v;
+                     }
                     cube.scale.x = y; // SCALE
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
