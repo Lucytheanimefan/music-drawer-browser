@@ -1,18 +1,23 @@
 var scene;
 var camera;
+var light;
 var renderer;
 var geometry;
 var material;
 var cube;
-
+var controls;
 
 
 // Settings
 var doScale = true;
-var doRotation = true;
+var doRotation = false;//true;
 var doMovement = false; //true;
 var doExplosion = false;
-var doVertexUpdate = true//false; //true;
+var doVertexUpdate = false; //true;
+
+// Init settings
+var useControls = true;
+var moveCamera = true;
 
 
 var threeDAnimateID;
@@ -22,7 +27,30 @@ var magnitudeFactor = 1.3;
 function init3d() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+
+    if (useControls) {
+        controls = new THREE.OrbitControls(camera);
+        controls.rotateSpeed = 1.0;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
+    }
+
+    light = new THREE.PointLight(0xffffff, 1, 100);
+    light.castShadow = true;
+
+    // Customize this later
+    light.position.set(0, 10, 0);
+    light.castShadow = true; // default false
+    scene.add(light);
+
+    //Set up shadow properties for the light
+    light.shadow.mapSize.width = 512; // default
+    light.shadow.mapSize.height = 512; // default
+    light.shadow.camera.near = 0.5; // default
+    light.shadow.camera.far = 500 // default
+
     renderer = new THREE.WebGLRenderer();
+    renderer.shadowMapEnabled = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById("3dStuff").appendChild(renderer.domElement);
     geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
@@ -31,8 +59,10 @@ function init3d() {
         prepareExplosion();
     }
 
-    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: false/*true*/ });
+    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
     cube = new THREE.Mesh(geometry, material);
+    cube.receiveShadow = true;
+    cube.castShadow = true;
     setUpParametersFromFeatures();
     scene.add(cube);
     camera.position.z = 950;
@@ -45,19 +75,46 @@ function setUpParametersFromFeatures() {
     } else {
 
     }
-    var diff = zcr * 5000;
+    var diff = zcr * 1000;
     updateVertices(diff, diff);
 }
+
+function animateCamera(posX=null, poxY=null, posZ=null) {
+
+    // TODO: get rid of these
+    var posX = camera.position.x - 100;
+    var posY = camera.position.y - 100;
+    var posZ = camera.position.z - 100;
+
+    var from = {
+        x: camera.position.x,
+        y: camera.position.y,
+        z: camera.position.z
+    };
+
+    var to = {
+        x: posX,
+        y: posY,
+        z: posZ
+    };
+    var tween = new TWEEN.Tween(from)
+        .to(to, 600)
+        .easing(TWEEN.Easing.Linear.None)
+        .onUpdate(function() {
+            camera.position.set(this.x, this.y, this.z);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+        })
+        .onComplete(function() {
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+        })
+        .start();
+}
+
 
 function prepareExplosion() {
     var explodeModifier = new THREE.ExplodeModifier();
     explodeModifier.modify(geometry);
     geometry.verticesNeedUpdate = true;
-}
-
-function resetCube() {
-    var geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
-    cube = new THREE.Mesh(geometry, material);
 }
 
 function updateVertices(xChange, yChange) {
@@ -66,7 +123,7 @@ function updateVertices(xChange, yChange) {
     }
     cube.geometry.verticesNeedUpdate = true;
     // update cube vertices
-    for (var i = 0; i < geometry.vertices.length; i++) {
+    for (var i = 0; i < geometry.vertices.length; i += 5) {
         //console.log("Update vertex: " + i);
         cube.geometry.vertices[i].y += yChange; //-10 + Math.random() * 20 //xChange;
         cube.geometry.vertices[i].x += xChange; //-10 + Math.random() * 20 //yChange;
@@ -94,13 +151,16 @@ function explode(explodeScale) {
 }
 
 
-
 function animate3d() {
     //console.log("ANIMATE 3D");
     var docHeight = $(document).height();
     var docWidth = $(document).width();
 
     if (do3d && musicPlaying) {
+        if (moveCamera) {
+            TWEEN.update();
+        }
+
 
         var bufferLength = analyser.fftSize;
         var dataArray = new Uint8Array(bufferLength);
@@ -116,9 +176,6 @@ function animate3d() {
 
         var prevRotateCount = 50;
         var prevRotateRate = 0;
-
-
-
 
         for (var i = 0; i < bufferLength; i++) {
 
@@ -185,6 +242,10 @@ function animate3d() {
             //cube.rotation.z += rotEnergy;
         }
 
+        if (moveCamera){
+            animateCamera();
+        }
+
         if (doMovement && mfcc.length > 0) {
             //var vector = cube.geometry.boundingSphere.center;
             //console.log(vector);
@@ -218,6 +279,7 @@ function animate3d() {
         }
 
     }
+    controls.update();
     threeDAnimateID = requestAnimationFrame(animate3d);
     renderer.render(scene, camera);
 }

@@ -16,10 +16,11 @@
     {% block body %}{% endblock %}
     <script type="text/javascript" src="{{ url_for('static', filename='plugins/three.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/explode.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/OrbitControls.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/16.3.5/Tween.min.js"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/mygraphics.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/3d.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/script.js') }}"></script>
-    
     {% block scripts %} {% endblock %}
 </body>
 

@@ -174,6 +174,7 @@ function setPause() {
     startPauseTime = new Date().getTime() / 1000; // seconds
     console.log("Start pause time: " + startPauseTime);
     musicPaused = true;
+
 }
 
 function scaleBetween(unscaledNum, minAllowed, maxAllowed, min, max) {
