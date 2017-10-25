@@ -242,12 +242,30 @@ function animate3d() {
             //cube.rotation.z += rotEnergy;
         }
 
-        
+
         if (moveCamera && rollOff != undefined && rollOff != 0) {
             console.log("RollOff: " + rollOff);
-            var pos = Math.round(rollOff * 5000)^2;
-    
-            animateCamera(pos, 0, pos);
+            let pos = Math.round(rollOff * 5000) ^ 3;
+            let roundedRollOff = 1
+            let overallRollOff = overallMusicFeatDict["spectralRolloff"];
+            if (rollOff > overallRollOff) {
+                if (3 * rollOff > overallRollOff) {
+                    animateCamera(0, pos, pos);
+                } else if (2 * rollOff > overallRollOff) {
+                    animateCamera(pos, 0, pos);
+                } else {
+                    animateCamera(pos, pos, 0);
+                }
+            } else if (rollOff < overallRollOff) {
+                if (3 * rollOff < overallRollOff) {
+                    animateCamera(0, pos, pos);
+                } else if (2 * rollOff < overallRollOff) {
+                    animateCamera(pos, 0, pos);
+                } else {
+                    animateCamera(pos, pos, 0);
+                }
+            }
+
         }
 
         if (doMovement && mfcc.length > 0) {
