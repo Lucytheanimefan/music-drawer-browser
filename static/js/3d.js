@@ -10,14 +10,17 @@ var controls;
 
 // Settings
 var doScale = true;
-var doRotation = false; //true;
+var doRotation = true;
 var doMovement = false; //true;
 var doExplosion = false;
 var doVertexUpdate = false; //true;
 
+var timeDomain = true;
+var freqDomain = false;
+
 // Init settings
 var useControls = true;
-var moveCamera = true;
+var moveCamera = false; //true;
 
 // features
 var singleMusicFeatures;
@@ -52,7 +55,7 @@ function init3d() {
     scene.add(light);
 
     renderer = new THREE.WebGLRenderer();
-    renderer.shadowMapEnabled = true;
+    renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.getElementById("3dStuff").appendChild(renderer.domElement);
     geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
@@ -68,6 +71,8 @@ function init3d() {
     setUpParametersFromFeatures();
     scene.add(cube);
     camera.position.z = 950;
+
+    initParticles();
 }
 
 function setUpParametersFromFeatures() {
@@ -151,6 +156,7 @@ function explode(explodeScale) {
 }
 
 
+
 function animate3d() {
     //console.log("ANIMATE 3D");
     var docHeight = $(document).height();
@@ -163,27 +169,52 @@ function animate3d() {
 
 
         var bufferLength = analyser.fftSize;
-        var dataArray = new Uint8Array(bufferLength);
-        var frequencyArray = new Uint8Array(analyser.frequencyBinCount);
+        var timeDomainArray = new Uint8Array(bufferLength);
 
-        analyser.getByteTimeDomainData(dataArray);
+        analyser.getByteTimeDomainData(timeDomainArray);
         cube.material.color.set(genreColor);
-        analyser.getByteFrequencyData(frequencyArray);
+
+        // Frequency
+        // var freqBufferLength = analyser.frequencyBinCount;
+        // var frequencyArray = new Uint8Array(freqBufferLength);
+        // analyser.getByteFrequencyData(frequencyArray);
         //var maxFreq = Math.max(frequencyArray);
+
+        // var dataArray;
+        // if (timeDomain) {
+            dataArray = timeDomainArray;
+        // } else {
+        //     dataArray = frequencyArray;
+        // }
+
+        //console.log(frequencyArray);
 
         var prevNum = 0;
         var amplitudeCumulativeAverage = 0;
+        //var freqCumulativeAverage = 0;
 
         var prevRotateCount = 50;
         var prevRotateRate = 0;
 
+        //var j = 0;
+
+
+        // Time domain
         for (var i = 0; i < bufferLength; i++) {
+            // var freq = frequencyArray[i];
+            // var f;
 
             var v = dataArray[i] / 128.0;
 
             //Magnify the effect
             var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
+
+            // if (!isNaN(freq) && freq != 0) {
+            //     freqCumulativeAverage = ((freqCumulativeAverage * i) + freq) / (i + 1);
+            //     f = (frequencyArray[i] / 100000) ^ 2;
+            //     j+=1;
+            // }
 
             //console.log("v: " + v + ", CumAvg: " + amplitudeCumulativeAverage);
             if (doScale) {
@@ -203,11 +234,6 @@ function animate3d() {
                 }
             }
 
-
-            // if (doVertexUpdate) {
-            //     updateVertices(v * 3, v * 2);
-            // }
-
             // Explode modifier
             if (doExplosion) {
                 if (v > (4 * amplitudeCumulativeAverage)) {
@@ -217,10 +243,21 @@ function animate3d() {
             }
 
             if (doRotation) {
+                //console.log(f);
+                // if (f != undefined && !isNaN(f)) {
+                //     if (2*freq > freqCumulativeAverage) {
+                //         cube.rotateX(f);
+                //     } else if (freq > freqCumulativeAverage){
+                //         cube.rotateY(f);
+                //     } else {
+                //         cube.rotateZ(f);
+                //     }
+                // }
                 if (v >= 2 * amplitudeCumulativeAverage) {
 
                     prevRotateRate = v // / 50;
                     cube.rotateX(prevRotateRate);
+
                     // Reset the rotate count
                     prevRotateCount = 0;
                 } else if (prevRotateCount < 50) {
@@ -230,36 +267,36 @@ function animate3d() {
                 }
             }
         }
-        //console.log("Cumulative average: " + amplitudeCumulativeAverage);
 
-        //updateVertices(energy, energy);
+        //console.log("Freq cumulative average: " + freqCumulativeAverage + ", j: " + j);
 
-        // // rotate cube
-        if (doRotation) {
-            //console.log("----rotEnergy: " + energy);
-            cube.rotation.x += energy;
-            //cube.rotation.y += spectralEntropy;
-            //cube.rotation.z += rotEnergy;
-        }
+        // rotate cube
 
 
         if (moveCamera && rollOff != undefined && rollOff != 0) {
             console.log("RollOff: " + rollOff);
-            let pos = Math.round(rollOff * 5000) ^ 3;
+            //let pos = Math.round(rollOff * 5000) ^ 3;
             let roundedRollOff = 1
             let overallRollOff = overallMusicFeatDict["spectralRolloff"];
             if (rollOff > overallRollOff) {
-                if (3 * rollOff > overallRollOff) {
+                console.log("Greater");
+
+                var rollOffm = rollOff - overallRollOff;
+                var pos = Math.round(rollOffm * 5000) ^ 3;
+                if (3 * rollOffm < overallRollOff) {
                     animateCamera(0, pos, pos);
-                } else if (2 * rollOff > overallRollOff) {
+                } else if (2 * rollOffm < overallRollOff) {
                     animateCamera(pos, 0, pos);
                 } else {
                     animateCamera(pos, pos, 0);
                 }
             } else if (rollOff < overallRollOff) {
-                if (3 * rollOff < overallRollOff) {
+                console.log("Smaller");
+                var rollOffm = overallRollOff + rollOff;
+                var pos = Math.round(rollOffm * 5000) ^ 3;
+                if (3 * rollOffm > overallRollOff) {
                     animateCamera(0, pos, pos);
-                } else if (2 * rollOff < overallRollOff) {
+                } else if (2 * rollOffm > overallRollOff) {
                     animateCamera(pos, 0, pos);
                 } else {
                     animateCamera(pos, pos, 0);
@@ -313,20 +350,26 @@ function animate3d() {
 var particleCount;
 var particles;
 var pMaterial;
+var particleSystem;
 
 function initParticles() {
     // create the particle variables
-    particleCount = 1800,
+    particleCount = 1024, // Count for frequency
         particles = new THREE.Geometry(),
-        pMaterial = new THREE.ParticleBasicMaterial({
+        pMaterial = new THREE.PointsMaterial({
             color: 0xFFFFFF,
             size: 20,
             map: THREE.ImageUtils.loadTexture(
-                "images/particle.png"
+                "../static/img/particle.png"
             ),
             blending: THREE.AdditiveBlending,
             transparent: true
         });
+
+    // create the particle system
+    particleSystem = new THREE.Points(
+        particles,
+        pMaterial);
 
     // also update the particle system to
     // sort the particles which enables
@@ -341,7 +384,7 @@ function initParticles() {
         var pX = Math.random() * 500 - 250,
             pY = Math.random() * 500 - 250,
             pZ = Math.random() * 500 - 250,
-            particle = new THREE.Vertex(
+            particle = new THREE.Vector3(
                 new THREE.Vector3(pX, pY, pZ)
             );
         // create a velocity vector
@@ -354,40 +397,45 @@ function initParticles() {
         particles.vertices.push(particle);
     }
 
-    // create the particle system
-    var particleSystem = new THREE.ParticleSystem(
-        particles,
-        pMaterial);
+    console.log("Particles vertices: ");
+    console.log(particles.vertices);
 
     // add it to the scene
-    scene.addChild(particleSystem);
+    scene.add(particleSystem);
 }
 // animation loop
 function particleUpdate() {
+    console.log("Particle Update!");
+
+    // Frequency
+    var freqBufferLength = analyser.frequencyBinCount;
+    var frequencyArray = new Uint8Array(freqBufferLength);
+    analyser.getByteFrequencyData(frequencyArray);
 
     // add some rotation to the system
     particleSystem.rotation.y += 0.01;
 
     var pCount = particleCount;
     while (pCount--) {
+        var f = (frequencyArray[pCount] / 1000);// ^ 2;
 
         // get the particle
         var particle =
             particles.vertices[pCount];
 
+        //console.log(particle);
         // check if we need to reset
-        if (particle.position.y < -200) {
-            particle.position.y = 200;
+        if (particle.y < -200) {
+            particle.y = 200;
             particle.velocity.y = 0;
         }
 
         // update the velocity with
         // a splat of randomniz
-        particle.velocity.y -= Math.random() * .1;
+        particle.velocity.y -= f;//Math.random() * .1;
 
         // and the position
-        particle.position.addSelf(
-            particle.velocity);
+        //particle.addSelf(particle.velocity);
     }
 
     // flag to the particle system
@@ -400,5 +448,5 @@ function particleUpdate() {
     renderer.render(scene, camera);
 
     // set up the next call
-    requestAnimFrame(particleUpdate);
+    requestAnimationFrame(particleUpdate);
 }

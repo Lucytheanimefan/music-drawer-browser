@@ -128,6 +128,7 @@ function playMusic() {
     }
     if (do3d) {
         animate3d();
+        particleUpdate();
     }
     //visualize();
 
@@ -287,7 +288,7 @@ function processFeature(index = 0) {
     window.spread = featureVector[4];
     window.spectralEntropy = featureVector[5];
     window.rollOff = featureVector[7];
-    console.log("processFeature rollOff: " + rollOff);
+    //console.log("processFeature rollOff: " + rollOff);
     mfcc = featureVector.slice(8, 20); // from 9 to 21
     //     console.log(
     //     "ZCR: " + zcr +
