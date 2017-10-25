@@ -39,17 +39,6 @@ var genreColor = "#ffffff";
 
 var red = "#ff0000";
 
-// features
-var singleMusicFeatures;
-var overallMusicFeatDict;
-var musicFeatures;
-var zcr = 0;
-var energy = 0;
-var entropy = 0; // measure of abrupt changes
-var centroid = 0;
-var spread = 0;
-var spectralEntropy = 0;
-var mfcc = [];
 
 var roseCoordinates = [];
 
@@ -291,12 +280,14 @@ function processFeature(index = 0) {
     }
 
     var featureVector = musicFeatures[index];
-    zcr = featureVector[0]; // number of times signal crosses the axis
-    energy = featureVector[1];
-    entropy = featureVector[2]; // measure of abrupt changes
-    centroid = featureVector[3];
-    spread = featureVector[4];
-    spectralEntropy = featureVector[5];
+    window.zcr = featureVector[0]; // number of times signal crosses the axis
+    window.energy = featureVector[1];
+    window.entropy = featureVector[2]; // measure of abrupt changes
+    window.centroid = featureVector[3];
+    window.spread = featureVector[4];
+    window.spectralEntropy = featureVector[5];
+    window.rollOff = featureVector[7];
+    console.log("processFeature rollOff: " + rollOff);
     mfcc = featureVector.slice(8, 20); // from 9 to 21
     //     console.log(
     //     "ZCR: " + zcr +

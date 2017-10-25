@@ -10,7 +10,7 @@ var controls;
 
 // Settings
 var doScale = true;
-var doRotation = false;//true;
+var doRotation = false; //true;
 var doMovement = false; //true;
 var doExplosion = false;
 var doVertexUpdate = false; //true;
@@ -19,6 +19,18 @@ var doVertexUpdate = false; //true;
 var useControls = true;
 var moveCamera = true;
 
+// features
+var singleMusicFeatures;
+var overallMusicFeatDict;
+var musicFeatures;
+var zcr = 0;
+var energy = 0;
+var entropy = 0; // measure of abrupt changes
+var centroid = 0;
+var spread = 0;
+var spectralEntropy = 0;
+var rollOff = 0;
+var mfcc = [];
 
 var threeDAnimateID;
 
@@ -35,19 +47,9 @@ function init3d() {
         controls.panSpeed = 0.8;
     }
 
-    light = new THREE.PointLight(0xffffff, 1, 100);
-    light.castShadow = true;
+    light = new THREE.HemisphereLight(0xffbf67, 0x15c6ff); //new THREE.PointLight(0xffffff, 1, 100);
 
-    // Customize this later
-    light.position.set(0, 10, 0);
-    light.castShadow = true; // default false
     scene.add(light);
-
-    //Set up shadow properties for the light
-    light.shadow.mapSize.width = 512; // default
-    light.shadow.mapSize.height = 512; // default
-    light.shadow.camera.near = 0.5; // default
-    light.shadow.camera.far = 500 // default
 
     renderer = new THREE.WebGLRenderer();
     renderer.shadowMapEnabled = true;
@@ -77,14 +79,12 @@ function setUpParametersFromFeatures() {
     }
     var diff = zcr * 1000;
     updateVertices(diff, diff);
+
+    var pos = Math.round(overallMusicFeatDict["spectralRolloff"] * 5000);
+    animateCamera(pos, pos, pos);
 }
 
-function animateCamera(posX=null, poxY=null, posZ=null) {
-
-    // TODO: get rid of these
-    var posX = camera.position.x - 100;
-    var posY = camera.position.y - 100;
-    var posZ = camera.position.z - 100;
+function animateCamera(posX = 1, posY = 1, posZ = 1) {
 
     var from = {
         x: camera.position.x,
@@ -242,8 +242,12 @@ function animate3d() {
             //cube.rotation.z += rotEnergy;
         }
 
-        if (moveCamera){
-            animateCamera();
+        
+        if (moveCamera && rollOff != undefined && rollOff != 0) {
+            console.log("RollOff: " + rollOff);
+            var pos = Math.round(rollOff * 5000)^2;
+    
+            animateCamera(pos, 0, pos);
         }
 
         if (doMovement && mfcc.length > 0) {
