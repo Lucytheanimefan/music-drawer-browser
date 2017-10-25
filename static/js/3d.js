@@ -12,7 +12,7 @@ var doScale = true;
 var doRotation = true;
 var doMovement = false; //true;
 var doExplosion = false;
-var doVertexUpdate = false; //true;
+var doVertexUpdate = true//false; //true;
 
 
 var threeDAnimateID;
@@ -31,8 +31,9 @@ function init3d() {
         prepareExplosion();
     }
 
-    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
+    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: false/*true*/ });
     cube = new THREE.Mesh(geometry, material);
+    setUpParametersFromFeatures();
     scene.add(cube);
     camera.position.z = 950;
 }
@@ -44,6 +45,8 @@ function setUpParametersFromFeatures() {
     } else {
 
     }
+    var diff = zcr * 5000;
+    updateVertices(diff, diff);
 }
 
 function prepareExplosion() {
@@ -61,11 +64,12 @@ function updateVertices(xChange, yChange) {
     if (!doVertexUpdate) {
         return;
     }
+    cube.geometry.verticesNeedUpdate = true;
     // update cube vertices
     for (var i = 0; i < geometry.vertices.length; i++) {
         //console.log("Update vertex: " + i);
-        geometry.vertices[i].x += energy; //-10 + Math.random() * 20 //xChange;
-        geometry.vertices[i].y += energy; //-10 + Math.random() * 20 //yChange;
+        cube.geometry.vertices[i].y += yChange; //-10 + Math.random() * 20 //xChange;
+        cube.geometry.vertices[i].x += xChange; //-10 + Math.random() * 20 //yChange;
     }
 }
 
@@ -132,7 +136,7 @@ function animate3d() {
                     var y = rounded * v;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
-                        y = rounded ^ 2 * v;
+                        y = rounded ^ rounded * v;
                     }
                     cube.scale.x = y; // SCALE
                     cube.scale.y = y; // SCALE
@@ -142,10 +146,10 @@ function animate3d() {
                 }
             }
 
-            // This is not working
-            if (doVertexUpdate) {
-                updateVertices(v * 3, v * 2);
-            }
+
+            // if (doVertexUpdate) {
+            //     updateVertices(v * 3, v * 2);
+            // }
 
             // Explode modifier
             if (doExplosion) {
