@@ -7,6 +7,7 @@ var material;
 var cube;
 var controls;
 
+var container;
 
 // Settings
 var doScale = true;
@@ -50,14 +51,19 @@ function init3d() {
         controls.panSpeed = 0.8;
     }
 
+    container = document.getElementById("3dStuff");
+    renderer = new THREE.WebGLRenderer();
+    renderer.shadowMap.enabled = true;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
     light = new THREE.HemisphereLight(0xffbf67, 0x15c6ff); //new THREE.PointLight(0xffffff, 1, 100);
 
     scene.add(light);
 
-    renderer = new THREE.WebGLRenderer();
-    renderer.shadowMap.enabled = true;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.getElementById("3dStuff").appendChild(renderer.domElement);
+    initParticles();
+
+
     geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
 
     if (doExplosion) {
@@ -72,7 +78,7 @@ function init3d() {
     scene.add(cube);
     camera.position.z = 950;
 
-    initParticles();
+
 }
 
 function setUpParametersFromFeatures() {
@@ -182,7 +188,7 @@ function animate3d() {
 
         // var dataArray;
         // if (timeDomain) {
-            dataArray = timeDomainArray;
+        dataArray = timeDomainArray;
         // } else {
         //     dataArray = frequencyArray;
         // }
@@ -348,105 +354,116 @@ function animate3d() {
 
 /* ---------------- Particles - Not being used right now --------------- */
 var particleCount;
-var particles;
-var pMaterial;
-var particleSystem;
+var pointMaterial;
+var particles, uniforms;
+var stats;
+//var pMaterial;
+//var particleSystem;
+var raycaster, intersects;
+var mouse, INTERSECTED;
+var PARTICLE_SIZE = 20;
+var particleLength = 1024;
 
 function initParticles() {
-    // create the particle variables
-    particleCount = 1024, // Count for frequency
-        particles = new THREE.Geometry(),
-        pMaterial = new THREE.PointsMaterial({
-            color: 0xFFFFFF,
-            size: 20,
-            map: THREE.ImageUtils.loadTexture(
-                "../static/img/particle.png"
-            ),
-            blending: THREE.AdditiveBlending,
-            transparent: true
-        });
+    var geometry1 = new THREE.BoxGeometry(500, 500, 500, 16, 16, 16);
+    var vertices = geometry1.vertices;
 
-    // create the particle system
-    particleSystem = new THREE.Points(
-        particles,
-        pMaterial);
-
-    // also update the particle system to
-    // sort the particles which enables
-    // the behaviour we want
-    particleSystem.sortParticles = true;
-
-    // now create the individual particles
-    for (var p = 0; p < particleCount; p++) {
-
-        // create a particle with random
-        // position values, -250 -> 250
-        var pX = Math.random() * 500 - 250,
-            pY = Math.random() * 500 - 250,
-            pZ = Math.random() * 500 - 250,
-            particle = new THREE.Vector3(
-                new THREE.Vector3(pX, pY, pZ)
-            );
-        // create a velocity vector
-        particle.velocity = new THREE.Vector3(
-            0, // x
-            -Math.random(), // y: random vel
-            0); // z
-
-        // add it to the geometry
-        particles.vertices.push(particle);
+    var positions = new Float32Array(particleLength * 3);
+    var colors = new Float32Array(particleLength * 3);
+    var sizes = new Float32Array(particleLength);
+    var vertex;
+    var color = new THREE.Color();
+    for (var i = 0, l = particleLength; i < l; i++) {
+        vertex = vertices[i];
+        vertex.toArray(positions, i * 3);
+        color.setHSL(0.01 + 0.1 * (i / l), 1.0, 0.5);
+        color.toArray(colors, i * 3);
+        sizes[i] = PARTICLE_SIZE * 0.5;
     }
+    var geometry = new THREE.BufferGeometry();
+    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.addAttribute('customColor', new THREE.BufferAttribute(colors, 3));
+    geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    //
+    pointMaterial = new THREE.PointsMaterial( { color: 0x888888 } );
+    pointMaterial.size = 2;
+    /*new THREE.ShaderMaterial({
+        uniforms: {
+            color: { value: new THREE.Color(0xffffff) },
+            texture: { value: new THREE.TextureLoader().load("../static/img/particle.png") }
+        },
+        vertexShader: document.getElementById('vertexshader').textContent,
+        fragmentShader: document.getElementById('fragmentshader').textContent,
+        alphaTest: 0.9
+    });*/
+    //
+    particles = new THREE.Points(geometry, pointMaterial);
 
-    console.log("Particles vertices: ");
-    console.log(particles.vertices);
-
-    // add it to the scene
-    scene.add(particleSystem);
+    scene.add(particles);
+    //
+    // renderer = new THREE.WebGLRenderer();
+    // renderer.setPixelRatio(window.devicePixelRatio);
+    // renderer.setSize(window.innerWidth, window.innerHeight);
+    // container.appendChild(renderer.domElement);
+    //
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+    //
+    stats = new Stats();
+    //container.appendChild(stats.dom);
+    //
+    window.addEventListener('resize', onWindowResize, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
-// animation loop
-function particleUpdate() {
-    console.log("Particle Update!");
 
+function onDocumentMouseMove(event) {
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function particleRender() {
     // Frequency
     var freqBufferLength = analyser.frequencyBinCount;
     var frequencyArray = new Uint8Array(freqBufferLength);
     analyser.getByteFrequencyData(frequencyArray);
 
-    // add some rotation to the system
-    particleSystem.rotation.y += 0.01;
-
-    var pCount = particleCount;
-    while (pCount--) {
-        var f = (frequencyArray[pCount] / 1000);// ^ 2;
-
-        // get the particle
-        var particle =
-            particles.vertices[pCount];
-
-        //console.log(particle);
-        // check if we need to reset
-        if (particle.y < -200) {
-            particle.y = 200;
-            particle.velocity.y = 0;
+    for (var i = 0; i < particleLength; i++) {
+        var f = (frequencyArray[i] / 1000); // ^ 2;
+        particles.material.size = frequencyArray[i]/10;//f;
+        //particles.rotation.x += f;
+        //particles.rotation.y += f;
+        var geometry = particles.geometry;
+        var attributes = geometry.attributes;
+        raycaster.setFromCamera(mouse, camera);
+        intersects = raycaster.intersectObject(particles);
+        if (intersects.length > 0) {
+            if (INTERSECTED != intersects[0].index) {
+                attributes.size.array[INTERSECTED] = PARTICLE_SIZE;
+                INTERSECTED = intersects[0].index;
+                attributes.size.array[INTERSECTED] = PARTICLE_SIZE * 1.25;
+                attributes.size.needsUpdate = true;
+            }
+        } else if (INTERSECTED !== null) {
+            attributes.size.array[INTERSECTED] = PARTICLE_SIZE;
+            attributes.size.needsUpdate = true;
+            INTERSECTED = null;
         }
 
-        // update the velocity with
-        // a splat of randomniz
-        particle.velocity.y -= f;//Math.random() * .1;
-
-        // and the position
-        //particle.addSelf(particle.velocity);
     }
 
-    // flag to the particle system
-    // that we've changed its vertices.
-    particleSystem.
-    geometry.
-    __dirtyVertices = true;
-
-    // draw
     renderer.render(scene, camera);
+}
 
-    // set up the next call
+// animation loop
+function particleUpdate() {
     requestAnimationFrame(particleUpdate);
+    particleRender();
+    stats.update();
 }
