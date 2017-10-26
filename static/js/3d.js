@@ -38,7 +38,7 @@ var mfcc = [];
 
 var threeDAnimateID;
 
-var magnitudeFactor = 1.3;
+var magnitudeFactor = 1.2;
 
 function init3d() {
     scene = new THREE.Scene();
@@ -259,7 +259,7 @@ function animate3d() {
                 //         cube.rotateZ(f);
                 //     }
                 // }
-                if (v >= 2 * amplitudeCumulativeAverage) {
+                if (v >= magnitudeFactor * amplitudeCumulativeAverage) {
 
                     prevRotateRate = v // / 50;
                     cube.rotateX(prevRotateRate);
@@ -371,10 +371,10 @@ function initParticles() {
     var coords = generateCircleCoordinates(64, 250, 0, 0);
 
     for (var i = 0; i < particleLength; i++) {
-        let coord = coords[i*2];
-        var radius = 5//1 + i;
-        var sphereGeometry = new THREE.SphereGeometry(radius, 16, 8);
-        var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+        let coord = coords[i * 2];
+        var radius = 17 //1 + i;
+        var sphereGeometry = new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//new THREE.SphereGeometry(radius, 16, 8);
+        var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: true });
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         sphere.position.x = coord[0];
         sphere.position.y = coord[1];
@@ -390,40 +390,44 @@ function initParticles() {
 
 }
 
-function onDocumentMouseMove(event) {
-    event.preventDefault();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
+var prevFreqArray = new Array(particleLength).fill(0);
+var sphereColor = new THREE.Color("rgb(255,255,255)");
 function particleRender() {
     //onsole.log(freqAnalyser);
     // Frequency
     var freqBufferLength = freqAnalyser.frequencyBinCount;
     var frequencyArray = new Uint8Array(freqBufferLength);
     freqAnalyser.getByteFrequencyData(frequencyArray);
-
-    console.log(frequencyArray);
+    
 
     var spheres = sphereParent.children;
-    for (var i = 0; i <freqBufferLength; i++) {
-        var f = (frequencyArray[i]/frequencyArray[0]) * 2;
+    //console.log(frequencyArray[0]);
+    for (var i = 0; i < freqBufferLength; i++) {
+        var f = (frequencyArray[i] / (frequencyArray[0] / 3)); // * 2;
+
 
         //console.log(f);
         var sphere = spheres[i];
-        //sphere.position.x = f;
-         sphere.scale.x = f;
-         sphere.scale.y = f;
-         sphere.scale.z = f;
+
+        sphere.scale.x = f;
+        sphere.scale.y = f;
+        sphere.scale.z = f;
+
+        // Change color for signficant changes
+        var color = new THREE.Color(genreColor);
+        if (1.1*prevFreqArray[i] <= frequencyArray[i]) {
+            
+            sphere.material.color = color;
+        }else{
+            sphere.material.color = sphereColor;
+        }
+
+
 
     }
-
+    //sphereParent.rotateY(energy);
+    //sphereParent.rotateZ(energy);
+    prevFreqArray = frequencyArray;
     renderer.render(scene, camera);
 }
 
