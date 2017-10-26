@@ -68,7 +68,7 @@ function init3d() {
     initParticles();
 
 
-    geometry = new THREE.BoxGeometry(200, 200, 200, 10, 10, 10);
+    geometry = new THREE.SphereGeometry(100);//.BoxGeometry(200, 200, 200, 10, 10, 10);
 
     if (doExplosion) {
         prepareExplosion();
