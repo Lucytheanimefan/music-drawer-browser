@@ -362,58 +362,32 @@ var stats;
 var raycaster, intersects;
 var mouse, INTERSECTED;
 var PARTICLE_SIZE = 20;
-var particleLength = 1024;
+
+var sphereParent;
+var particleLength = 32; // 64 fft size
 
 function initParticles() {
-    var geometry1 = new THREE.BoxGeometry(500, 500, 500, 16, 16, 16);
-    var vertices = geometry1.vertices;
+    sphereParent = new THREE.Object3D();
+    var coords = generateCircleCoordinates(64, 250, 0, 0);
 
-    var positions = new Float32Array(particleLength * 3);
-    var colors = new Float32Array(particleLength * 3);
-    var sizes = new Float32Array(particleLength);
-    var vertex;
-    var color = new THREE.Color();
-    for (var i = 0, l = particleLength; i < l; i++) {
-        vertex = vertices[i];
-        vertex.toArray(positions, i * 3);
-        color.setHSL(0.01 + 0.1 * (i / l), 1.0, 0.5);
-        color.toArray(colors, i * 3);
-        sizes[i] = PARTICLE_SIZE * 0.5;
+    for (var i = 0; i < particleLength; i++) {
+        let coord = coords[i*2];
+        var radius = 5//1 + i;
+        var sphereGeometry = new THREE.SphereGeometry(radius, 16, 8);
+        var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x = coord[0];
+        sphere.position.y = coord[1];
+        sphereParent.add(sphere);
     }
-    var geometry = new THREE.BufferGeometry();
-    geometry.addAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.addAttribute('customColor', new THREE.BufferAttribute(colors, 3));
-    geometry.addAttribute('size', new THREE.BufferAttribute(sizes, 1));
-    //
-    pointMaterial = new THREE.PointsMaterial( { color: 0x888888 } );
-    pointMaterial.size = 2;
-    /*new THREE.ShaderMaterial({
-        uniforms: {
-            color: { value: new THREE.Color(0xffffff) },
-            texture: { value: new THREE.TextureLoader().load("../static/img/particle.png") }
-        },
-        vertexShader: document.getElementById('vertexshader').textContent,
-        fragmentShader: document.getElementById('fragmentshader').textContent,
-        alphaTest: 0.9
-    });*/
-    //
-    particles = new THREE.Points(geometry, pointMaterial);
+    sphereParent.position.set(0, 0, 200);
+    console.log(sphereParent);
+    scene.add(sphereParent);
 
-    scene.add(particles);
-    //
-    // renderer = new THREE.WebGLRenderer();
-    // renderer.setPixelRatio(window.devicePixelRatio);
-    // renderer.setSize(window.innerWidth, window.innerHeight);
-    // container.appendChild(renderer.domElement);
-    //
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-    //
-    stats = new Stats();
-    //container.appendChild(stats.dom);
-    //
-    window.addEventListener('resize', onWindowResize, false);
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+
+
+    //--------------
+
 }
 
 function onDocumentMouseMove(event) {
@@ -429,32 +403,24 @@ function onWindowResize() {
 }
 
 function particleRender() {
+    //onsole.log(freqAnalyser);
     // Frequency
-    var freqBufferLength = analyser.frequencyBinCount;
+    var freqBufferLength = freqAnalyser.frequencyBinCount;
     var frequencyArray = new Uint8Array(freqBufferLength);
-    analyser.getByteFrequencyData(frequencyArray);
+    freqAnalyser.getByteFrequencyData(frequencyArray);
 
-    for (var i = 0; i < particleLength; i++) {
-        var f = (frequencyArray[i] / 1000); // ^ 2;
-        particles.material.size = frequencyArray[i]/10;//f;
-        //particles.rotation.x += f;
-        //particles.rotation.y += f;
-        var geometry = particles.geometry;
-        var attributes = geometry.attributes;
-        raycaster.setFromCamera(mouse, camera);
-        intersects = raycaster.intersectObject(particles);
-        if (intersects.length > 0) {
-            if (INTERSECTED != intersects[0].index) {
-                attributes.size.array[INTERSECTED] = PARTICLE_SIZE;
-                INTERSECTED = intersects[0].index;
-                attributes.size.array[INTERSECTED] = PARTICLE_SIZE * 1.25;
-                attributes.size.needsUpdate = true;
-            }
-        } else if (INTERSECTED !== null) {
-            attributes.size.array[INTERSECTED] = PARTICLE_SIZE;
-            attributes.size.needsUpdate = true;
-            INTERSECTED = null;
-        }
+    console.log(frequencyArray);
+
+    var spheres = sphereParent.children;
+    for (var i = 0; i <freqBufferLength; i++) {
+        var f = (frequencyArray[i]/frequencyArray[0]) * 2;
+
+        //console.log(f);
+        var sphere = spheres[i];
+        //sphere.position.x = f;
+         sphere.scale.x = f;
+         sphere.scale.y = f;
+         sphere.scale.z = f;
 
     }
 
@@ -465,5 +431,5 @@ function particleRender() {
 function particleUpdate() {
     requestAnimationFrame(particleUpdate);
     particleRender();
-    stats.update();
+    //stats.update();
 }

@@ -21,6 +21,7 @@ var duration; // in seconds
 var chunkIntervalSeconds;
 
 var analyser;
+var freqAnalyser;
 var frequencyData;
 var timeDomainData;
 var bufferLength;
@@ -120,8 +121,13 @@ function playMusic() {
         audioSrc.connect(analyser);
         // we could configure the analyser: e.g. analyser.fftSize (for further infos read the spec)
         bufferLength = analyser.frequencyBinCount;
+
+
+        freqAnalyser = ctx.createAnalyser();
+        freqAnalyser.fftSize = 64;
+        audioSrc.connect(freqAnalyser);
         // frequencyBinCount tells you how many values you'll receive from the analyser
-        frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        frequencyData = new Uint8Array(freqAnalyser.frequencyBinCount); // Not being used
         timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
         firstTime = false;
