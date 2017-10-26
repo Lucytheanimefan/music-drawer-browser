@@ -49,6 +49,8 @@ var camera;
 var renderer;
 var cube;
 
+console.disableYellowBox = true;
+
 function generalSetup() {
     genreColors = generateColorBasedOnGenre();
     musicFeatures = $("#musicCanvas").data("features");

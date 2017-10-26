@@ -40,6 +40,10 @@ var threeDAnimateID;
 
 var magnitudeFactor = 1.2;
 
+var expandFreqOrbit = false;
+
+console.disableYellowBox = true;
+
 function init3d() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
@@ -231,12 +235,19 @@ function animate3d() {
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
                         y = rounded ^ rounded * v;
+                        if (v > 2 * amplitudeCumulativeAverage) {
+                            expandFreqOrbit = true;
+                        }
+                    } else {
+                        expandFreqOrbit = false;
                     }
                     cube.scale.x = y; // SCALE
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
                     prevNum = rounded;
 
+                } else {
+                    expandFreqOrbit = false;
                 }
             }
 
@@ -363,15 +374,16 @@ var raycaster, intersects;
 var mouse, INTERSECTED;
 var PARTICLE_SIZE = 20;
 
-var sphereParent;
+var sphereParent, spheres;
 var particleLength = 32; // 64 fft size
+var orbitRadius = originalOrbitRadius = 270;
 
 function initParticles() {
     sphereParent = new THREE.Object3D();
-    var coords = generateCircleCoordinates(64, 250, 0, 0);
+    var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
 
     for (var i = 0; i < particleLength; i++) {
-        let coord = coords[i * 2];
+        let coord = coords[i];
         var radius = 17 //1 + i;
         var sphereGeometry = new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//new THREE.SphereGeometry(radius, 16, 8);
         var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: true });
@@ -392,15 +404,17 @@ function initParticles() {
 
 var prevFreqArray = new Array(particleLength).fill(0);
 var sphereColor = new THREE.Color("rgb(255,255,255)");
+var radExpand = 50;
+var radDecrease = 5;
 function particleRender() {
     //onsole.log(freqAnalyser);
     // Frequency
     var freqBufferLength = freqAnalyser.frequencyBinCount;
     var frequencyArray = new Uint8Array(freqBufferLength);
     freqAnalyser.getByteFrequencyData(frequencyArray);
-    
 
-    var spheres = sphereParent.children;
+
+    spheres = sphereParent.children;
     //console.log(frequencyArray[0]);
     for (var i = 0; i < freqBufferLength; i++) {
         var f = (frequencyArray[i] / (frequencyArray[0] / 3)); // * 2;
@@ -415,20 +429,51 @@ function particleRender() {
 
         // Change color for signficant changes
         var color = new THREE.Color(genreColor);
-        if (1.1*prevFreqArray[i] <= frequencyArray[i]) {
-            
+        if (1.1 * prevFreqArray[i] <= frequencyArray[i]) {
+
             sphere.material.color = color;
-        }else{
+        } else {
             sphere.material.color = sphereColor;
         }
 
 
 
     }
+
+    // Move everything apart
+    if (expandFreqOrbit) {
+        orbitRadius += radExpand;
+        setSpherePosition();
+        // var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
+        // for (var i = 0; i < coords.length; i++) {
+        //     let coord = coords[i];
+        //     let sphere = spheres[i];
+        //     if (sphere != undefined) {
+        //         sphere.position.x = coord[0];
+        //         sphere.position.y = coord[1];
+        //     }
+        // }
+    } else if (originalOrbitRadius < orbitRadius) {
+        orbitRadius += -1*radDecrease;
+        setSpherePosition();
+    }
+
     //sphereParent.rotateY(energy);
     //sphereParent.rotateZ(energy);
     prevFreqArray = frequencyArray;
     renderer.render(scene, camera);
+}
+
+function setSpherePosition() {
+    var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
+    for (var i = 0; i < coords.length; i++) {
+        let coord = coords[i];
+        let sphere = spheres[i];
+        if (sphere != undefined) {
+            sphere.position.x = coord[0];
+            sphere.position.y = coord[1];
+        }
+    }
 }
 
 // animation loop
