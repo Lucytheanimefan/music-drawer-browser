@@ -172,3 +172,15 @@ function generateCircleCoordinates(steps, radius, centerX, centerY) {
     }
     return coords;
 }
+
+
+function rgbToString(rgbArray) {
+    return "rgb(" +
+        convertGenreProbToRGB(rgbArray[0]) + "," +
+        convertGenreProbToRGB(rgbArray[1]) + "," +
+        convertGenreProbToRGB(rgbArray[2]) + ")";
+}
+
+function convertGenreProbToRGB(genreProb) {
+    return Math.round(genreProb * 265);
+}

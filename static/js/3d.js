@@ -42,6 +42,22 @@ var magnitudeFactor = 1.2;
 
 var expandFreqOrbit = false;
 
+// Particles
+// 
+// 
+var timeDomainParent, mfccSpheres;
+var sphereParent, spheres;
+var particleLength = 32; // 64 fft size
+var orbitRadius = originalOrbitRadius = 270;
+
+// Frequencies
+var prevFreqArray = new Array(particleLength).fill(0);
+var sphereColor = new THREE.Color("rgb(255,255,255)");
+var radExpand = 50;
+var radDecrease = 5;
+
+//
+
 console.disableYellowBox = true;
 
 function init3d() {
@@ -67,8 +83,9 @@ function init3d() {
 
     initParticles();
 
-
-    geometry = new THREE.SphereGeometry(100);//.BoxGeometry(200, 200, 200, 10, 10, 10);
+    let segments = overallMusicFeatDict["spectralEntropy"] * 0;
+    let rad = overallMusicFeatDict["ZCR"] * 1000;
+    geometry = new THREE.SphereGeometry(rad, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
 
     if (doExplosion) {
         prepareExplosion();
@@ -78,26 +95,12 @@ function init3d() {
     cube = new THREE.Mesh(geometry, material);
     cube.receiveShadow = true;
     cube.castShadow = true;
-    setUpParametersFromFeatures();
     scene.add(cube);
     camera.position.z = 950;
 
 
 }
 
-function setUpParametersFromFeatures() {
-    var zcr = overallMusicFeatDict["ZCR"];
-    if (zcr < 0.5) {
-        // Probably soft instrumental
-    } else {
-
-    }
-    var diff = zcr * 1000;
-    updateVertices(diff, diff);
-
-    var pos = Math.round(overallMusicFeatDict["spectralRolloff"] * 5000);
-    animateCamera(pos, pos, pos);
-}
 
 function animateCamera(posX = 1, posY = 1, posZ = 1) {
 
@@ -184,35 +187,17 @@ function animate3d() {
         analyser.getByteTimeDomainData(timeDomainArray);
         cube.material.color.set(genreColor);
 
-        // Frequency
-        // var freqBufferLength = analyser.frequencyBinCount;
-        // var frequencyArray = new Uint8Array(freqBufferLength);
-        // analyser.getByteFrequencyData(frequencyArray);
-        //var maxFreq = Math.max(frequencyArray);
-
-        // var dataArray;
-        // if (timeDomain) {
         dataArray = timeDomainArray;
-        // } else {
-        //     dataArray = frequencyArray;
-        // }
 
-        //console.log(frequencyArray);
 
         var prevNum = 0;
         var amplitudeCumulativeAverage = 0;
-        //var freqCumulativeAverage = 0;
 
         var prevRotateCount = 50;
         var prevRotateRate = 0;
 
-        //var j = 0;
-
-
         // Time domain
         for (var i = 0; i < bufferLength; i++) {
-            // var freq = frequencyArray[i];
-            // var f;
 
             var v = dataArray[i] / 128.0;
 
@@ -220,11 +205,8 @@ function animate3d() {
             var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
 
-            // if (!isNaN(freq) && freq != 0) {
-            //     freqCumulativeAverage = ((freqCumulativeAverage * i) + freq) / (i + 1);
-            //     f = (frequencyArray[i] / 100000) ^ 2;
-            //     j+=1;
-            // }
+            // Alright I want an orbit for this too.
+            var sphere = timeDomainParent.children[i];
 
             //console.log("v: " + v + ", CumAvg: " + amplitudeCumulativeAverage);
             if (doScale) {
@@ -244,6 +226,20 @@ function animate3d() {
                     cube.scale.x = y; // SCALE
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
+
+                    let val = v;//y * 2;
+                    sphere.scale.x = val;
+                    sphere.scale.y = val;
+                    sphere.scale.z = val;
+                    if (genreColorArr != undefined) {
+                        //console.log(genreColorArr);
+                        let factor = i/bufferLength;
+                        let newCol = rgbToString([genreColorArr[0] * factor, genreColorArr[1] * factor, genreColorArr[2] * factor]);
+                        //console.log(newCol);
+                        var color = new THREE.Color(newCol);
+                        //console.log(color);
+                        sphere.material.color = color;
+                    }
                     prevNum = rounded;
 
                 } else {
@@ -260,16 +256,6 @@ function animate3d() {
             }
 
             if (doRotation) {
-                //console.log(f);
-                // if (f != undefined && !isNaN(f)) {
-                //     if (2*freq > freqCumulativeAverage) {
-                //         cube.rotateX(f);
-                //     } else if (freq > freqCumulativeAverage){
-                //         cube.rotateY(f);
-                //     } else {
-                //         cube.rotateZ(f);
-                //     }
-                // }
                 if (v >= magnitudeFactor * amplitudeCumulativeAverage) {
 
                     prevRotateRate = v // / 50;
@@ -284,8 +270,6 @@ function animate3d() {
                 }
             }
         }
-
-        //console.log("Freq cumulative average: " + freqCumulativeAverage + ", j: " + j);
 
         // rotate cube
 
@@ -328,27 +312,9 @@ function animate3d() {
             var x = mfcc[0];
             var y = mfcc[1];
             var z = mfcc[2];
-            // Of the screen in the x direction
-            // if (((x > 0 && cube.position.x > 0) || (x < 0 && cube.position.x < 0))
-            //  && (Math.abs(cube.position.x) >= docWidth / 2)) {
-            //     console.log("Move in other x direction: cube x:" + cube.position.x + ", x: " + x);
-            //     // Move to the left
-            //     cube.translateX(-1 * x);
-            // } else {
-            //     cube.translateX(x);
-            // }
-
             var factor = (Math.random() < 0.5) ? -1 : 1;
             cube.translateX(factor * x);
 
-            // Off screen in the y direction
-            // if (((y > 0 && cube.position.y > 0) || (y < 0 && cube.position.y < 0)) 
-            //  && (Math.abs(cube.position.y) >= docHeight / 2)) {
-            //     console.log("Move in other y direction: cube y: " + cube.position.y);
-            //     cube.translateY(-1 * y);
-            // } else {
-            //     cube.translateY(y);
-            // }
             cube.translateY(factor * y);
 
             cube.translateZ(z);
@@ -363,104 +329,94 @@ function animate3d() {
 
 
 
-/* ---------------- Particles - Not being used right now --------------- */
-var particleCount;
-var pointMaterial;
-var particles, uniforms;
-var stats;
-//var pMaterial;
-//var particleSystem;
-var raycaster, intersects;
-var mouse, INTERSECTED;
-var PARTICLE_SIZE = 20;
-
-var sphereParent, spheres;
-var particleLength = 32; // 64 fft size
-var orbitRadius = originalOrbitRadius = 270;
+/* ---------------- Particles --------------- */
 
 function initParticles() {
-    sphereParent = new THREE.Object3D();
+    // Frequency orbit
     var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
-
-    for (var i = 0; i < particleLength; i++) {
-        let coord = coords[i];
-        var radius = 17 //1 + i;
-        var sphereGeometry = new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//new THREE.SphereGeometry(radius, 16, 8);
-        var sphereMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff, wireframe: true });
-        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
-        sphere.position.x = coord[0];
-        sphere.position.y = coord[1];
-        sphereParent.add(sphere);
-    }
-    sphereParent.position.set(0, 0, 200);
+    sphereParent = generateParticles(coords, 17);
+    sphereParent.position.set(0, 0, 0);
     console.log(sphereParent);
     scene.add(sphereParent);
 
-
-
+    // MFCC orbit
     //--------------
-
+    //let mfcc = overallMusicFeatDict["mfcc"];
+    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius * 2, 0, 0);
+    timeDomainParent = generateParticles(timeDomainCoords, 10);
+    timeDomainParent.rotateX(Math.PI / 2);
+    scene.add(timeDomainParent);
 }
 
-var prevFreqArray = new Array(particleLength).fill(0);
-var sphereColor = new THREE.Color("rgb(255,255,255)");
-var radExpand = 50;
-var radDecrease = 5;
+function generateParticles(coords, radius, color = null) {
+    var parent = new THREE.Object3D();
+    for (var i = 0; i < coords.length; i++) {
+        let coord = coords[i];
+        var sphereGeometry = new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//new THREE.SphereGeometry(radius, 16, 8);
+        var sphereMaterial;
+        if (!color) {
+            sphereMaterial = new THREE.MeshLambertMaterial({ color: sphereColor, wireframe: true });
+        } else {
+            sphereMaterial = new THREE.MeshLambertMaterial({ color: color, wireframe: true });
+        }
+        var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+        sphere.position.x = coord[0];
+        sphere.position.y = coord[1];
+        parent.add(sphere);
+    }
+    return parent;
+}
+
 function particleRender() {
-    //onsole.log(freqAnalyser);
-    // Frequency
+    // ----------- Frequency
+    // 
     var freqBufferLength = freqAnalyser.frequencyBinCount;
     var frequencyArray = new Uint8Array(freqBufferLength);
     freqAnalyser.getByteFrequencyData(frequencyArray);
 
-
     spheres = sphereParent.children;
-    //console.log(frequencyArray[0]);
+    mfccSpheres = timeDomainParent.children;
+
     for (var i = 0; i < freqBufferLength; i++) {
         var f = (frequencyArray[i] / (frequencyArray[0] / 3)); // * 2;
-
-
-        //console.log(f);
         var sphere = spheres[i];
-
         sphere.scale.x = f;
         sphere.scale.y = f;
         sphere.scale.z = f;
-
         // Change color for signficant changes
         var color = new THREE.Color(genreColor);
         if (1.1 * prevFreqArray[i] <= frequencyArray[i]) {
-
             sphere.material.color = color;
         } else {
             sphere.material.color = sphereColor;
         }
-
-
-
     }
 
     // Move everything apart
     if (expandFreqOrbit) {
         orbitRadius += radExpand;
         setSpherePosition();
-        // var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
-        // for (var i = 0; i < coords.length; i++) {
-        //     let coord = coords[i];
-        //     let sphere = spheres[i];
-        //     if (sphere != undefined) {
-        //         sphere.position.x = coord[0];
-        //         sphere.position.y = coord[1];
-        //     }
-        // }
     } else if (originalOrbitRadius < orbitRadius) {
-        orbitRadius += -1*radDecrease;
+        orbitRadius += -1 * radDecrease;
         setSpherePosition();
     }
 
-    //sphereParent.rotateY(energy);
-    //sphereParent.rotateZ(energy);
     prevFreqArray = frequencyArray;
+
+
+    // ----------- MFCC
+    // 
+    // var singleMFCCFeature = overallMusicFeatDict["mfcc"];
+    // for (var j = 0; j< mfcc.length; j++){
+    //     let mfccOrig = Math.abs(singleMFCCFeature[j]);
+    //     let sphere = mfccSpheres[j];
+    //     // Get % diff
+    //     let val = Math.abs(mfcc[j])/mfccOrig;
+    //     sphere.scale.x = val;
+    //     sphere.scale.y = val;
+    //     sphere.scale.z = val;
+
+    // }
     renderer.render(scene, camera);
 }
 

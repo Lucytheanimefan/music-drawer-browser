@@ -26,6 +26,8 @@ var frequencyData;
 var timeDomainData;
 var bufferLength;
 
+var timeDomainfftSize = 128;
+
 var colorScheme = [];
 
 var cursorX;
@@ -34,9 +36,11 @@ var cursorY;
 var animationID;
 
 // Genres
+var genres;
 var useChunkedGenres = true;
 var genreColors;
 var genreColor = "#ffffff";
+var genreColorArr;
 
 var red = "#ff0000";
 
@@ -52,10 +56,11 @@ var cube;
 console.disableYellowBox = true;
 
 function generalSetup() {
-    genreColors = generateColorBasedOnGenre();
+    genres = $("#musicCanvas").data("genre");
+    genreColors = generateColorBasedOnGenre(genres);
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
-    overallMusicFeatDict = { "ZCR": singleMusicFeatures[0], "energy": singleMusicFeatures[1], "entropyOfEnergy": singleMusicFeatures[2], "spectralCentroid": singleMusicFeatures[3], "spectralSpread": singleMusicFeatures[4], "spectralEntropy": singleMusicFeatures[5], "spectralFlux": singleMusicFeatures[6], "spectralRolloff": singleMusicFeatures[7] };
+    overallMusicFeatDict = { "ZCR": singleMusicFeatures[0], "energy": singleMusicFeatures[1], "entropyOfEnergy": singleMusicFeatures[2], "spectralCentroid": singleMusicFeatures[3], "spectralSpread": singleMusicFeatures[4], "spectralEntropy": singleMusicFeatures[5], "spectralFlux": singleMusicFeatures[6], "spectralRolloff": singleMusicFeatures[7], "mfcc": singleMusicFeatures.slice(8, 20) };
     // set up singleFeatures
     console.log(musicFeatures);
     console.log(overallMusicFeatDict);
@@ -103,6 +108,8 @@ function playMusic() {
                 // Set the color
                 if (useChunkedGenres) {
                     genreColor = genreColors[i];
+                    genreColorArr = genres[i][1];
+                    console.log(genreColorArr);
                 }
                 //console.log("Update color to " + genreColor);
                 i += 1;
@@ -117,7 +124,7 @@ function playMusic() {
         };
         var audioSrc = ctx.createMediaElementSource(audio);
         analyser = ctx.createAnalyser();
-        analyser.fftSize = 2048;
+        analyser.fftSize = timeDomainfftSize; //2048;
         audioSrc.connect(ctx.destination);
         // we have to connect the MediaElementSource with the analyser 
         audioSrc.connect(analyser);
@@ -241,12 +248,8 @@ function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
 
-function convertGenreProbToRGB(genreProb) {
-    return Math.round(genreProb * 265);
-}
 
-function generateColorBasedOnGenre() {
-    var genres = $("#musicCanvas").data("genre");
+function generateColorBasedOnGenre(genres) {
     console.log(genres);
     var colors = [];
 
@@ -258,10 +261,7 @@ function generateColorBasedOnGenre() {
             var classifiers = genre[2];
 
             if (probs.length == 3) {
-                var genreString = "rgba(" +
-                    convertGenreProbToRGB(probs[0]) + "," +
-                    convertGenreProbToRGB(probs[1]) + "," +
-                    convertGenreProbToRGB(probs[2]) + ", 1)";
+                var genreString = rgbToString(probs);
                 colors.push(genreString);
             }
         }
