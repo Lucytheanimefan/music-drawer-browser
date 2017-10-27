@@ -227,7 +227,7 @@ function animate3d() {
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
 
-                    let val = v;//y * 2;
+                    let val = y;//y * 2;
                     sphere.scale.x = val;
                     sphere.scale.y = val;
                     sphere.scale.z = val;
@@ -395,6 +395,8 @@ function particleRender() {
     // Move everything apart
     if (expandFreqOrbit) {
         orbitRadius += radExpand;
+        sphereParent.rotateX(1);
+        timeDomainParent.rotateY(1);
         setSpherePosition();
     } else if (originalOrbitRadius < orbitRadius) {
         orbitRadius += -1 * radDecrease;
