@@ -395,8 +395,8 @@ function particleRender() {
     // Move everything apart
     if (expandFreqOrbit) {
         orbitRadius += radExpand;
-        sphereParent.rotateX(1);
-        timeDomainParent.rotateY(1);
+        sphereParent.rotateX(energy);
+        timeDomainParent.rotateY(energy);
         setSpherePosition();
     } else if (originalOrbitRadius < orbitRadius) {
         orbitRadius += -1 * radDecrease;
