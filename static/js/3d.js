@@ -37,6 +37,7 @@ var rollOff = 0;
 var mfcc = [];
 
 var threeDAnimateID;
+var particleAnimateID;
 
 var magnitudeFactor = 1.2;
 
@@ -48,7 +49,7 @@ var expandFreqOrbit = false;
 var timeDomainParent, mfccSpheres;
 var sphereParent, spheres;
 var particleLength = 32; // 64 fft size
-var orbitRadius = originalOrbitRadius = 270;
+var orbitRadius = originalOrbitRadius = 540;
 
 // Frequencies
 var prevFreqArray = new Array(particleLength).fill(0);
@@ -81,9 +82,12 @@ function init3d() {
 
     scene.add(light);
 
+    orbitRadius = originalOrbitRadius = overallMusicFeatDict["spectralSpread"] * 2500;
+    console.log("orbitRadius: " + orbitRadius);
+
     initParticles();
 
-    let segments = overallMusicFeatDict["spectralEntropy"] * 0;
+    let segments = overallMusicFeatDict["spectralEntropy"] * 50;
     let rad = overallMusicFeatDict["ZCR"] * 1000;
     geometry = new THREE.SphereGeometry(rad, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
 
@@ -97,8 +101,6 @@ function init3d() {
     cube.castShadow = true;
     scene.add(cube);
     camera.position.z = 950;
-
-
 }
 
 
@@ -227,13 +229,13 @@ function animate3d() {
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
 
-                    let val = y;//y * 2;
+                    let val = y; //y * 2;
                     sphere.scale.x = val;
                     sphere.scale.y = val;
                     sphere.scale.z = val;
                     if (genreColorArr != undefined) {
                         //console.log(genreColorArr);
-                        let factor = i/bufferLength;
+                        let factor = i / bufferLength;
                         let newCol = rgbToString([genreColorArr[0] * factor, genreColorArr[1] * factor, genreColorArr[2] * factor]);
                         //console.log(newCol);
                         var color = new THREE.Color(newCol);
@@ -334,31 +336,29 @@ function animate3d() {
 function initParticles() {
     // Frequency orbit
     var coords = generateCircleCoordinates(32, orbitRadius, 0, 0);
-    sphereParent = generateParticles(coords, 17);
+    let seg = 100 * overallMusicFeatDict["energy"];
+    sphereParent = generateParticles(coords, 17, seg, seg);
     sphereParent.position.set(0, 0, 0);
     console.log(sphereParent);
     scene.add(sphereParent);
 
     // MFCC orbit
     //--------------
-    //let mfcc = overallMusicFeatDict["mfcc"];
-    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius * 2, 0, 0);
-    timeDomainParent = generateParticles(timeDomainCoords, 10);
+    let rad = 50 * (overallMusicFeatDict["ZCR"] * 5) ^ 2;
+    console.log("Time domain rad: " + rad);
+    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius / 2, 0, 0);
+    timeDomainParent = generateParticles(timeDomainCoords, rad);
     timeDomainParent.rotateX(Math.PI / 2);
     scene.add(timeDomainParent);
 }
 
-function generateParticles(coords, radius, color = null) {
+function generateParticles(coords, radius, wSegments = 8, hSegments = 6, color = sphereColor) {
     var parent = new THREE.Object3D();
     for (var i = 0; i < coords.length; i++) {
         let coord = coords[i];
-        var sphereGeometry = new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//new THREE.SphereGeometry(radius, 16, 8);
-        var sphereMaterial;
-        if (!color) {
-            sphereMaterial = new THREE.MeshLambertMaterial({ color: sphereColor, wireframe: true });
-        } else {
-            sphereMaterial = new THREE.MeshLambertMaterial({ color: color, wireframe: true });
-        }
+        var sphereGeometry = new THREE.SphereGeometry(radius, wSegments, hSegments); //new THREE.DodecahedronGeometry(radius); //THREE.BoxGeometry(20, 20, 20, 10, 10, 10);//
+        var sphereMaterial = new THREE.MeshLambertMaterial({ color: color, wireframe: true });
+
         var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         sphere.position.x = coord[0];
         sphere.position.y = coord[1];
@@ -377,6 +377,8 @@ function particleRender() {
     spheres = sphereParent.children;
     mfccSpheres = timeDomainParent.children;
 
+    var rotSpeed = energy/2;
+
     for (var i = 0; i < freqBufferLength; i++) {
         var f = (frequencyArray[i] / (frequencyArray[0] / 3)); // * 2;
         var sphere = spheres[i];
@@ -387,6 +389,7 @@ function particleRender() {
         var color = new THREE.Color(genreColor);
         if (1.1 * prevFreqArray[i] <= frequencyArray[i]) {
             sphere.material.color = color;
+        
         } else {
             sphere.material.color = sphereColor;
         }
@@ -395,12 +398,19 @@ function particleRender() {
     // Move everything apart
     if (expandFreqOrbit) {
         orbitRadius += radExpand;
-        sphereParent.rotateX(energy);
-        timeDomainParent.rotateY(energy);
+
+        // Start rotation in z direction
+        timeDomainParent.rotateZ(rotSpeed);
+
         setSpherePosition();
     } else if (originalOrbitRadius < orbitRadius) {
         orbitRadius += -1 * radDecrease;
         setSpherePosition();
+    } else {
+
+        // Rotate!
+        sphereParent.rotateX(rotSpeed);
+        timeDomainParent.rotateY(rotSpeed);
     }
 
     prevFreqArray = frequencyArray;
@@ -436,7 +446,7 @@ function setSpherePosition() {
 
 // animation loop
 function particleUpdate() {
-    requestAnimationFrame(particleUpdate);
+    particleAnimateID = requestAnimationFrame(particleUpdate);
     particleRender();
     //stats.update();
 }

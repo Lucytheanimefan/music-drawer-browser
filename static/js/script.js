@@ -109,7 +109,7 @@ function playMusic() {
                 if (useChunkedGenres) {
                     genreColor = genreColors[i];
                     genreColorArr = genres[i][1];
-                    console.log(genreColorArr);
+                    //console.log(genreColorArr);
                 }
                 //console.log("Update color to " + genreColor);
                 i += 1;
@@ -120,8 +120,14 @@ function playMusic() {
             }
             // Update other visual stuff....maybe
 
-
         };
+
+
+        audio.onended = function(){
+            cancelAnimationFrame(threeDAnimateID);
+            cancelAnimationFrame(particleAnimateID);
+        }
+
         var audioSrc = ctx.createMediaElementSource(audio);
         analyser = ctx.createAnalyser();
         analyser.fftSize = timeDomainfftSize; //2048;

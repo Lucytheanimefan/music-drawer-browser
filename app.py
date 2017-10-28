@@ -21,7 +21,7 @@ app = Flask(__name__)
 app.secret_key = os.urandom(12)
 #socketio = SocketIO(app)
 
-CHUNK_SECONDS = 2
+CHUNK_SECONDS = 5
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
 APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
