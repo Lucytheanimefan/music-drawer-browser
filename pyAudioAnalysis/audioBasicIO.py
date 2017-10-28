@@ -77,7 +77,24 @@ def duration(path):
         self.seconds = duration
         return int(duration)
 
-def readAudioFile(path, chunk_seconds = None):
+def stereo2mono(x):
+    '''
+    This function converts the input signal (stored in a numpy array) to MONO (if it is STEREO)
+    '''
+    if isinstance(x, int):
+        return -1
+    if x.ndim==1:
+        return x
+    elif x.ndim==2:
+        if x.shape[1]==1:
+            return x.flatten()
+        else:
+            if x.shape[1]==2:
+                return ( (x[:,1] / 2) + (x[:,0] / 2) )
+            else:
+                return -1
+                
+def readAudioFile(path ,chunk_seconds = None, stereo = True):
     '''
     This function returns a numpy array that stores the audio samples of a specified WAV of AIFF file
     '''
@@ -92,6 +109,8 @@ def readAudioFile(path, chunk_seconds = None):
             nframes = s.getnframes()
             strsig = s.readframes(nframes)
             x = numpy.fromstring(strsig, numpy.short).byteswap()
+            if stereo:
+                x = stereo2mono(x)
             Fs = s.getframerate()
             duration = nframes / float(Fs)
             print("Duration: " + duration)
@@ -154,20 +173,5 @@ def readAudioFile(path, chunk_seconds = None):
 
     return (Fs, x)
 
-def stereo2mono(x):
-    '''
-    This function converts the input signal (stored in a numpy array) to MONO (if it is STEREO)
-    '''
-    if isinstance(x, int):
-        return -1
-    if x.ndim==1:
-        return x
-    elif x.ndim==2:
-        if x.shape[1]==1:
-            return x.flatten()
-        else:
-            if x.shape[1]==2:
-                return ( (x[:,1] / 2) + (x[:,0] / 2) )
-            else:
-                return -1
+
 

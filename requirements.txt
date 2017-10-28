@@ -18,3 +18,4 @@ hmmlearn
 Simplejson
 pydub
 sklearn
+MDP

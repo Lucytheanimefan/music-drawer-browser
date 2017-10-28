@@ -7,9 +7,25 @@ from sklearn.decomposition import FastICA, PCA
 
 import matplotlib.pyplot as plt
 
+#------------
+import wave
+from mdp import fastica
+from scikits.audiolab import wavread, wavwrite
 
-folder = "/Users/lucyzhang/Github/music-drawer-browser/pyAudioAnalysis/data/mono/"
+
+folder = "/Users/lucyzhang/Github/music-drawer-browser/static/uploads/"#"/Users/lucyzhang/Github/music-drawer-browser/pyAudioAnalysis/data/mono/"
 songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
+
+def fastICA(filename):
+	recording, fs, enc = wavread(folder + filename)
+	sources = fastica(recording)
+	print sources
+	print len(sources)
+	#sources /= max(abs(sources), axis=0)
+	#print sources
+	wavwrite(sources, 'sources.wav', fs, enc)
+	print "DONE"
+
 
 def computeICA(filename):
 	[Fs, X] = audioBasicIO.readAudioFile(folder + filename)
@@ -32,4 +48,5 @@ def computeICA(filename):
 
 
 if __name__ == '__main__':
-	computeICA(songs[0])
+	#computeICA(songs[0])
+	fastICA("penguindrum.wav")
