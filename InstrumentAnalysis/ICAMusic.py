@@ -19,7 +19,7 @@ songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mo
 def fastICA(filename):
 	recording, fs, enc = wavread(folder + filename)
 	sources = fastica(recording)
-	print sources
+	#print sources
 	print len(sources)
 	#sources /= max(abs(sources), axis=0)
 	#print sources

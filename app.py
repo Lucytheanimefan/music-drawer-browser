@@ -28,7 +28,7 @@ APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
 APP_STATIC = os.path.join(APP_ROOT, 'static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-app.config['ALLOWED_EXTENSIONS'] = set(['wav', 'mp3'])
+app.config['ALLOWED_EXTENSIONS'] = set(['wav'])
 
 # For a given file, return whether it's an allowed type or not
 def allowed_file(filename):
