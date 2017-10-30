@@ -1011,7 +1011,7 @@ def fileClassification(inputFile, modelName, modelType, chunk_seconds = None):
         classification_data = []
         features = []
         for i, chunk in enumerate(chunk_data):
-            print str(i) + " of " + str(len(chunk_data))
+            #print str(i) + " of " + str(len(chunk_data))
             [Fs, x] = chunk
             x = audioBasicIO.stereo2mono(x)
             if isinstance(x, int):                                 # audio file IO problem

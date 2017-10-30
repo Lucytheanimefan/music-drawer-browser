@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import sys
 sys.path.append('../pyAudioAnalysis')
 
@@ -9,9 +10,11 @@ import matplotlib.pyplot as plt
 
 #------------
 import numpy as np
+from numpy import array
 import wave
 from mdp import fastica
 from scikits.audiolab import wavread, wavwrite
+from array import array
 
 
 folder = "/Users/lucyzhang/Github/music-drawer-browser/static/uploads/"#"/Users/lucyzhang/Github/music-drawer-browser/pyAudioAnalysis/data/mono/"
@@ -43,10 +46,31 @@ def mixSignals(file1, file2):
 	sig2, fs2, enc2 = wavread(file2)
 	sig2 = pad_audio(sig2, fs2, 280)
 	sig1 = pad_audio(sig1, fs1, 280)
-	mixed1 = 0.5*sig1 + sig2
+	mixed1 = sig1 + 0.5 * sig2
 	mixed2 = sig2 + 0.6 * sig1
-	wavwrite(mixed1, 'mixed1.wav', fs1, enc1)
+	wavwrite(np.array([mixed1, mixed2]).T, 'mixed1.wav', fs1, enc1)
+	#wavwrite(mixed1, 'mixed1.wav', fs1, enc1)
 	return (mixed1, mixed2)
+
+def full_compute():
+	# sig1, fs1, enc1 = wavread('source 1.wav')
+	# sig2, fs2, enc2 = wavread('source 2.wav')
+	# mixed1 = sig1 + 0.5 * sig2
+	# mixed2 = sig2 + 0.6 * sig1
+
+	# wavwrite(array([mixed1, mixed2]).T, 'mixed1.wav', fs1, enc1)
+	 
+	# Load in the stereo file
+	recording, fs, enc = wavread('mixed1.wav')
+
+	# Perform FastICA algorithm on the two channels
+	sources = fastica(recording)
+
+	# The output levels of this algorithm are arbitrary, so normalize them to 1.0.
+	sources /= max(abs(sources), axis = 0)
+
+	# Write back to a file
+	wavwrite(sources, 'sources.wav', fs, enc)
 
 def fastICA(filename):
 	#recording = mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
@@ -84,4 +108,5 @@ def computeICA(filename):
 if __name__ == '__main__':
 	#computeICA(songs[0])
 	mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
-	fastICA("mixed1.wav")
+	full_compute()
+	#fastICA("mixed1.wav")
