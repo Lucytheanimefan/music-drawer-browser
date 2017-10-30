@@ -8,6 +8,7 @@ from sklearn.decomposition import FastICA, PCA
 import matplotlib.pyplot as plt
 
 #------------
+import numpy as np
 import wave
 from mdp import fastica
 from scikits.audiolab import wavread, wavwrite
@@ -15,12 +16,45 @@ from scikits.audiolab import wavread, wavwrite
 
 folder = "/Users/lucyzhang/Github/music-drawer-browser/static/uploads/"#"/Users/lucyzhang/Github/music-drawer-browser/pyAudioAnalysis/data/mono/"
 songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
+#4:40 = 240 + 40 = 280
+
+def pad_audio(data, fs, T):
+    # Calculate target number of samples
+    N_tar = int(fs * T)
+    # Calculate number of zero samples to append
+    shape = data.shape
+    # Create the target shape    
+    N_pad = N_tar - shape[0]
+    print("Padding with %s seconds of silence" % str(N_pad/fs) )
+    shape = (N_pad,) + shape[1:]
+    # Stack only if there is something to append    
+    if shape[0] > 0:                
+        if len(shape) > 1:
+            return np.vstack((np.zeros(shape),
+                              data))
+        else:
+            return np.hstack((np.zeros(shape),
+                              data))
+    else:
+        return data
+
+def mixSignals(file1, file2):
+	sig1, fs1, enc1 = wavread(file1)
+	sig2, fs2, enc2 = wavread(file2)
+	sig2 = pad_audio(sig2, fs2, 280)
+	sig1 = pad_audio(sig1, fs1, 280)
+	mixed1 = 0.5*sig1 + sig2
+	mixed2 = sig2 + 0.6 * sig1
+	wavwrite(mixed1, 'mixed1.wav', fs1, enc1)
+	return (mixed1, mixed2)
 
 def fastICA(filename):
-	recording, fs, enc = wavread(folder + filename)
+	#recording = mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
+	recording, fs, enc = wavread(filename)
 	sources = fastica(recording)
 	#print sources
-	print len(sources)
+	print type(sources)
+	print sources.shape
 	#sources /= max(abs(sources), axis=0)
 	#print sources
 	wavwrite(sources, 'sources.wav', fs, enc)
@@ -49,4 +83,5 @@ def computeICA(filename):
 
 if __name__ == '__main__':
 	#computeICA(songs[0])
-	fastICA("penguindrum.wav")
+	mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
+	fastICA("mixed1.wav")
