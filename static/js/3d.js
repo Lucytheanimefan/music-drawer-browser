@@ -39,7 +39,7 @@ var mfcc = [];
 var threeDAnimateID;
 var particleAnimateID;
 
-var magnitudeFactor = 1.3;
+var magnitudeFactor = 1.2;
 
 var expandFreqOrbit = false;
 
@@ -219,6 +219,7 @@ function animate3d() {
                     //console.log("Update scale");
 
                     var y = rounded * v;
+                    let val = v; //y * 2;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
                         y = Math.pow(rounded, rounded * v);
@@ -232,7 +233,7 @@ function animate3d() {
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
 
-                    let val = y; //y * 2;
+                    
                     sphere.scale.x = val;
                     sphere.scale.y = val;
                     sphere.scale.z = val;
@@ -357,13 +358,13 @@ function initParticles() {
     // Time domain orbit
     //--------------
     
-    let rad = Math.pow((overallMusicFeatDict["ZCR"] * 100),2);
+    let rad = centerShapeRadius/2;
     orbitRadius = originalOrbitRadius = Math.pow(overallMusicFeatDict["ZCR"] * 100, 3) + 2*centerShapeRadius;
     originalOrbitRadius = orbitRadius;
     console.log("Time domain rad: " + rad);
     console.log("Time domain orbit radius: " + orbitRadius);
     var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius, 0, 0);
-    timeDomainParent = generateParticles(timeDomainCoords, rad);
+    timeDomainParent = generateParticles(timeDomainCoords, rad, seg, seg);
     timeDomainParent.rotateX(Math.PI / 2);
     scene.add(timeDomainParent);
 }
