@@ -218,11 +218,11 @@ function animate3d() {
                 if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                     //console.log("Update scale");
 
-                    var y = rounded * v;
+                    var y =  rounded * v;
                     let val = v; //y * 2;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
-                        y = Math.pow(rounded, rounded * v);
+                        y = y * rounded;
                         if (v > 2 * amplitudeCumulativeAverage) {
                             expandFreqOrbit = true;
                         }
