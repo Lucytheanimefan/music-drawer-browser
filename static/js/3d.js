@@ -39,9 +39,11 @@ var mfcc = [];
 var threeDAnimateID;
 var particleAnimateID;
 
-var magnitudeFactor = 1.2;
+var magnitudeFactor = 1.3;
 
 var expandFreqOrbit = false;
+
+var centerShapeRadius;
 
 // Particles
 // 
@@ -85,15 +87,16 @@ function init3d() {
     orbitRadius = originalOrbitRadius = overallMusicFeatDict["spectralSpread"] * 2500;
     console.log("orbitRadius: " + orbitRadius);
 
-    initParticles();
 
     let segments = overallMusicFeatDict["spectralEntropy"] * 50;
-    let rad = overallMusicFeatDict["ZCR"] * 1000;
-    geometry = new THREE.SphereGeometry(rad, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
+    centerShapeRadius = overallMusicFeatDict["ZCR"] * 1000;
+    geometry = new THREE.SphereGeometry(centerShapeRadius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
 
     if (doExplosion) {
         prepareExplosion();
     }
+
+    initParticles();
 
     material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
     cube = new THREE.Mesh(geometry, material);
@@ -218,7 +221,7 @@ function animate3d() {
                     var y = rounded * v;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
-                        y = rounded ^ rounded * v;
+                        y = Math.pow(rounded, rounded * v);
                         if (v > 2 * amplitudeCumulativeAverage) {
                             expandFreqOrbit = true;
                         }
@@ -246,6 +249,15 @@ function animate3d() {
 
                 } else {
                     expandFreqOrbit = false;
+                }
+
+                var rotSpeed = Math.pow(energy,2);
+                if (v > 0.8 * amplitudeCumulativeAverage) {
+                    timeDomainParent.rotateX(rotSpeed);
+                } else if (v > 0.4 * amplitudeCumulativeAverage) {
+                    timeDomainParent.rotateY(rotSpeed);
+                } else {
+                    timeDomainParent.rotateZ(rotSpeed);
                 }
             }
 
@@ -342,11 +354,15 @@ function initParticles() {
     console.log(sphereParent);
     scene.add(sphereParent);
 
-    // MFCC orbit
+    // Time domain orbit
     //--------------
-    let rad = 50 * (overallMusicFeatDict["ZCR"] * 5) ^ 2;
+    
+    let rad = Math.pow((overallMusicFeatDict["ZCR"] * 100),2);
+    orbitRadius = originalOrbitRadius = Math.pow(overallMusicFeatDict["ZCR"] * 100, 3) + 2*centerShapeRadius;
+    originalOrbitRadius = orbitRadius;
     console.log("Time domain rad: " + rad);
-    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius / 2, 0, 0);
+    console.log("Time domain orbit radius: " + orbitRadius);
+    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius, 0, 0);
     timeDomainParent = generateParticles(timeDomainCoords, rad);
     timeDomainParent.rotateX(Math.PI / 2);
     scene.add(timeDomainParent);
@@ -377,7 +393,7 @@ function particleRender() {
     spheres = sphereParent.children;
     mfccSpheres = timeDomainParent.children;
 
-    var rotSpeed = energy/2;
+    var rotSpeed = energy / 2;
 
     for (var i = 0; i < freqBufferLength; i++) {
         var f = (frequencyArray[i] / (frequencyArray[0] / 3)); // * 2;
@@ -389,7 +405,7 @@ function particleRender() {
         var color = new THREE.Color(genreColor);
         if (1.1 * prevFreqArray[i] <= frequencyArray[i]) {
             sphere.material.color = color;
-        
+
         } else {
             sphere.material.color = sphereColor;
         }
@@ -400,17 +416,18 @@ function particleRender() {
         orbitRadius += radExpand;
 
         // Start rotation in z direction
-        timeDomainParent.rotateZ(rotSpeed);
+        //timeDomainParent.rotateZ(rotSpeed);
 
         setSpherePosition();
     } else if (originalOrbitRadius < orbitRadius) {
         orbitRadius += -1 * radDecrease;
         setSpherePosition();
+        //timeDomainParent.rotateX(rotSpeed);
     } else {
 
         // Rotate!
-        sphereParent.rotateX(rotSpeed);
-        timeDomainParent.rotateY(rotSpeed);
+        //sphereParent.rotateX(rotSpeed); // Don't rotate the freq domain, it's already too hard to see
+
     }
 
     prevFreqArray = frequencyArray;
