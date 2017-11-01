@@ -20,6 +20,8 @@ var musicPlaying = false;
 var duration; // in seconds
 var chunkIntervalSeconds;
 
+var audio;
+var audioCtx;
 var analyser;
 var freqAnalyser;
 var frequencyData;
@@ -67,6 +69,29 @@ function generalSetup() {
 
     // Set the first color so it's not white
     genreColor = genreColors[0];
+
+    audioCtx = new AudioContext();
+    //$("#myAudio").attr("src", filename);
+    audio = document.getElementById('myAudio');
+    duration = audio.duration;
+    chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
+    var audioSrc = audioCtx.createMediaElementSource(audio);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = timeDomainfftSize; //2048;
+    audioSrc.connect(audioCtx.destination);
+    // we have to connect the MediaElementSource with the analyser 
+    audioSrc.connect(analyser);
+    // we could configure the analyser: e.g. analyser.fftSize (for further infos read the spec)
+    bufferLength = analyser.frequencyBinCount;
+
+
+    freqAnalyser = audioCtx.createAnalyser();
+    freqAnalyser.fftSize = 64;
+    audioSrc.connect(freqAnalyser);
+    // frequencyBinCount tells you how many values you'll receive from the analyser
+    frequencyData = new Uint8Array(freqAnalyser.frequencyBinCount); // Not being used
+    timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
+
 }
 
 function setCanvas() {
@@ -93,11 +118,7 @@ function triggerMusic() {
 // Let's try to do this in javascript instead of python
 function playMusic() {
     if (firstTime) {
-        var ctx = new AudioContext();
-        //$("#myAudio").attr("src", filename);
-        var audio = document.getElementById('myAudio');
-        duration = audio.duration;
-        chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
+
 
         var oldTime = 0;
         var i = 0;
@@ -123,27 +144,11 @@ function playMusic() {
         };
 
 
-        audio.onended = function(){
+        audio.onended = function() {
             cancelAnimationFrame(threeDAnimateID);
             cancelAnimationFrame(particleAnimateID);
         }
 
-        var audioSrc = ctx.createMediaElementSource(audio);
-        analyser = ctx.createAnalyser();
-        analyser.fftSize = timeDomainfftSize; //2048;
-        audioSrc.connect(ctx.destination);
-        // we have to connect the MediaElementSource with the analyser 
-        audioSrc.connect(analyser);
-        // we could configure the analyser: e.g. analyser.fftSize (for further infos read the spec)
-        bufferLength = analyser.frequencyBinCount;
-
-
-        freqAnalyser = ctx.createAnalyser();
-        freqAnalyser.fftSize = 64;
-        audioSrc.connect(freqAnalyser);
-        // frequencyBinCount tells you how many values you'll receive from the analyser
-        frequencyData = new Uint8Array(freqAnalyser.frequencyBinCount); // Not being used
-        timeDomainData = new Uint8Array(analyser.fftSize); // Uint8Array should be the same length as the fftSize 
 
         firstTime = false;
     }

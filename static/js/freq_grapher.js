@@ -1,15 +1,16 @@
-$(function () {
+function beginFreqSpectrum() {
+
     // Future-proofing...
-    var context;
-    if (typeof AudioContext !== "undefined") {
-        context = new AudioContext();
-    } else if (typeof webkitAudioContext !== "undefined") {
-        context = new webkitAudioContext();
-    } else {
-        $(".hideIfNoApi").hide();
-        $(".showIfNoApi").show();
-        return;
-    }
+    // var context;
+    // if (typeof AudioContext !== "undefined") {
+    //     context = new AudioContext();
+    // } else if (typeof webkitAudioContext !== "undefined") {
+    //     context = new webkitAudioContext();
+    // } else {
+    //     $(".hideIfNoApi").hide();
+    //     $(".showIfNoApi").show();
+    //     return;
+    // }
 
     // Overkill - if we've got Web Audio API, surely we've got requestAnimationFrame. Surely?...
     // requestAnimationFrame polyfill by Erik M�ller
@@ -20,36 +21,36 @@ $(function () {
     var vendors = ['ms', 'moz', 'webkit', 'o'];
     for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
         window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
-        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame']
-                                    || window[vendors[x] + 'CancelRequestAnimationFrame'];
+        window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] ||
+            window[vendors[x] + 'CancelRequestAnimationFrame'];
     }
 
     if (!window.requestAnimationFrame)
-        window.requestAnimationFrame = function (callback, element) {
+        window.requestAnimationFrame = function(callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function () { callback(currTime + timeToCall); },
+            var id = window.setTimeout(function() { callback(currTime + timeToCall); },
                 timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
 
     if (!window.cancelAnimationFrame)
-        window.cancelAnimationFrame = function (id) {
+        window.cancelAnimationFrame = function(id) {
             clearTimeout(id);
         };
 
     // Create the analyser
-    var analyser = context.createAnalyser();
-    analyser.fftSize = 64;
-    var frequencyData = new Uint8Array(analyser.frequencyBinCount);
+    //var analyser = context.createAnalyser();
+    //analyser.fftSize = 64;
+    var frequencyData = new Uint8Array(freqAnalyser.frequencyBinCount);
 
     // Set up the visualisation elements
     var visualisation = $("#visualisation");
-	var barSpacingPercent = 100 / analyser.frequencyBinCount;
-    for (var i = 0; i < analyser.frequencyBinCount; i++) {
-    	$("<div/>").css("left", i * barSpacingPercent + "%")
-			.appendTo(visualisation);
+    var barSpacingPercent = 100 / freqAnalyser.frequencyBinCount;
+    for (var i = 0; i < freqAnalyser.frequencyBinCount; i++) {
+        $("<div/>").css("left", i * barSpacingPercent + "%")
+            .appendTo(visualisation);
     }
     var bars = $("#visualisation > div");
 
@@ -57,22 +58,22 @@ $(function () {
     function update() {
         requestAnimationFrame(update);
 
-        analyser.getByteFrequencyData(frequencyData);
+        freqAnalyser.getByteFrequencyData(frequencyData);
 
-        bars.each(function (index, bar) {
+        bars.each(function(index, bar) {
             bar.style.height = frequencyData[index] + 'px';
         });
     };
 
     // Hook up the audio routing...
     // player -> analyser -> speakers
-	// (Do this after the player is ready to play - https://code.google.com/p/chromium/issues/detail?id=112368#c4)
-	$("#player").bind('canplay', function() {
-		var source = context.createMediaElementSource(this);
-		source.connect(analyser);
-		analyser.connect(context.destination);
-	});
+    // (Do this after the player is ready to play - https://code.google.com/p/chromium/issues/detail?id=112368#c4)
+    //$("#player").bind('canplay', function() {
+    // var source = context.createMediaElementSource(document.getElementById('myAudio'));
+    // source.connect(analyser);
+    // analyser.connect(context.destination);
+    //});
 
     // Kick it off...
     update();
-});
+}

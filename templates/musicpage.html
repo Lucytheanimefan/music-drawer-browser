@@ -2,22 +2,36 @@
 <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
 <audio id="myAudio" src="{{ musicfile }}" controls onplay="triggerMusic();" onpause="setPause();">
 </audio>
-<div id="3dStuff"></div>
-<canvas data-chunkSeconds = "{{ chunk_seconds }}" data-genre="{{ genres }}" data-features="{{ musicfeatures }}" data-singleFeatures = "{{ singleFeatures }}" id = "musicCanvas"></canvas>
-{% endblock %}
-
-{% block scripts %} 
-<script type="text/javascript">
-	generalSetup();
-	var features = "{{ musicfeatures }}";
-	var do3d = true;
-	if (do3d){
-		init3d();
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#home">Main</a></li>
+    <li><a data-toggle="tab" href="#menu1">Debug</a></li>
+</ul>
+<div class="tab-content">
+    <div id="home" class="tab-pane fade in active">
+        <div id="3dStuff"></div>
+        <canvas data-chunkSeconds="{{ chunk_seconds }}" data-genre="{{ genres }}" data-features="{{ musicfeatures }}" data-singleFeatures="{{ singleFeatures }}" id="musicCanvas"></canvas>
+    </div>
+    <div id="menu1" class="tab-pane fade">
+        <div id="visualisation">
+            <script type="text/javascript">
+            inDebug = true;
+            </script>
+        </div>
+    </div>
+    {% endblock %} {% block scripts %}
+    <script type="text/javascript">
+    generalSetup();
+    var features = "{{ musicfeatures }}";
+    var do3d = true;
+    if (do3d) {
+        init3d();
         $("#musicCanvas").css("display", "none");
+    } else {
+        setCanvas();
     }
-    else
-    {
-    	setCanvas();
+
+    if (inDebug){
+    	beginFreqSpectrum();
     }
-</script>
-{% endblock %}
+    </script>
+    {% endblock %}

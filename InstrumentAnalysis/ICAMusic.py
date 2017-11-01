@@ -79,6 +79,15 @@ def fastICA(filename):
 	#print sources
 	print type(sources)
 	print sources.shape
+	plt.subplot(2,1,1)
+	plt.plot(np.array(sources[:, 0]))
+	plt.title('First compoment: Time domain of penguindrum.wav')
+	plt.xlabel('Time'); plt.ylabel('Amplitude'); 
+	plt.subplot(2,1,2)
+	plt.plot(np.array(sources[:, 1]))
+	plt.title('Second compoment: Time domain of penguindrum.wav')
+	plt.xlabel('Time'); plt.ylabel('Amplitude'); 
+	#plt.show()
 	#sources /= max(abs(sources), axis=0)
 	#print sources
 	wavwrite(sources, 'sources.wav', fs, enc)
@@ -107,6 +116,6 @@ def computeICA(filename):
 
 if __name__ == '__main__':
 	#computeICA(songs[0])
-	mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
-	full_compute()
-	#fastICA("mixed1.wav")
+	#mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
+	#full_compute()
+	fastICA(folder + "penguindrum.wav")
