@@ -358,12 +358,12 @@ function initParticles() {
     // Time domain orbit
     //--------------
     
-    let rad = centerShapeRadius/2;
-    orbitRadius = originalOrbitRadius = Math.pow(overallMusicFeatDict["ZCR"] * 100, 3) + 2*centerShapeRadius;
-    originalOrbitRadius = orbitRadius;
+    let rad = Math.pow(centerShapeRadius, 0.75);
+    let orbitRad = Math.pow(overallMusicFeatDict["ZCR"] * 100, 2.5) + 2*centerShapeRadius;
+    //originalOrbitRadius = orbitRadius;
     console.log("Time domain rad: " + rad);
     console.log("Time domain orbit radius: " + orbitRadius);
-    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRadius, 0, 0);
+    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRad, 0, 0);
     timeDomainParent = generateParticles(timeDomainCoords, rad, seg, seg);
     timeDomainParent.rotateX(Math.PI / 2);
     scene.add(timeDomainParent);
