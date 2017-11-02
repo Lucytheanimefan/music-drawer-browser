@@ -64,7 +64,7 @@ def fixNotes(letters):
 
 class MusicNoteAnalyzer(object):
     def __init__(self, filename):
-        self.filename = '/tmp/' + filename
+        self.filename = filename
         self.rate, self.data = wavfile.read(self.filename)
         #print self.rate
         #print self.data[22100]
@@ -79,7 +79,7 @@ class MusicNoteAnalyzer(object):
 
         # Another plot
         #plt.show()
-        plt.savefig('specgram1.png')
+        plt.savefig('specgramShelter.png')
         a = np.mean(pxx,axis=0)
         aa = np.arange(len(a))
         a = a/np.max(a)*np.max(self.data[:,0])
@@ -149,6 +149,10 @@ class MusicNoteAnalyzer(object):
         if condition>=0.90:
             harmonics.append(f[index][0])
 
+
+        print 'Harmonics: '
+        print harmonics
+
         return harmonics
 
     def getFreq(self, notes, data):
@@ -180,6 +184,8 @@ class MusicNoteAnalyzer(object):
     #        maxFreq = f[maxFFT]
     #        freqs.append(maxFreq)
             maxFreq = harmonics
+            print 'maxFreq'
+            print maxFreq
     #        q = NoteFile['Lower']<maxFreq[0]
     #        r = NoteFile['Upper']>maxFreq[0]
     #        note = np.in1d(q,r)
@@ -191,10 +197,16 @@ class MusicNoteAnalyzer(object):
 
             letterNotes.append(note)
 
-        return letterNotes, freqs, individualNotes
+        print 'Letter notes: '
+        print letterNotes
+
+        print 'Freqs:'
+        print maxFreq
+
+        return letterNotes, maxFreq, individualNotes
 
 if __name__ == '__main__':
-    music = MusicNoteAnalyzer('static/uploads/Shelter.wav')
+    music = MusicNoteAnalyzer('../static/uploads/Shelter_40.wav')
     music.generateGraphData()
 
 

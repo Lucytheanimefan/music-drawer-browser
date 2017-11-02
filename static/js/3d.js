@@ -252,7 +252,7 @@ function animate3d() {
                     expandFreqOrbit = false;
                 }
 
-                var rotSpeed = Math.pow(energy,2);
+                var rotSpeed = Math.pow(energy,3);
                 if (v > 0.8 * amplitudeCumulativeAverage) {
                     timeDomainParent.rotateX(rotSpeed);
                 } else if (v > 0.4 * amplitudeCumulativeAverage) {
