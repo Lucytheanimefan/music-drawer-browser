@@ -57,6 +57,10 @@ var cube;
 
 console.disableYellowBox = true;
 
+var AudioContext = window.AudioContext // Default
+    || window.webkitAudioContext // Safari and old versions of Chrome
+    || false; 
+
 function generalSetup() {
     genres = $("#musicCanvas").data("genre");
     genreColors = generateColorBasedOnGenre(genres);
