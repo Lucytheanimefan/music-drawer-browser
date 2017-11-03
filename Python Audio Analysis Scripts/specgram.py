@@ -126,7 +126,7 @@ class MusicNoteAnalyzer(object):
                 result.append(fixed)
                 pass
 
-
+        print "Result:"
         return result
 
 
@@ -149,10 +149,6 @@ class MusicNoteAnalyzer(object):
         #if p[index]/maxPower>=0.90:
         if condition>=0.90:
             harmonics.append(f[index][0])
-
-
-        print 'Harmonics: '
-        print harmonics
 
         return harmonics
 
@@ -198,14 +194,10 @@ class MusicNoteAnalyzer(object):
 
             letterNotes.append(note)
 
-        print 'Letter notes: '
-        print letterNotes
-
         return letterNotes, maxFreq, individualNotes
 
 if __name__ == '__main__':
     music = MusicNoteAnalyzer('../static/uploads/signal.wav')
-    print 'Graph data:'
     print music.generateGraphData()
 
 

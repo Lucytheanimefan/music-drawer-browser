@@ -4,9 +4,10 @@ duration=10;%tone duration = 1s
 
 Ftone1=440;%sound1 frequency = 440Hz 
 Ftone2=1320;%sound1 frequency = 500Hz
-
-left=sin([1:Fsampling*duration]*2*pi*Ftone1/Fsampling);%generate sound1 for 1s 
-right=sin([1:Fsampling*duration]*2*pi*Ftone2/Fsampling);%generate sound1 for 1s
+n = [1:Fsampling*duration];
+y = sin(n*2*pi*262/Fsampling);
+left=sin(n*2*pi*Ftone1/Fsampling) + y;%generate sound1 for 1s 
+right=sin(n*2*pi*Ftone2/Fsampling) + y;%generate sound1 for 1s
 stereosnd = [left; right];
 stereosnd = stereosnd';
 f = abs(fft(stereosnd));
