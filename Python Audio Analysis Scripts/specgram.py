@@ -13,7 +13,7 @@ import re
 NoteFile = pd.read_excel('NoteFreq.xlsx',0)
 #staff = abjad.Staff()
 
-debug = False
+debug = True
 
 def fixNotes(letters):
 
@@ -71,7 +71,7 @@ class MusicNoteAnalyzer(object):
 
     def generateGraphData(self):
         if debug:
-            print(self.data[:,0])
+            print(self.data)
         time = np.arange(len(self.data[:,0]))*1.0/self.rate
         nfft = 1024*6
         pxx, freq, bins, plot = plt.specgram(self.data[:,0],NFFT=nfft,noverlap=32, Fs=2,
@@ -125,6 +125,7 @@ class MusicNoteAnalyzer(object):
                 #print fixed
                 result.append(fixed)
                 pass
+
 
         return result
 
@@ -184,7 +185,7 @@ class MusicNoteAnalyzer(object):
     #        maxFreq = f[maxFFT]
     #        freqs.append(maxFreq)
             maxFreq = harmonics
-            print 'maxFreq'
+            print 'maxFreq: ' + str(i)
             print maxFreq
     #        q = NoteFile['Lower']<maxFreq[0]
     #        r = NoteFile['Upper']>maxFreq[0]
@@ -200,13 +201,11 @@ class MusicNoteAnalyzer(object):
         print 'Letter notes: '
         print letterNotes
 
-        print 'Freqs:'
-        print maxFreq
-
         return letterNotes, maxFreq, individualNotes
 
 if __name__ == '__main__':
-    music = MusicNoteAnalyzer('../static/uploads/Shelter_40.wav')
-    music.generateGraphData()
+    music = MusicNoteAnalyzer('../static/uploads/signal.wav')
+    print 'Graph data:'
+    print music.generateGraphData()
 
 
