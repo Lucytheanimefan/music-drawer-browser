@@ -174,18 +174,10 @@ class MusicNoteAnalyzer(object):
             if harmonics==[]:
                 harmonics = [maxFrequency]
 
-            #print 'HARMONICS'
-            #print harmonics
-
-    #        maxFFT = np.where(p==np.max(p))
-    #        maxFreq = f[maxFFT]
-    #        freqs.append(maxFreq)
             maxFreq = harmonics
             print 'maxFreq: ' + str(i)
             print maxFreq
-    #        q = NoteFile['Lower']<maxFreq[0]
-    #        r = NoteFile['Upper']>maxFreq[0]
-    #        note = np.in1d(q,r)
+
 
 
             a = NoteFile[NoteFile['Lower']<maxFreq[0]]
