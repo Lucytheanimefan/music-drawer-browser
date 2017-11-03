@@ -5,3 +5,7 @@ sample-graph.png
 audioData.txt
 03.png
 pyAudioAnalysis/data/*
+*.m~
+*.wav
+*.png
+*.xlsx
