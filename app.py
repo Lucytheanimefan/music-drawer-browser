@@ -87,7 +87,7 @@ def upload():
            genre_dat[name] = P[i]
 
 
-        print type(MidTermFeatures)
+        #print type(MidTermFeatures)
         # Write single feature to CSV
         with open('music_features.csv', 'wb') as csvfile:
             wr = csv.writer(csvfile)

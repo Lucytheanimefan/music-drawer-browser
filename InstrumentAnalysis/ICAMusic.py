@@ -81,13 +81,13 @@ def fastICA(filename):
 	print sources.shape
 	plt.subplot(2,1,1)
 	plt.plot(np.array(sources[:, 0]))
-	plt.title('First compoment: Time domain of penguindrum.wav')
+	plt.title('First compoment: Time domain of ' + filename)
 	plt.xlabel('Time'); plt.ylabel('Amplitude'); 
 	plt.subplot(2,1,2)
 	plt.plot(np.array(sources[:, 1]))
-	plt.title('Second compoment: Time domain of penguindrum.wav')
+	plt.title('Second compoment: Time domain of ' + filename)
 	plt.xlabel('Time'); plt.ylabel('Amplitude'); 
-	#plt.show()
+	plt.show()
 	#sources /= max(abs(sources), axis=0)
 	#print sources
 	wavwrite(sources, 'sources.wav', fs, enc)
@@ -95,15 +95,16 @@ def fastICA(filename):
 
 
 def computeICA(filename):
-	[Fs, X] = audioBasicIO.readAudioFile(folder + filename)
+	[Fs, X] = audioBasicIO.readAudioFile(filename)
 	
 	ica = FastICA(n_components=3)
 	S = ica.fit_transform(X.reshape(-1, 1))
 	A_ = ica.mixing_
-	pca = PCA(n_components = 3)
-	H = pca.fit_transform(X.reshape(-1, 1))
+	#pca = PCA(n_components = 3)
+	#H = pca.fit_transform(X.reshape(-1, 1))
+	plt.clf()
 	plt.figure()
-	models = [X, S, H]
+	models = [X, S]#, H]
 	names = ['Original', 'ICA recovered', 'PCA recovered']
 	colors = ['red', 'steelblue', 'orange']
 	for ii, (model, name) in enumerate(zip(models, names), 1):
@@ -115,7 +116,7 @@ def computeICA(filename):
 
 
 if __name__ == '__main__':
-	#computeICA(songs[0])
+	computeICA(folder + "canon_short.wav")
 	#mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
 	#full_compute()
-	fastICA(folder + "penguindrum.wav")
+	#fastICA(folder + "shigatsu_short.wav")

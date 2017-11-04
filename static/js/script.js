@@ -28,7 +28,7 @@ var frequencyData;
 var timeDomainData;
 var bufferLength;
 
-var timeDomainfftSize = 2048//128;
+var timeDomainfftSize = 2048 //128;
 
 var colorScheme = [];
 
@@ -39,7 +39,7 @@ var animationID;
 
 // Genres
 var genres;
-var useChunkedGenres = true;
+var useChunkedGenres = false; //true;
 var genreColors;
 var genreColor = "#ffffff";
 var genreColorArr;
@@ -58,12 +58,19 @@ var cube;
 console.disableYellowBox = true;
 
 var AudioContext = window.AudioContext // Default
-    || window.webkitAudioContext // Safari and old versions of Chrome
-    || false; 
+    ||
+    window.webkitAudioContext // Safari and old versions of Chrome
+    ||
+    false;
 
 function generalSetup() {
-    genres = $("#musicCanvas").data("genre");
+    if (useChunkedGenres) {
+        genres = $("#musicCanvas").data("genre");
+    } else {
+        genres = $("#musicCanvas").data("singlegenre");
+    }
     genreColors = generateColorBasedOnGenre(genres);
+    genreColor = genreColors[0];
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
     overallMusicFeatDict = { "ZCR": singleMusicFeatures[0], "energy": singleMusicFeatures[1], "entropyOfEnergy": singleMusicFeatures[2], "spectralCentroid": singleMusicFeatures[3], "spectralSpread": singleMusicFeatures[4], "spectralEntropy": singleMusicFeatures[5], "spectralFlux": singleMusicFeatures[6], "spectralRolloff": singleMusicFeatures[7], "mfcc": singleMusicFeatures.slice(8, 20) };
@@ -136,6 +143,7 @@ function playMusic() {
                     genreColorArr = genres[i][1];
                     //console.log(genreColorArr);
                 }
+
                 //console.log("Update color to " + genreColor);
                 i += 1;
                 oldTime = audio.currentTime;
@@ -265,7 +273,7 @@ function replaceAll(str, find, replace) {
 
 
 function generateColorBasedOnGenre(genres) {
-    console.log(genres);
+    //console.log(genres);
     var colors = [];
 
     // For multiple colors
@@ -281,10 +289,11 @@ function generateColorBasedOnGenre(genres) {
             }
         }
     } else {
-        colors = [convertGenreProbToRGB(genres["Classical"]) + "," +
+        colors = ["rgb(" + convertGenreProbToRGB(genres["Classical"]) + "," +
             convertGenreProbToRGB(genres["Electronic"]) + "," +
             convertGenreProbToRGB(genres["Jazz"]) + ", 1)"
         ];
+        console.log(colors);
     }
 
     return colors;
