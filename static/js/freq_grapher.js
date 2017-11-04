@@ -11,12 +11,6 @@ function beginFreqSpectrum() {
     //     $(".showIfNoApi").show();
     //     return;
     // }
-
-    // Overkill - if we've got Web Audio API, surely we've got requestAnimationFrame. Surely?...
-    // requestAnimationFrame polyfill by Erik M�ller
-    // fixes from Paul Irish and Tino Zijdel
-    // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-    // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
     var lastTime = 0;
     var vendors = ['ms', 'moz', 'webkit', 'o'];
     for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
@@ -40,9 +34,6 @@ function beginFreqSpectrum() {
             clearTimeout(id);
         };
 
-    // Create the analyser
-    //var analyser = context.createAnalyser();
-    //analyser.fftSize = 64;
     var frequencyData = new Uint8Array(freqAnalyser.frequencyBinCount);
 
     // Set up the visualisation elements
@@ -65,15 +56,63 @@ function beginFreqSpectrum() {
         });
     };
 
-    // Hook up the audio routing...
-    // player -> analyser -> speakers
-    // (Do this after the player is ready to play - https://code.google.com/p/chromium/issues/detail?id=112368#c4)
-    //$("#player").bind('canplay', function() {
-    // var source = context.createMediaElementSource(document.getElementById('myAudio'));
-    // source.connect(analyser);
-    // analyser.connect(context.destination);
-    //});
-
     // Kick it off...
     update();
+}
+
+
+function beginTimeDomain(canvas) {
+    WIDTH = canvas.width;
+    HEIGHT = canvas.height;
+    canvasCtx = canvas.getContext("2d");
+
+
+    // var visualSetting = visualSelect.value;
+    // console.log(visualSetting);
+
+    //if (visualSetting == "sinewave") {
+        //analyser.fftSize = 2048;
+        var bufferLength = analyser.fftSize;
+        //console.log(bufferLength);
+        var dataArray = new Uint8Array(bufferLength);
+
+        canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        var draw = function() {
+
+            drawVisual = requestAnimationFrame(draw);
+
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.fillStyle = 'rgb(0, 0, 0)';
+            canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = 'rgb(265, 265, 265)';
+
+            canvasCtx.beginPath();
+
+            var sliceWidth = WIDTH * 1.0 / bufferLength;
+            var x = 0;
+
+            for (var i = 0; i < bufferLength; i++) {
+
+                var v = dataArray[i] / 128.0;
+                var y = v * HEIGHT / 2;
+
+                if (i === 0) {
+                    canvasCtx.moveTo(x, y);
+                } else {
+                    canvasCtx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
+        };
+
+        draw();
+    //}
 }

@@ -28,7 +28,7 @@ var frequencyData;
 var timeDomainData;
 var bufferLength;
 
-var timeDomainfftSize = 128;
+var timeDomainfftSize = 2048//128;
 
 var colorScheme = [];
 

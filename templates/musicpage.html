@@ -1,39 +1,49 @@
 {% extends "layout.html" %} {% block css %}
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
-<audio id="myAudio" src="{{ musicfile }}" controls onplay="triggerMusic();" onpause="setPause();">
-</audio>
-<ul class="nav nav-tabs">
-    <li class="active"><a data-toggle="tab" href="#home">Main</a></li>
-    <li><a data-toggle="tab" href="#version2">Version 2</a></li>
-    <li><a data-toggle="tab" href="#debug">Debug</a></li>
-</ul>
-<div class="tab-content">
-    <div id="home" class="tab-pane fade in active">
-        <script type="text/javascript">do3d = true;</script>
-        <div id="3dStuff"></div>
-        <canvas data-chunkSeconds="{{ chunk_seconds }}" data-genre="{{ genres }}" data-features="{{ musicfeatures }}" data-singleFeatures="{{ singleFeatures }}" id="musicCanvas"></canvas>
-    </div>
-    <div id="version2" class="tab-pane fade">
-        
-    </div>
-    <div id="debug" class="tab-pane fade">
-        <div id="visualisation">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/musicpage.css') }}"> {% endblock %} {% block body %}
+    <audio id="myAudio" src="{{ musicfile }}" controls onplay="triggerMusic();" onpause="setPause();">
+    </audio>
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#home">Main</a></li>
+        <li><a data-toggle="tab" href="#version2">Version 2</a></li>
+        <li><a data-toggle="tab" href="#debug">Debug</a></li>
+    </ul>
+    <div class="tab-content">
+        <div id="home" class="tab-pane fade in active">
             <script type="text/javascript">
-            inDebug = true;
+            do3d = true;
             </script>
+            <div id="3dStuff"></div>
+            <canvas data-chunkSeconds="{{ chunk_seconds }}" data-genre="{{ genres }}" data-features="{{ musicfeatures }}" data-singleFeatures="{{ singleFeatures }}" id="musicCanvas"></canvas>
+        </div>
+        <div id="version2" class="tab-pane fade">
+        </div>
+        <div id="debug" class="tab-pane fade">
+            <div class="row">
+                <div class="col-md-6">
+                    <div id="visualisation">
+                        <script type="text/javascript">
+                        inDebug = true;
+                        </script>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <canvas id="timeDomainCanvas"></canvas>
+                </div>
+            </div>
         </div>
     </div>
-    {% endblock %} {% block scripts %}
-    <script type="text/javascript">
-    generalSetup();
-    var features = "{{ musicfeatures }}";
-    if (do3d) {
-        init3d();
-        $("#musicCanvas").css("display", "none");
-    } 
-
-    if (inDebug){
-    	beginFreqSpectrum();
-    }
-    </script>
-    {% endblock %}
+{% endblock %} {% block scripts %}
+<script type="text/javascript">
+generalSetup();
+var features = "{{ musicfeatures }}";
+if (do3d) {
+init3d();
+$("#musicCanvas").css("display", "none");
+}
+if (inDebug) {
+canvas = document.getElementById("timeDomainCanvas");
+beginFreqSpectrum();
+beginTimeDomain(canvas);
+}
+</script>
+{% endblock %}

@@ -79,7 +79,7 @@ class MusicNoteAnalyzer(object):
 
         # Another plot
         #plt.show()
-        plt.savefig('specgramShelter.png')
+        plt.savefig('specgramHeavy.png')
         a = np.mean(pxx,axis=0)
         aa = np.arange(len(a))
         a = a/np.max(a)*np.max(self.data[:,0])
@@ -178,8 +178,6 @@ class MusicNoteAnalyzer(object):
             print 'maxFreq: ' + str(i)
             print maxFreq
 
-
-
             a = NoteFile[NoteFile['Lower']<maxFreq[0]]
             b = NoteFile[NoteFile['Upper']>maxFreq[0]]
             note = a.join(b,how='inner',lsuffix='Lower').index[0]
@@ -189,7 +187,7 @@ class MusicNoteAnalyzer(object):
         return letterNotes, maxFreq, individualNotes
 
 if __name__ == '__main__':
-    music = MusicNoteAnalyzer('../static/uploads/signal.wav')
+    music = MusicNoteAnalyzer('../static/uploads/Heavy_mono_short.wav')
     print music.generateGraphData()
 
 

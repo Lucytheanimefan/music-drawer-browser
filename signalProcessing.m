@@ -4,6 +4,6 @@ filename = 'static/uploads/input.wav'
 [y,Fs] = audioread(filename)
 
 % Returns the cumulative maximum elements of A
-M = cummax(y)
+M = cummax(y);
 
 [yupper,ylower] = envelope(y)
