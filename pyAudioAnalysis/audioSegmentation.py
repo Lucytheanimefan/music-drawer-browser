@@ -684,7 +684,7 @@ def silenceRemoval(x, Fs, stWin, stStep, smoothWindow=0.5, Weight=0.5, plot=Fals
     return segmentLimits
 
 
-def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.05, LDAdim=35, PLOT=False):
+def speakerDiarization(fileName, numOfSpeakers, relativePath = '',mtSize=2.0, mtStep=0.2, stWin=0.05, LDAdim=35, PLOT=False):
     '''
     ARGUMENTS:
         - fileName:        the name of the WAV file to be analyzed
@@ -701,8 +701,10 @@ def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.
     x = audioBasicIO.stereo2mono(x)
     Duration = len(x) / Fs
 
-    [Classifier1, MEAN1, STD1, classNames1, mtWin1, mtStep1, stWin1, stStep1, computeBEAT1] = aT.loadKNNModel(os.path.join("data","knnSpeakerAll"))
-    [Classifier2, MEAN2, STD2, classNames2, mtWin2, mtStep2, stWin2, stStep2, computeBEAT2] = aT.loadKNNModel(os.path.join("data","knnSpeakerFemaleMale"))
+    print os.path.join(relativePath + "data","knnSpeakerAll")
+
+    [Classifier1, MEAN1, STD1, classNames1, mtWin1, mtStep1, stWin1, stStep1, computeBEAT1] = aT.loadKNNModel(os.path.join(relativePath + "data","knnSpeakerAll"))
+    [Classifier2, MEAN2, STD2, classNames2, mtWin2, mtStep2, stWin2, stStep2, computeBEAT2] = aT.loadKNNModel(os.path.join(relativePath + "data","knnSpeakerFemaleMale"))
 
     [MidTermFeatures, ShortTermFeatures] = aF.mtFeatureExtraction(x, Fs, mtSize * Fs, mtStep * Fs, round(Fs * stWin), round(Fs*stWin * 0.5))
 
@@ -959,8 +961,8 @@ def speakerDiarizationEvaluateScript(folderName, LDAs):
 
 
 
-def get_speakers(filename, numSpeakers=-1):
-    times, speakers_data = speakerDiarization(filename, numSpeakers)
+def get_speakers(filename, numSpeakers=-1, relativePath = ''):
+    times, speakers_data = speakerDiarization(filename, numSpeakers, relativePath)
     new_speaker_times = {}
     for i, speaker in enumerate(speakers_data):
         if (i != 0 and speakers_data[i-1] != speaker) or i == 0:
@@ -1053,7 +1055,8 @@ if __name__ == '__main__':
     folder = " /Users/lucyzhang/Github/music-drawer-browser/"
     genre_models = ["svmMusicGenre3", "svmMusicGenre6"]
     songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
-    print get_speakers('data/angel_beats_short.wav')
+    speakerDiarization('data/mono/shigatsu_short.wav', -1, PLOT=True)
+    #print get_speakers('data/angel_beats_short.wav')
     #mtFileClassification("data/mono/" + songs[0], "data/" + genre_models[0], "svm", True)
 
 

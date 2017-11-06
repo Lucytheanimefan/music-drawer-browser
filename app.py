@@ -26,7 +26,7 @@ app.secret_key = os.urandom(12)
 CHUNK_SECONDS = 5
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = '/tmp/'#os.path.join(APP_ROOT, 'static/uploads')
-APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/data')
+APP_DATA = os.path.join(APP_ROOT, 'pyAudioAnalysis/')
 APP_STATIC = os.path.join(APP_ROOT, 'static')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -96,8 +96,9 @@ def upload():
             wr = csv.writer(csvfile)
             wr.writerows([MidTermFeatures])
 
+        speakers = aS.get_speakers('static/uploads/angel_beats_short.wav', relativePath = APP_DATA)
 
-        return render_template("musicpage.html", genres = json.dumps(genre_data), single_genre = json.dumps(genre_dat), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
+        return render_template("musicpage.html", speakers = json.dumps(speakers), genres = json.dumps(genre_data), single_genre = json.dumps(genre_dat), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 
     return "No allowed file"
 
@@ -112,5 +113,5 @@ def uploaded_file(filename):
 
 
 if __name__ == "__main__":
-	port = int(os.environ.get("PORT", 5000))
-	app.run(host='0.0.0.0', debug=True, port=port, threaded=True) 
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', debug=True, port=port, threaded=True) 
