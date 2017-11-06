@@ -696,6 +696,8 @@ def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.
         - PLOT     (opt)   0 for not plotting the results 1 for plottingy
     '''
     [Fs, x] = audioBasicIO.readAudioFile(fileName)
+    print type(x)
+    print len(x)
     x = audioBasicIO.stereo2mono(x)
     Duration = len(x) / Fs
 
@@ -887,6 +889,9 @@ def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.
         [segStart, segEnd, segLabels] = readSegmentGT(gtFile)                    # read GT data
         flagsGT, classNamesGT = segs2flags(segStart, segEnd, segLabels, mtStep)            # convert to flags
 
+
+    times = numpy.array(range(len(cls)))*mtStep+mtStep/2.0
+
     if PLOT:
         fig = plt.figure()    
         if numOfSpeakers>0:
@@ -896,14 +901,19 @@ def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.
         ax1.set_yticks(numpy.array(range(len(classNames))))
         ax1.axis((0, Duration, -1, len(classNames)))
         ax1.set_yticklabels(classNames)
-        ax1.plot(numpy.array(range(len(cls)))*mtStep+mtStep/2.0, cls)
+        print "Plot data"
+        print len(cls)
+        print len(times)
+        print(cls)
+
+        ax1.plot(times, cls)
 
     if os.path.isfile(gtFile):
         if PLOT:
+            print "Plot in isfile!"
             ax1.plot(numpy.array(range(len(flagsGT)))*mtStep+mtStep/2.0, flagsGT, 'r')
-        purityClusterMean, puritySpeakerMean = evaluateSpeakerDiarization(cls, flagsGT)
-        print "{0:.1f}\t{1:.1f}".format(100*purityClusterMean, 100*puritySpeakerMean)
-        if PLOT:
+            purityClusterMean, puritySpeakerMean = evaluateSpeakerDiarization(cls, flagsGT)
+            print "{0:.1f}\t{1:.1f}".format(100*purityClusterMean, 100*puritySpeakerMean)
             plt.title("Cluster purity: {0:.1f}% - Speaker purity: {1:.1f}%".format(100*purityClusterMean, 100*puritySpeakerMean) )
     if PLOT:
         plt.xlabel("time (seconds)")
@@ -914,7 +924,8 @@ def speakerDiarization(fileName, numOfSpeakers, mtSize=2.0, mtStep=0.2, stWin=0.
             plt.xlabel("number of clusters");
             plt.ylabel("average clustering's sillouette");
         plt.show()
-    return cls
+
+    return times, cls
     
 def speakerDiarizationEvaluateScript(folderName, LDAs):
     '''
@@ -945,7 +956,19 @@ def speakerDiarizationEvaluateScript(folderName, LDAs):
         for i, wavFile in enumerate(wavFilesList):
             speakerDiarization(wavFile, N[i], 2.0, 0.2, 0.05, l, PLOT = False)            
         print
-        
+
+
+
+def get_speakers(filename, numSpeakers=-1):
+    times, speakers_data = speakerDiarization(filename, numSpeakers)
+    new_speaker_times = {}
+    for i, speaker in enumerate(speakers_data):
+        if (i != 0 and speakers_data[i-1] != speaker) or i == 0:
+            new_speaker_times[times[i]] = speaker
+
+    return new_speaker_times 
+
+
 def musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize=10.0, Limit1 = 0, Limit2 = 1):
     '''
     This function detects instances of the most representative part of a music recording, also called "music thumbnails".
@@ -1025,5 +1048,20 @@ def musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize
             j2 += 1            
 
     return (shortTermStep*i1, shortTermStep*i2, shortTermStep*j1, shortTermStep*j2, S)
+
+if __name__ == '__main__':
+    folder = " /Users/lucyzhang/Github/music-drawer-browser/"
+    genre_models = ["svmMusicGenre3", "svmMusicGenre6"]
+    songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
+    print get_speakers('data/angel_beats_short.wav')
+    #mtFileClassification("data/mono/" + songs[0], "data/" + genre_models[0], "svm", True)
+
+
+
+
+
+
+
+
 
 

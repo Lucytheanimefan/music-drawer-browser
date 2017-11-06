@@ -15,6 +15,7 @@ import wave
 from mdp import fastica
 from scikits.audiolab import wavread, wavwrite
 from array import array
+from scipy.fftpack import fft
 
 
 folder = "/Users/lucyzhang/Github/music-drawer-browser/static/uploads/"#"/Users/lucyzhang/Github/music-drawer-browser/pyAudioAnalysis/data/mono/"
@@ -73,12 +74,21 @@ def full_compute():
 	wavwrite(sources, 'sources.wav', fs, enc)
 
 def fastICA(filename):
+	print "Plot fft"
 	#recording = mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
 	recording, fs, enc = wavread(filename)
+	
+	plt.subplot(2,1,1)
+	plt.plot(recording)
+	plt.subplot(2,1,2)
+	plt.plot(fft(recording))
+	plt.show()
+
 	sources = fastica(recording)
 	#print sources
 	print type(sources)
 	print sources.shape
+	'''
 	plt.subplot(2,1,1)
 	plt.plot(np.array(sources[:, 0]))
 	plt.title('First compoment: Time domain of ' + filename)
@@ -86,7 +96,8 @@ def fastICA(filename):
 	plt.subplot(2,1,2)
 	plt.plot(np.array(sources[:, 1]))
 	plt.title('Second compoment: Time domain of ' + filename)
-	plt.xlabel('Time'); plt.ylabel('Amplitude'); 
+	plt.xlabel('Time'); plt.ylabel('Amplitude');
+	''' 
 	plt.show()
 	#sources /= max(abs(sources), axis=0)
 	#print sources
@@ -116,7 +127,7 @@ def computeICA(filename):
 
 
 if __name__ == '__main__':
-	computeICA(folder + "canon_short.wav")
+	#computeICA(folder + "shigatsu_short.wav")
 	#mixSignals(folder + "penguindrum.wav", folder + "Yuri.wav")
 	#full_compute()
-	#fastICA(folder + "shigatsu_short.wav")
+	fastICA(folder + "shigatsu_short.wav")

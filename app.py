@@ -12,6 +12,8 @@ from pyAudioAnalysis import audioTrainTest as aT
 from pyAudioAnalysis import audioFeatureExtraction as aF
 from pyAudioAnalysis import NumpyEncoder
 
+from pyAudioAnalysis import audioSegmentation as aS
+
 import csv
 
 # for faster communication
@@ -38,6 +40,7 @@ def allowed_file(filename):
 def classify_genre(filename, chunk_seconds = CHUNK_SECONDS):
     #print filename
     return aT.fileClassification(filename, os.path.join(APP_STATIC, 'models/svmMusicGenre3'),"svm", chunk_seconds)
+
 
 
 def extract_other_features(filename):
