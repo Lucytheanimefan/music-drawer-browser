@@ -60,7 +60,7 @@ var radExpand = 50;
 var radDecrease = 5;
 
 //New instruments
-var instrumentsDict = {};
+var instrumentsDict = [];
 
 console.disableYellowBox = true;
 
@@ -271,13 +271,16 @@ function animate3d() {
             }
 
 
-            // Instruments
-            for (var key in instrumentsDict) {
-                let sphere = instrumentsDict[key];
-                //console.log(sphere);
-                sphere.scale.x = v; // SCALE
-                sphere.scale.y = v; // SCALE
-                sphere.scale.z = v;
+            // Instruments scaling
+            if (instrumentsDict.length > 0) {
+                for (var i in instrumentsDict) {
+                    //if (instrumentsDict.length > 0) {
+                    let instrSphere = instrumentsDict[i][1];
+                    //console.log(sphere);
+                    instrSphere.scale.x = v; // SCALE
+                    instrSphere.scale.y = v; // SCALE
+                    instrSphere.scale.z = v;
+                }
             }
 
             // Explode modifier
@@ -305,20 +308,29 @@ function animate3d() {
         }
 
         // Instruments
-        for (var key in instrumentsDict) {
-            console.log("Spectral centroid: " + centroid);
-            let factor = key * (key % 2 == 0 ? -1 : 1);
-            var instr = instrumentsDict[key];
-            var dist = factor * centroid * 10;
-            if (Math.abs(instr.position.x) < orbitRadius) {
-                instr.position.x += dist; // SCALE
+        //for (var key in instrumentsDict) {
+        if (instrumentsDict.length > 0) {
+            let instrument = instrumentsDict[instrumentsDict.length - 1];
+            var instrSphere = instrument[1]; // sphere
+            let speakerIndex = instrument[0]; // speakerIndex
+            console.log("Move instrument!");
+            let f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
+            //var instr = instrumentsDict[key];
+            var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
+            var okToDelete = 0;
+            if (Math.abs(instrSphere.position.x) < orbitRadius) {
+                instrSphere.position.x += dist; // SCALE
+            } else {
+                okToDelete += 1;
             }
 
-            if (Math.abs(instr.position.y) < orbitRadius) {
-                instr.position.y += dist; // SCALE
+            if (Math.abs(instrSphere.position.y) < orbitRadius) {
+                instrSphere.position.y += dist; // SCALE
+            } else {
+                okToDelete += 1;
             }
-            //sphere.scale.z = v;
         }
+
 
         // rotate cube
         if (moveCamera && rollOff != undefined && rollOff != 0) {
@@ -506,11 +518,15 @@ function particleUpdate() {
     //stats.update();
 }
 
-function createNew3DInstrument(speakerIndex = 0, i = 0) {
+function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = spectralEntropy * 50;
     let rad = zcr * 1000;
-    let sphere = createCenterSphere(rad, segments, genreColors[i]);
-    instrumentsDict[speakerIndex] = sphere;
+    let sphere = createCenterSphere(rad, segments, new THREE.Color(color));
+    console.log(color);
+    //sphere.material.color = new THREE.Color(color);
+    // Empty the array
+    //instrumentsDict = {}
+    instrumentsDict.push([speakerIndex, sphere]);
     scene.add(sphere);
 
 }

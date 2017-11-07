@@ -43,6 +43,7 @@ var useChunkedGenres = false; //true;
 var genreColors;
 var genreColor = "#ffffff";
 var genreColorArr;
+var chunkedGenres;
 
 var red = "#ff0000";
 
@@ -68,11 +69,14 @@ var AudioContext = window.AudioContext // Default
 
 function generalSetup() {
     if (useChunkedGenres) {
-        genres = $("#musicCanvas").data("genre");
+        genres = chunkedGenres = $("#musicCanvas").data("genre");
+        chunkedGenres = $("#musicCanvas").data("singlegenre");
     } else {
         genres = $("#musicCanvas").data("singlegenre");
+        chunkedGenres = $("#musicCanvas").data("genre"); //$("#musicCanvas").data("singlegenre");
     }
     genreColors = generateColorBasedOnGenre(genres);
+    chunkedGenres = generateColorBasedOnGenre(chunkedGenres, true);
     genreColor = genreColors[0];
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
@@ -167,7 +171,7 @@ function playMusic() {
                     // TODO: trigger new visual from 3d.js
                     // 
                     if (instrUpdateCount > 0) {
-                        createNew3DInstrument(instruments[instrUpdateCount][1], i);
+                        createNew3DInstrument(instruments[instrUpdateCount][1], chunkedGenres[i]);
                     }
 
                     instrUpdateCount += 1;
@@ -293,7 +297,7 @@ function replaceAll(str, find, replace) {
 }
 
 
-function generateColorBasedOnGenre(genres) {
+function generateColorBasedOnGenre(genres, useChunkedGenres=false) {
     //console.log(genres);
     var colors = [];
 
