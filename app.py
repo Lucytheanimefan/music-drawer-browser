@@ -96,7 +96,7 @@ def upload():
             wr = csv.writer(csvfile)
             wr.writerows([MidTermFeatures])
 
-        speakers = aS.get_speakers('static/uploads/angel_beats_short.wav', relativePath = APP_DATA)
+        speakers = aS.get_speakers(full_filename, relativePath = APP_DATA)
 
         return render_template("musicpage.html", speakers = json.dumps(speakers), genres = json.dumps(genre_data), single_genre = json.dumps(genre_dat), chunk_seconds = CHUNK_SECONDS,  musicfeatures = json.dumps(features), singleFeatures = json.dumps(MidTermFeatures), musicfile=str(url_for('uploaded_file',filename=filename)))
 

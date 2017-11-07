@@ -47,7 +47,10 @@ var genreColorArr;
 var red = "#ff0000";
 
 
-var roseCoordinates = [];
+// Speakers/"Instruments"
+var instruments;
+
+//var roseCoordinates = [];
 
 // 3d stuff
 var scene;
@@ -74,15 +77,17 @@ function generalSetup() {
     musicFeatures = $("#musicCanvas").data("features");
     singleMusicFeatures = $("#musicCanvas").data("singlefeatures");
     overallMusicFeatDict = { "ZCR": singleMusicFeatures[0], "energy": singleMusicFeatures[1], "entropyOfEnergy": singleMusicFeatures[2], "spectralCentroid": singleMusicFeatures[3], "spectralSpread": singleMusicFeatures[4], "spectralEntropy": singleMusicFeatures[5], "spectralFlux": singleMusicFeatures[6], "spectralRolloff": singleMusicFeatures[7], "mfcc": singleMusicFeatures.slice(8, 20) };
-    // set up singleFeatures
-    console.log(musicFeatures);
+    instruments = $("#musicCanvas").data("speakers");
+
+
+    console.log(instruments);
+    //console.log(musicFeatures);
     console.log(overallMusicFeatDict);
 
     // Set the first color so it's not white
     genreColor = genreColors[0];
 
     audioCtx = new AudioContext();
-    //$("#myAudio").attr("src", filename);
     audio = document.getElementById('myAudio');
     duration = audio.duration;
     chunkIntervalSeconds = $("#musicCanvas").data("chunkseconds");
@@ -133,25 +138,41 @@ function playMusic() {
 
         var oldTime = 0;
         var i = 0;
+        var instrUpdateCount = 0;
         audio.ontimeupdate = function() {
+            var currentTime = audio.currentTime;
             // Every chunk_seconds, update the color
-            if (Math.abs(oldTime - audio.currentTime) >= chunkIntervalSeconds) {
+            if (Math.abs(oldTime - currentTime) >= chunkIntervalSeconds) {
 
                 // Set the color
                 if (useChunkedGenres) {
                     genreColor = genreColors[i];
                     genreColorArr = genres[i][1];
-                    //console.log(genreColorArr);
                 }
 
-                //console.log("Update color to " + genreColor);
                 i += 1;
                 oldTime = audio.currentTime;
 
                 // Process features
                 processFeature(i);
             }
-            // Update other visual stuff....maybe
+            // Update other visual stuff - change in instruments
+
+            if (instrUpdateCount < instruments.length) {
+                var instrumentTime = instruments[instrUpdateCount][0];
+                //console.log(Math.round(currentTime) + "vs" + instrumentTime);
+                if (Math.round(currentTime) >= instrumentTime) {
+                    console.log(Math.round(currentTime) + "vs" + instrumentTime);
+                    console.log("Update num instruments!");
+                    // TODO: trigger new visual from 3d.js
+                    // 
+                    if (instrUpdateCount > 0) {
+                        createNew3DInstrument(instruments[instrUpdateCount][1], i);
+                    }
+
+                    instrUpdateCount += 1;
+                }
+            }
 
         };
 
@@ -170,7 +191,7 @@ function playMusic() {
     }
     //visualize();
 
-    // we're ready to receive some data!
+    // we're ready to receive some dat;a!
     // loop
     function renderFrame() {
 

@@ -51,7 +51,7 @@ var centerShapeRadius;
 var timeDomainParent, mfccSpheres;
 var sphereParent, spheres;
 var particleLength = 32; // 64 fft size
-var orbitRadius = originalOrbitRadius = 540;
+var orbitRadius = originalOrbitRadius = timeDomainOrbitRad = 540;
 
 // Frequencies
 var prevFreqArray = new Array(particleLength).fill(0);
@@ -59,7 +59,8 @@ var sphereColor = new THREE.Color("rgb(255,255,255)");
 var radExpand = 50;
 var radDecrease = 5;
 
-//
+//New instruments
+var instrumentsDict = {};
 
 console.disableYellowBox = true;
 
@@ -87,23 +88,31 @@ function init3d() {
     orbitRadius = originalOrbitRadius = overallMusicFeatDict["spectralSpread"] * 2500;
     console.log("orbitRadius: " + orbitRadius);
 
-
     let segments = overallMusicFeatDict["spectralEntropy"] * 50;
     centerShapeRadius = overallMusicFeatDict["ZCR"] * 1000;
-    geometry = new THREE.SphereGeometry(centerShapeRadius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
+    window.cube = createCenterSphere(centerShapeRadius, segments);
+    scene.add(cube);
 
-    if (doExplosion) {
-        prepareExplosion();
-    }
+
+    // if (doExplosion) {
+    //     prepareExplosion();
+    // }
 
     initParticles();
 
-    material = new THREE.MeshBasicMaterial({ color: 0x56a0d3, wireframe: true });
-    cube = new THREE.Mesh(geometry, material);
-    cube.receiveShadow = true;
-    cube.castShadow = true;
-    scene.add(cube);
     camera.position.z = 950;
+}
+
+function createCenterSphere(radius, segments, color = 0x56a0d3) {
+    geometry = new THREE.SphereGeometry(radius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
+
+
+    material = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
+    let geom = new THREE.Mesh(geometry, material);
+    geom.receiveShadow = true;
+    geom.castShadow = true;
+
+    return geom;
 }
 
 
@@ -210,16 +219,13 @@ function animate3d() {
             var rounded = 1.1 * Math.round(v);
             amplitudeCumulativeAverage = ((amplitudeCumulativeAverage * i) + v) / (i + 1);
 
-            // Alright I want an orbit for this too.
-            var sphere = timeDomainParent.children[i];
-
-            //console.log("v: " + v + ", CumAvg: " + amplitudeCumulativeAverage);
+            // Scaling for amplitude
             if (doScale) {
                 if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                     //console.log("Update scale");
 
-                    var y =  rounded * v;
-                    let val = v; //y * 2;
+                    var y = rounded * v;
+                    //let val = v; //y * 2;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
                         y = y * rounded;
@@ -233,18 +239,20 @@ function animate3d() {
                     cube.scale.y = y; // SCALE
                     cube.scale.z = y; // SCALE
 
-                    
-                    sphere.scale.x = val;
-                    sphere.scale.y = val;
-                    sphere.scale.z = val;
-                    if (genreColorArr != undefined) {
-                        //console.log(genreColorArr);
-                        let factor = i / bufferLength;
-                        let newCol = rgbToString([genreColorArr[0] * factor, genreColorArr[1] * factor, genreColorArr[2] * factor]);
-                        //console.log(newCol);
-                        var color = new THREE.Color(newCol);
-                        //console.log(color);
-                        sphere.material.color = color;
+                    if (i % centerShapeRadius == 0) {
+                        var sphere = timeDomainParent.children[i];
+                        sphere.scale.x = v;
+                        sphere.scale.y = v;
+                        sphere.scale.z = v;
+                        if (genreColorArr != undefined) {
+                            //console.log(genreColorArr);
+                            let factor = i / bufferLength;
+                            let newCol = rgbToString([genreColorArr[0] * factor, genreColorArr[1] * factor, genreColorArr[2] * factor]);
+                            //console.log(newCol);
+                            var color = new THREE.Color(newCol);
+                            //console.log(color);
+                            sphere.material.color = color;
+                        }
                     }
                     prevNum = rounded;
 
@@ -252,7 +260,7 @@ function animate3d() {
                     expandFreqOrbit = false;
                 }
 
-                var rotSpeed = Math.pow(energy,3);
+                var rotSpeed = Math.pow(energy, 3);
                 if (v > 0.8 * amplitudeCumulativeAverage) {
                     timeDomainParent.rotateX(rotSpeed);
                 } else if (v > 0.4 * amplitudeCumulativeAverage) {
@@ -260,6 +268,16 @@ function animate3d() {
                 } else {
                     timeDomainParent.rotateZ(rotSpeed);
                 }
+            }
+
+
+            // Instruments
+            for (var key in instrumentsDict) {
+                let sphere = instrumentsDict[key];
+                //console.log(sphere);
+                sphere.scale.x = v; // SCALE
+                sphere.scale.y = v; // SCALE
+                sphere.scale.z = v;
             }
 
             // Explode modifier
@@ -286,9 +304,23 @@ function animate3d() {
             }
         }
 
+        // Instruments
+        for (var key in instrumentsDict) {
+            console.log("Spectral centroid: " + centroid);
+            let factor = key * (key % 2 == 0 ? -1 : 1);
+            var instr = instrumentsDict[key];
+            var dist = factor * centroid * 10;
+            if (Math.abs(instr.position.x) < orbitRadius) {
+                instr.position.x += dist; // SCALE
+            }
+
+            if (Math.abs(instr.position.y) < orbitRadius) {
+                instr.position.y += dist; // SCALE
+            }
+            //sphere.scale.z = v;
+        }
+
         // rotate cube
-
-
         if (moveCamera && rollOff != undefined && rollOff != 0) {
             console.log("RollOff: " + rollOff);
             //let pos = Math.round(rollOff * 5000) ^ 3;
@@ -357,16 +389,19 @@ function initParticles() {
 
     // Time domain orbit
     //--------------
-    
+
     let rad = Math.pow(centerShapeRadius, 0.75);
-    let orbitRad = Math.pow(overallMusicFeatDict["ZCR"] * 100, 2.5) + 2*centerShapeRadius;
+    timeDomainOrbitRad = Math.pow(overallMusicFeatDict["ZCR"] * 100, 2.5) + 2 * centerShapeRadius;
     //originalOrbitRadius = orbitRadius;
     console.log("Time domain rad: " + rad);
     console.log("Time domain orbit radius: " + orbitRadius);
-    var timeDomainCoords = generateCircleCoordinates(timeDomainfftSize, orbitRad, 0, 0);
+    var timeDomainCoords = generateCircleCoordinates(Math.round(timeDomainfftSize / centerShapeRadius), timeDomainOrbitRad, 0, 0); // TODO: don't use timeDomainfftSize
     timeDomainParent = generateParticles(timeDomainCoords, rad, seg, seg);
     timeDomainParent.rotateX(Math.PI / 2);
     scene.add(timeDomainParent);
+
+    console.log("Time domain parent: ");
+    console.log(timeDomainParent);
 }
 
 function generateParticles(coords, radius, wSegments = 8, hSegments = 6, color = sphereColor) {
@@ -410,6 +445,8 @@ function particleRender() {
         } else {
             sphere.material.color = sphereColor;
         }
+
+
     }
 
     // Move everything apart
@@ -468,3 +505,16 @@ function particleUpdate() {
     particleRender();
     //stats.update();
 }
+
+function createNew3DInstrument(speakerIndex = 0, i = 0) {
+    let segments = spectralEntropy * 50;
+    let rad = zcr * 1000;
+    let sphere = createCenterSphere(rad, segments, genreColors[i]);
+    instrumentsDict[speakerIndex] = sphere;
+    scene.add(sphere);
+
+}
+
+// function animateNewInstrument() {
+//     var animatedID = requestAnimationFrame()
+// }

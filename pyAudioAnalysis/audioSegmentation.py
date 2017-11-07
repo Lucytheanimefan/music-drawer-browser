@@ -963,10 +963,11 @@ def speakerDiarizationEvaluateScript(folderName, LDAs):
 
 def get_speakers(filename, numSpeakers=-1, relativePath = ''):
     times, speakers_data = speakerDiarization(filename, numSpeakers, relativePath)
-    new_speaker_times = {}
+    new_speaker_times = []
     for i, speaker in enumerate(speakers_data):
         if (i != 0 and speakers_data[i-1] != speaker) or i == 0:
-            new_speaker_times[times[i]] = speaker
+            new_speaker_times.append([times[i], speaker])
+            #[times[i]] = speaker
 
     return new_speaker_times 
 
