@@ -271,17 +271,18 @@ function animate3d() {
             }
 
 
-            // Instruments scaling
-            if (instrumentsDict.length > 0) {
-                for (var i in instrumentsDict) {
-                    //if (instrumentsDict.length > 0) {
-                    let instrSphere = instrumentsDict[i][1];
-                    //console.log(sphere);
-                    instrSphere.scale.x = v; // SCALE
-                    instrSphere.scale.y = v; // SCALE
-                    instrSphere.scale.z = v;
-                }
-            }
+            // Instruments scaling - this is causing everything to freeze 
+            // if (instrumentsDict.length > 0) {
+            //     console.log("Scale instrument: " + instrumentsDict);
+            //     for (var i in instrumentsDict) {
+            //         //if (instrumentsDict.length > 0) {
+            //         let instrSphere = instrumentsDict[i][1];
+            //         //console.log(sphere);
+            //         instrSphere.scale.x = v; // SCALE
+            //         instrSphere.scale.y = v; // SCALE
+            //         instrSphere.scale.z = v;
+            //     }
+            // }
 
             // Explode modifier
             if (doExplosion) {
@@ -304,30 +305,6 @@ function animate3d() {
                     cube.rotateX(prevRotateRate - 0.01);
                     prevRotateCount += 1;
                 }
-            }
-        }
-
-        // Instruments
-        //for (var key in instrumentsDict) {
-        if (instrumentsDict.length > 0) {
-            let instrument = instrumentsDict[instrumentsDict.length - 1];
-            var instrSphere = instrument[1]; // sphere
-            let speakerIndex = instrument[0]; // speakerIndex
-            console.log("Move instrument!");
-            let f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
-            //var instr = instrumentsDict[key];
-            var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
-            var okToDelete = 0;
-            if (Math.abs(instrSphere.position.x) < orbitRadius) {
-                instrSphere.position.x += dist; // SCALE
-            } else {
-                okToDelete += 1;
-            }
-
-            if (Math.abs(instrSphere.position.y) < orbitRadius) {
-                instrSphere.position.y += dist; // SCALE
-            } else {
-                okToDelete += 1;
             }
         }
 
@@ -482,6 +459,26 @@ function particleRender() {
 
     prevFreqArray = frequencyArray;
 
+    // Instruments
+    //for (var key in instrumentsDict) {
+    if (instrumentsDict.length > 0) {
+        var instrument = instrumentsDict[instrumentsDict.length - 1];
+        var instrSphere = instrument[1]; // sphere
+        var speakerIndex = instrument[0] + 1; // speakerIndex
+        //console.log("Move instrument!");
+        let f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
+        //var instr = instrumentsDict[key];
+        var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
+        console.log("dist: " + dist);
+        if (Math.abs(instrSphere.position.x) < orbitRadius) {
+            instrSphere.position.x += dist; // SCALE
+        }
+
+        if (Math.abs(instrSphere.position.y) < orbitRadius) {
+            instrSphere.position.y += dist; // SCALE
+        }
+    }
+
 
     // ----------- MFCC
     // 
@@ -521,13 +518,14 @@ function particleUpdate() {
 function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = spectralEntropy * 50;
     let rad = zcr * 1000;
-    let sphere = createCenterSphere(rad, segments, new THREE.Color(color));
+    var sphere = createCenterSphere(rad, segments, new THREE.Color(color));
     console.log(color);
     //sphere.material.color = new THREE.Color(color);
     // Empty the array
     //instrumentsDict = {}
     instrumentsDict.push([speakerIndex, sphere]);
     scene.add(sphere);
+    console.log("Done creating new instrument");
 
 }
 
