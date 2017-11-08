@@ -184,6 +184,13 @@ function playMusic() {
         audio.onended = function() {
             cancelAnimationFrame(threeDAnimateID);
             cancelAnimationFrame(particleAnimateID);
+
+            // Terminate the tweens
+            for (var i in instrumentsDict){
+                let instr = instrumentsDict[i];
+                let tween = instr["tween"];
+                tween.stop();
+            }
         }
 
 
