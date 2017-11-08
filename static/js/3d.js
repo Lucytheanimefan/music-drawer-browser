@@ -67,6 +67,9 @@ console.disableYellowBox = true;
 function init3d() {
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+    // camera.position.set(0, .8, 1.5);
+    // camera.up = new THREE.Vector3(1, 1, 1);
+    // camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     if (useControls) {
         controls = new THREE.OrbitControls(camera);
@@ -190,9 +193,9 @@ function animate3d() {
     var docWidth = $(document).width();
 
     if (do3d && musicPlaying) {
-        if (moveCamera) {
-            TWEEN.update();
-        }
+        // if (moveCamera) {
+        //     TWEEN.update();
+        // }
 
 
         var bufferLength = analyser.fftSize;
@@ -357,6 +360,7 @@ function animate3d() {
         }
 
     }
+    TWEEN.update();
     controls.update();
     threeDAnimateID = requestAnimationFrame(animate3d);
     renderer.render(scene, camera);
@@ -469,13 +473,83 @@ function particleRender() {
         let f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
         //var instr = instrumentsDict[key];
         var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
-        console.log("dist: " + dist);
+        //console.log("dist: " + dist);
         if (Math.abs(instrSphere.position.x) < orbitRadius) {
             instrSphere.position.x += dist; // SCALE
         }
 
         if (Math.abs(instrSphere.position.y) < orbitRadius) {
             instrSphere.position.y += dist; // SCALE
+        }
+
+        for (var j in instrumentsDict) {
+            //console.log(j);
+            var instrument = instrumentsDict[j];
+            var instrSphere = instrument[1]; // sphere
+            var speakerIndex = instrument[0] // + 1; // speakerIndex
+            var firstTime = instrument[2];
+
+            //instrSphere.translateZ(0.0005);
+            // instrSphere.translateX(-0.009);
+            // instrSphere.translateZ(0.0004);
+            // //comet.translateX(-0.00425);
+            // if (speakerIndex % 2 == 0) {
+            //     instrSphere.rotation.x += 0.01;
+            // } else {
+            //     instrSphere.rotation.z += 0.01;
+            // }
+
+            if (firstTime) {
+                instrumentsDict[j][2] = false;
+                var speed = speakerIndex + 1;
+                var tilt = 0.5;
+                var distance = orbitRadius;
+
+                var orbitContainer = new THREE.Object3D();
+                orbitContainer.rotation.x = tilt;
+
+                var orbit = new THREE.Object3D();
+
+                var geometry = new THREE.CircleGeometry(distance, 100);
+                geometry.vertices.shift();
+                // var line = new THREE.Line(
+                //     geometry,
+                //     new THREE.LineBasicMaterial({ color: 'aqua' })
+                // );
+
+                //line.rotation.x = Math.PI * 0.5;
+
+                // var planet = new THREE.Mesh(
+                //     new THREE.SphereBufferGeometry(radius, 32, 32),
+                //     new THREE.MeshPhongMaterial({ color: color })
+                // );
+                // planet.position.set(distance, 0.0, 0.0);
+
+                //orbit.add(line);
+                orbit.add(instrSphere);
+
+                var tween = new TWEEN.Tween(orbit.rotation).to({ y: '+' + (Math.PI * 2) }, 10000 / speed);
+                tween.onComplete(function() {
+                    orbit.rotation.y = 0;
+                    tween.start();
+                });
+                tween.start();
+
+                orbitContainer.add(orbit);
+                scene.add(orbitContainer);
+
+
+                // var tween = new TWEEN.Tween(instrSphere.rotation).to({ y: Math.PI / 2 }, 5000 / (speakerIndex + 1));
+
+                // // and start again
+                // tween.onComplete(function() {
+                //     instrSphere.rotation.y = 0;
+                //     tween.start();
+                // });
+
+                // tween.start(); // kick off the animation
+                console.log("Started tween");
+            }
         }
     }
 
@@ -519,11 +593,11 @@ function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = spectralEntropy * 50;
     let rad = zcr * 1000;
     var sphere = createCenterSphere(rad, segments, new THREE.Color(color));
-    console.log(color);
+    //console.log(color);
     //sphere.material.color = new THREE.Color(color);
     // Empty the array
     //instrumentsDict = {}
-    instrumentsDict.push([speakerIndex, sphere]);
+    instrumentsDict.push([speakerIndex, sphere, true]);
     scene.add(sphere);
     console.log("Done creating new instrument");
 
