@@ -49,7 +49,8 @@ var red = "#ff0000";
 
 
 // Speakers/"Instruments"
-var instruments;
+// An associative array: [time, speaker index]
+var instruments = [];
 
 //var roseCoordinates = [];
 
@@ -143,6 +144,7 @@ function playMusic() {
         var oldTime = 0;
         var i = 0;
         var instrUpdateCount = 0;
+        var usedInstruments = [];
         audio.ontimeupdate = function() {
             var currentTime = audio.currentTime;
             // Every chunk_seconds, update the color
@@ -167,11 +169,30 @@ function playMusic() {
                 //console.log(Math.round(currentTime) + "vs" + instrumentTime);
                 if (Math.round(currentTime) >= instrumentTime) {
                     console.log(Math.round(currentTime) + "vs" + instrumentTime);
-                    console.log("Update num instruments!");
-                    // TODO: trigger new visual from 3d.js
-                    // 
+
+
                     if (instrUpdateCount > 0) {
-                        createNew3DInstrument(instruments[instrUpdateCount][1], chunkedGenres[i]);
+                        console.log("used instruments: ");
+                        console.log(usedInstruments);
+                        var index = instruments[instrUpdateCount][1];
+                        var newInstrumentIsUnique = 0;
+
+                        for (var j = 0; j < usedInstruments; j++) {
+                            if (usedInstruments[j] != index) {
+                                newInstrumentIsUnique += 1;
+                            }
+                        }
+                        if (newInstrumentIsUnique >= usedInstruments.length) {
+                            console.log("Update num instruments!");
+                            // Unique instrument!
+                            usedInstruments.push(index);
+                            // Only create a new instrument if it's a new speaker
+                            // createNew3DInstrument(speakerIndex = 0, color) 
+                            createNew3DInstrument(index, chunkedGenres[i]);
+                        } else {
+                            // New instrument isn't unique, we should still do something to show the change in instruments/speakers
+                        }
+
                     }
 
                     instrUpdateCount += 1;
@@ -186,7 +207,7 @@ function playMusic() {
             cancelAnimationFrame(particleAnimateID);
 
             // Terminate the tweens
-            for (var i in instrumentsDict){
+            for (var i in instrumentsDict) {
                 let instr = instrumentsDict[i];
                 let tween = instr["tween"];
                 tween.stop();
@@ -304,7 +325,7 @@ function replaceAll(str, find, replace) {
 }
 
 
-function generateColorBasedOnGenre(genres, useChunkedGenres=false) {
+function generateColorBasedOnGenre(genres, useChunkedGenres = false) {
     //console.log(genres);
     var colors = [];
 
@@ -340,11 +361,17 @@ function generateColors(seedColor, callback) {
 
 /* ---------------- Features ------------------- */
 function processFeature(index = 0) {
-    if (musicFeatures == null) {
+    if (musicFeatures == null || musicFeatures == undefined) {
         return;
     }
 
     var featureVector = musicFeatures[index];
+
+
+    if (featureVector == undefined || featureVector.length < 7) {
+        return;
+    }
+
     window.zcr = featureVector[0]; // number of times signal crosses the axis
     window.energy = featureVector[1];
     window.entropy = featureVector[2]; // measure of abrupt changes
@@ -412,15 +439,7 @@ function visualize() {
             var b = entropyDecimal * 10;
             //console.log(a + ", " + b);
             updateRoseGraphCoordinates(a, a, true);
-            // var coords = roseCoordinates[roseCount];
-            // var x = coords[0];
-            // var y = coords[1];
-            // var nextCoords = roseCoordinates[0];
-            // var nextX = nextCoords[0];
-            // var nextY = nextCoords[1];
-            //ctx.beginPath();
-            // ctx.moveTo(x,y);
-            // ctx.lineTo(nextX, nextY);
+
 
             // ctx.stroke();
             console.log("length: " + roseCoordinates.length);
