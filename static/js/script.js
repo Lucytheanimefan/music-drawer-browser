@@ -174,16 +174,18 @@ function playMusic() {
                     if (instrUpdateCount > 0) {
                         console.log("used instruments: ");
                         console.log(usedInstruments);
+
+                        // The instrument index
                         var index = instruments[instrUpdateCount][1];
                         var newInstrumentIsUnique = 0;
 
-                        for (var j = 0; j < usedInstruments; j++) {
+                        for (var j = 0; j < usedInstruments.length; j++) {
                             if (usedInstruments[j] != index) {
                                 newInstrumentIsUnique += 1;
                             }
                         }
                         if (newInstrumentIsUnique >= usedInstruments.length) {
-                            console.log("Update num instruments!");
+                            console.log("Create new instrument!");
                             // Unique instrument!
                             usedInstruments.push(index);
                             // Only create a new instrument if it's a new speaker
@@ -191,6 +193,16 @@ function playMusic() {
                             createNew3DInstrument(index, chunkedGenres[i]);
                         } else {
                             // New instrument isn't unique, we should still do something to show the change in instruments/speakers
+                            // 
+                            // Find the instrument
+                            for (var k in instrumentsDict){
+                                var instrument = instrumentsDict[k];
+                                if (instrument["speakerIndex"] == index){
+                                    // Increase 
+                                    instrumentsDict["ongoing"] = true;
+                                    break;
+                                }
+                            }
                         }
 
                     }

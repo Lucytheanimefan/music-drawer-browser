@@ -59,7 +59,10 @@ var sphereColor = new THREE.Color("rgb(255,255,255)");
 var radExpand = 50;
 var radDecrease = 5;
 
-//New instruments
+//instrumentsDict - New instruments
+//Keys: "sphere" - three.js object
+// "speakerIndex" - speaker/instrument index
+// "firstTime" - first time getting expanded out, maybe not necessary anymore
 var instrumentsDict = [];
 
 console.disableYellowBox = true;
@@ -489,7 +492,7 @@ function particleRender() {
 
                 var geometry = new THREE.CircleGeometry(distance, 100);
                 geometry.vertices.shift();
-            
+
                 orbit.add(instrSphere);
 
                 var tween = new TWEEN.Tween(orbit.rotation).to({ y: '+' + (Math.PI * 2) }, 10000 / speed);
@@ -535,9 +538,11 @@ function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = spectralEntropy * 50;
     let rad = zcr * 1000;
     var sphere = createCenterSphere(rad, segments, new THREE.Color(color));
-    instrumentsDict.push({ "speakerIndex": speakerIndex, "sphere": sphere, "firstTime": true });
+    instrumentsDict.push({ "speakerIndex": speakerIndex, "sphere": sphere, "firstTime": true, "ongoing":true });
     scene.add(sphere);
     console.log("Done creating new instrument");
+
+    // TODO: set the others ongoing to false
 
 }
 
