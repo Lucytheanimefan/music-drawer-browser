@@ -195,14 +195,18 @@ function playMusic() {
                             // New instrument isn't unique, we should still do something to show the change in instruments/speakers
                             // 
                             // Find the instrument
-                            for (var k in instrumentsDict){
-                                var instrument = instrumentsDict[k];
-                                if (instrument["speakerIndex"] == index){
-                                    // Increase 
-                                    instrumentsDict["ongoing"] = true;
-                                    break;
+                            console.log("Current instrument: " + index);
+                            for (var key in instrumentToObjectDict){
+                                if (key == index){
+                                    instrumentToObjectDict[key]["ongoing"] = true;
+                                }
+                                else{
+                                    instrumentToObjectDict[key]["ongoing"] = false;
                                 }
                             }
+                            
+                            console.log("instrumentToObjectDict:");
+                            console.log(instrumentToObjectDict);
                         }
 
                     }
