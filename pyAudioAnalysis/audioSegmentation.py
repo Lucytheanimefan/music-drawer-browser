@@ -1006,18 +1006,26 @@ def musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize
     [1] Bartsch, M. A., & Wakefield, G. H. (2005). Audio thumbnailing of popular music using chroma-based representations. 
     Multimedia, IEEE Transactions on, 7(1), 96-104.
     '''
+    print '---musicThumbnailing---'
     x = audioBasicIO.stereo2mono(x);
+
+    print 'Extract features'
     # feature extraction:
     stFeatures = aF.stFeatureExtraction(x, Fs, Fs*shortTermSize, Fs*shortTermStep)
 
+    print 'Self Similarity matrix'
+
     # self-similarity matrix
     S = selfSimilarityMatrix(stFeatures)
+
+    print 'Moving filter'
 
     # moving filter:
     M = int(round(thumbnailSize / shortTermStep))
     B = numpy.eye(M,M)
     S = scipy.signal.convolve2d(S, B, 'valid')
 
+    print 'Post-processing'
 
     # post-processing (remove main diagonal elements)
     MIN = numpy.min(S)
@@ -1050,13 +1058,17 @@ def musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize
             i2 += 1
             j2 += 1            
 
+    print 'Return'
     return (shortTermStep*i1, shortTermStep*i2, shortTermStep*j1, shortTermStep*j2, S)
 
 if __name__ == '__main__':
     folder = " /Users/lucyzhang/Github/music-drawer-browser/"
     genre_models = ["svmMusicGenre3", "svmMusicGenre6"]
     songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
-    speakerDiarization('data/mono/shigatsu_short.wav', -1, PLOT=True)
+    #speakerDiarization('data/mono/shigatsu_short.wav', -1, PLOT=True)
+    [Fs, x] = audioBasicIO.readAudioFile('data/mono/sakura_mono.wav')
+    [A1, A2, B1, B2, S] = musicThumbnailing(x, Fs)
+    #musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize=10.0, Limit1 = 0, Limit2 = 1)
     #print get_speakers('data/angel_beats_short.wav')
     #mtFileClassification("data/mono/" + songs[0], "data/" + genre_models[0], "svm", True)
 

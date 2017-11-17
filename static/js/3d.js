@@ -482,7 +482,7 @@ function particleRender() {
 
 
             if (firstTime) {
-                var speed = energy * 50; //speakerIndex + 1;
+                var speed = overallMusicFeatDict["energy"] * 50; //energy * 50; //speakerIndex + 1;
                 var tilt = Math.pow(speakerIndex, 1 / 2);
                 var distance = orbitRadius;
 
@@ -515,7 +515,28 @@ function particleRender() {
             // Previously created instruments that are now playing
             var ongoing = instrumentToObjectDict[speakerIndex]["ongoing"];
             if (ongoing) {
-                instrSphere.rotateX(0.01);
+                //instrSphere.rotateX(0.01);
+                //console.log("ONGOING - set color!");
+                //instrSphere.material.color.set(genreColor);
+
+
+                // Terminate
+                for (var i in instrumentsDict) {
+                    var instr = instrumentsDict[i];
+                    var tween = instr["tween"];
+                    //console.log(tween);
+                    if (instr["speakerIndex"] == speakerIndex) {
+                        // Pause the orbiting if instrument not ongoing
+                        console.log("Resume tween of " + speakerIndex)
+                        tween.start();
+                    } else {
+                        if (tween != undefined && tween != null) {
+                            console.log("Stop tween of " + instr["speakerIndex"]);
+                            tween.stop();
+                        }
+                    }
+                }
+
             }
         }
     }

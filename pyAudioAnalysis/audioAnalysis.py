@@ -424,6 +424,7 @@ def segmentclassifyFileWrapperHMM(wavFile, hmmModelName):
 
 
 if __name__ == "__main__":
+    thumbnailWrapper('data/mono/Shelter_mono.wav', 30)
     args = parse_arguments()
 
     if args.task == "dirMp3toWav":                                                            # Convert mp3 to wav (batch - folder)
