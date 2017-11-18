@@ -248,9 +248,9 @@ function animate3d() {
                     cube.scale.z = scaleVal; // SCALE
 
                     if (ongoingInstrument != null) {
-                        ongoingInstrument.scale.x = v;
-                        ongoingInstrument.scale.y = v;
-                        ongoingInstrument.scale.z = v;
+                        ongoingInstrument.scale.x = scaleVal;
+                        ongoingInstrument.scale.y = scaleVal;
+                        ongoingInstrument.scale.z = scaleVal;
                     }
 
                     if (i % centerShapeRadius == 0) {
@@ -511,15 +511,15 @@ function particleRender() {
         }
 
         // Ongoing instrument gets to go outside the frequency spectrum radius
-        if (ongoingInstrument) {
-            if (Math.abs(ongoingInstrument.position.x) < (instrumentExpansionFactor * originalOrbitRadius)) {
-                ongoingInstrument.position.x += 1; // SCALE
-            }
+        // if (ongoingInstrument) {
+        //     if (Math.abs(ongoingInstrument.position.x) < (instrumentExpansionFactor * originalOrbitRadius)) {
+        //         ongoingInstrument.position.x += 1; // SCALE
+        //     }
 
-            if (Math.abs(ongoingInstrument.position.y) < (instrumentExpansionFactor * originalOrbitRadius)) {
-                ongoingInstrument.position.y += 1; // SCALE
-            }
-        }
+        //     if (Math.abs(ongoingInstrument.position.y) < (instrumentExpansionFactor * originalOrbitRadius)) {
+        //         ongoingInstrument.position.y += 1; // SCALE
+        //     }
+        // }
 
 
 
@@ -540,19 +540,24 @@ function particleRender() {
                     //console.log(tween);
                     if (instr["speakerIndex"] == speakerIndex) {
                         ongoingInstrument = instrSphere;
+                        ongoingInstrument.material.color = sphereColor;
+                        //break;
+
 
                     } else {
 
-                        // Shrink orbit radii of the non ongoing instruments
-                      
-                        // If it was outside the frequency radius, move it back inside the radius
-                        if (Math.abs(instrSphere.position.x) >= 0.5*originalOrbitRadius) {
-                            instrSphere.position.x -= dist; // SCALE
-                        }
+                        instrSphere.material.color = new THREE.Color(genreColor);
 
-                        if (Math.abs(instrSphere.position.y) >= 0.5*originalOrbitRadius) {
-                            instrSphere.position.y -= dist; // SCALE
-                        }
+                        // Shrink orbit radii of the non ongoing instruments
+
+                        // If it was outside the frequency radius, move it back inside the radius
+                        // if (Math.abs(instrSphere.position.x) >= 0.5 * originalOrbitRadius) {
+                        //     instrSphere.position.x -= dist; // SCALE
+                        // }
+
+                        // if (Math.abs(instrSphere.position.y) >= 0.5 * originalOrbitRadius) {
+                        //     instrSphere.position.y -= dist; // SCALE
+                        // }
                     }
                 }
 
