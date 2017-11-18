@@ -65,6 +65,7 @@ var radDecrease = 5;
 // "firstTime" - first time getting expanded out, maybe not necessary anymore
 var instrumentsDict = [];
 var instrumentToObjectDict = {};
+var ongoingInstrument = null;
 
 console.disableYellowBox = true;
 
@@ -231,20 +232,26 @@ function animate3d() {
                 if (v > amplitudeCumulativeAverage || rounded != 1 || (prevNum != 1)) {
                     //console.log("Update scale");
 
-                    var y = rounded * v;
+                    var scaleVal = rounded * v;
                     //let val = v; //y * 2;
                     // NEED this 1.3 to determine larger magnitude changes!
                     if (v > magnitudeFactor * amplitudeCumulativeAverage) {
-                        y = y * rounded;
+                        scaleVal = scaleVal * rounded;
                         if (v > 2 * amplitudeCumulativeAverage) {
                             expandFreqOrbit = true;
                         }
                     } else {
                         expandFreqOrbit = false;
                     }
-                    cube.scale.x = y; // SCALE
-                    cube.scale.y = y; // SCALE
-                    cube.scale.z = y; // SCALE
+                    cube.scale.x = scaleVal; // SCALE
+                    cube.scale.y = scaleVal; // SCALE
+                    cube.scale.z = scaleVal; // SCALE
+
+                    if (ongoingInstrument != null){
+                        ongoingInstrument.scale.x = v;
+                        ongoingInstrument.scale.y = v;
+                        ongoingInstrument.scale.z = v;
+                    }
 
                     if (i % centerShapeRadius == 0) {
                         var sphere = timeDomainParent.children[i];
@@ -482,8 +489,8 @@ function particleRender() {
 
 
             if (firstTime) {
-                var speed = overallMusicFeatDict["energy"] * 50; //energy * 50; //speakerIndex + 1;
-                var tilt = Math.pow(speakerIndex, 1 / 2);
+                var speed = overallMusicFeatDict["energy"] * 100; //energy * 50; //speakerIndex + 1;
+                var tilt = Math.PI; //0;//Math.pow(speakerIndex, 1 / 2);
                 var distance = orbitRadius;
 
                 var orbitContainer = new THREE.Object3D();
@@ -496,7 +503,25 @@ function particleRender() {
 
                 orbit.add(instrSphere);
 
-                var tween = new TWEEN.Tween(orbit.rotation).to({ y: '+' + (Math.PI * 2) }, 10000 / speed);
+                // var circleGeometry = new THREE.CircleGeometry(3.2, 100);
+                // circleGeometry.vertices.shift();
+                // var circle = new THREE.Line(
+                //     circleGeometry,
+                //     new THREE.LineDashedMaterial({ color: 'aqua' })
+                // );
+                // circle.rotation.x = Math.PI * 0.5;
+
+                // orbit.add(circle);
+
+                var tween;
+                if (j % 3 == 0) {
+                    tween = new TWEEN.Tween(orbit.rotation).to({ z: '+' + (Math.PI * 2) }, 10000 / speed);
+                } else if (j % 2 == 0) {
+                    tween = new TWEEN.Tween(orbit.rotation).to({ y: '+' + (Math.PI * 2) }, 10000 / speed);
+                } else {
+                    tween = new TWEEN.Tween(orbit.rotation).to({ x: '+' + (Math.PI * 2) }, 10000 / speed);
+                }
+                //var tween = new TWEEN.Tween(orbit.rotation).to({ z: '+' + (Math.PI * 2) }, 10000 / speed);
                 tween.onComplete(function() {
                     orbit.rotation.y = 0;
                     tween.start();
@@ -515,26 +540,21 @@ function particleRender() {
             // Previously created instruments that are now playing
             var ongoing = instrumentToObjectDict[speakerIndex]["ongoing"];
             if (ongoing) {
-                //instrSphere.rotateX(0.01);
-                //console.log("ONGOING - set color!");
-                //instrSphere.material.color.set(genreColor);
-
-
                 // Terminate
                 for (var i in instrumentsDict) {
                     var instr = instrumentsDict[i];
                     var tween = instr["tween"];
                     //console.log(tween);
                     if (instr["speakerIndex"] == speakerIndex) {
-                        // Pause the orbiting if instrument not ongoing
-                        console.log("Resume tween of " + speakerIndex)
-                        tween.start();
-                    } else {
-                        if (tween != undefined && tween != null) {
-                            console.log("Stop tween of " + instr["speakerIndex"]);
-                            tween.stop();
-                        }
+                        
+                        ongoingInstrument = instrSphere;
+                        break;
                     }
+
+                    // } else {
+                    //     instrSphere.rotateX(0.01);
+               
+                    // }
                 }
 
             }
