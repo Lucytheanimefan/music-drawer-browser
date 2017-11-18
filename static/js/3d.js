@@ -172,9 +172,6 @@ function updateVertices(xChange, yChange) {
 
 function explode(explodeScale) {
     for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
-        //var rand = energy * (Math.random() > 0.5 ? 1 : -1);
-        //var rand = 1;
-
         geometry.vertices[i].x += explodeScale * 0.005;
         geometry.vertices[i].y += explodeScale * 0.0005;
         geometry.vertices[i].z += explodeScale * 0.00005;
@@ -198,11 +195,6 @@ function animate3d() {
     var docWidth = $(document).width();
 
     if (do3d && musicPlaying) {
-        // if (moveCamera) {
-        //     TWEEN.update();
-        // }
-
-
         var bufferLength = analyser.fftSize;
         var timeDomainArray = new Uint8Array(bufferLength);
 
@@ -484,7 +476,8 @@ function particleRender() {
         }
 
         if (firstTime) {
-            var speed = overallMusicFeatDict["energy"] * 100; //energy * 50; //speakerIndex + 1;
+            var speed = energy * 50; //speakerIndex + 1;
+            //console.log("Speed: " + speed);
             var tilt = Math.PI / 2; //0;//Math.pow(speakerIndex, 1 / 2);
             //var distance = orbitRadius + 20 * j;
 
