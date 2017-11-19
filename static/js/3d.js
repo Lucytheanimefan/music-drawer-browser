@@ -66,6 +66,7 @@ var radDecrease = 5;
 var instrumentsDict = [];
 var instrumentToObjectDict = {};
 var ongoingInstrument = null;
+var ongoingInstrumentGeometry = null;
 
 console.disableYellowBox = true;
 
@@ -112,14 +113,15 @@ function init3d() {
 }
 
 function createCenterSphere(radius, segments, color = 0x56a0d3) {
-    geometry = new THREE.SphereGeometry(radius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
+    var geometry = new THREE.SphereGeometry(radius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
 
 
-    material = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
+    var material = new THREE.MeshBasicMaterial({ color: color, wireframe: true });
     let geom = new THREE.Mesh(geometry, material);
     geom.receiveShadow = true;
     geom.castShadow = true;
 
+    // geom is all we care about though (mostly)
     return geom;
 }
 
@@ -153,8 +155,8 @@ function animateCamera(posX = 1, posY = 1, posZ = 1) {
 
 function prepareExplosion() {
     var explodeModifier = new THREE.ExplodeModifier();
-    explodeModifier.modify(geometry);
-    geometry.verticesNeedUpdate = true;
+    explodeModifier.modify(ongoingInstrumentGeometry);
+    ongoingInstrumentGeometry.verticesNeedUpdate = true;
 }
 
 function updateVertices(xChange, yChange) {
@@ -171,14 +173,14 @@ function updateVertices(xChange, yChange) {
 }
 
 function explode(explodeScale) {
-    for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
-        geometry.vertices[i].x += explodeScale * 0.005;
-        geometry.vertices[i].y += explodeScale * 0.0005;
-        geometry.vertices[i].z += explodeScale * 0.00005;
-        geometry.verticesNeedUpdate = true;
-        var A = geometry.vertices[i + 0]
-        var B = geometry.vertices[i + 1]
-        var C = geometry.vertices[i + 2]
+    for (var i = 0; i < ongoingInstrumentGeometry.vertices.length - 3; i += 2) {
+        ongoingInstrumentGeometry.vertices[i].x += explodeScale * 0.005;
+        ongoingInstrumentGeometry.vertices[i].y += explodeScale * 0.0005;
+        ongoingInstrumentGeometry.vertices[i].z += explodeScale * 0.00005;
+        ongoingInstrumentGeometry.verticesNeedUpdate = true;
+        var A = ongoingInstrumentGeometry.vertices[i + 0]
+        var B = ongoingInstrumentGeometry.vertices[i + 1]
+        var C = ongoingInstrumentGeometry.vertices[i + 2]
 
         var scale = 1 + Math.random() * 0.05;
         A.multiplyScalar(scale);
@@ -276,14 +278,6 @@ function animate3d() {
                 }
             }
 
-
-            // Explode modifier
-            if (doExplosion) {
-                if (v > (4 * amplitudeCumulativeAverage)) {
-                    var rand = energy * (Math.random() > 0.5 ? 1 : -1);
-                    explode(rand);
-                }
-            }
 
             if (doRotation) {
                 if (v >= magnitudeFactor * amplitudeCumulativeAverage) {
@@ -454,54 +448,100 @@ function particleRender() {
     prevFreqArray = frequencyArray;
 
     // Instruments
+    if (ongoingInstrument != null) {
+        ongoingInstrument.material.color = sphereColor;
 
+        var expansionFactor = zcr * 10;
+        var dist = overallMusicFeatDict["spectralCentroid"] * 10;
+        if (Math.abs(ongoingInstrument.position.x) < expansionFactor * originalOrbitRadius) {
+            //console.log("Add x to ongoingInstrument");
+            ongoingInstrument.position.x += dist; // SCALE
+        }
+
+        if (Math.abs(ongoingInstrument.position.y) < expansionFactor * originalOrbitRadius) {
+            //console.log("Add y to ongoingInstrument");
+            ongoingInstrument.position.y += dist; // SCALE
+        }
+    }
+
+    // Explode the previous instruments
+    for (var j = 0; j < instrumentsDict.length - 1; j++) {
+        //console.log(j);
+        var instrument = instrumentsDict[j];
+        var instrSphere = instrument["sphere"]; // sphere
+        var speakerIndex = instrument["speakerIndex"] // + 1; // speakerIndex
+
+        var geometry = instrSphere.geometry;
+
+        var explodeScale = energy * (Math.random() > 0.5 ? 1 : -1);
+
+        instrSphere.material.color = new THREE.Color(genreColor);
+        //console.log("Explode!");
+        //console.log(instrSphere);
+        for (var i = 0; i < geometry.vertices.length - 3; i += 2) {
+            geometry.vertices[i].x += explodeScale * 0.005;
+            geometry.vertices[i].y += explodeScale * 0.0005;
+            geometry.vertices[i].z += explodeScale * 0.00005;
+            geometry.verticesNeedUpdate = true;
+            var A = geometry.vertices[i + 0]
+            var B = geometry.vertices[i + 1]
+            var C = geometry.vertices[i + 2]
+
+            var scale = 1 + Math.random() * 0.05;
+            A.multiplyScalar(scale);
+            B.multiplyScalar(scale);
+            C.multiplyScalar(scale);
+        }
+    }
+
+    /* ------ Old --------- */
     var instrumentExpansionFactor = 1.5;
     if (instrumentsDict.length > 0) {
 
-        // The latest instrument
-        var j = instrumentsDict.length - 1
-        var instrument = instrumentsDict[j];
-        var instrSphere = instrument["sphere"]; // sphere
-        var speakerIndex = instrument["speakerIndex"] + 1; // speakerIndex
-        var f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
-        var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
-        var firstTime = instrument["firstTime"];
+        // // The latest instrument
+        // var j = instrumentsDict.length - 1
+        // var instrument = instrumentsDict[j];
+        // var instrSphere = instrument["sphere"]; // sphere
+        // var speakerIndex = instrument["speakerIndex"] + 1; // speakerIndex
+        // var f = speakerIndex * (speakerIndex % 2 == 0 ? -1 : 1);
+        // var dist = f * overallMusicFeatDict["spectralCentroid"] * 10;
+        // var firstTime = instrument["firstTime"];
 
-        if (Math.abs(instrSphere.position.x) < 0.5 * originalOrbitRadius) {
-            instrSphere.position.x += dist; // SCALE
-        }
+        // if (Math.abs(instrSphere.position.x) < 0.5 * originalOrbitRadius) {
+        //     instrSphere.position.x += dist; // SCALE
+        // }
 
-        if (Math.abs(instrSphere.position.y) < 0.5 * originalOrbitRadius) {
-            instrSphere.position.y += dist; // SCALE
-        }
+        // if (Math.abs(instrSphere.position.y) < 0.5 * originalOrbitRadius) {
+        //     instrSphere.position.y += dist; // SCALE
+        // }
 
-        if (firstTime) {
-            var speed = energy * 50; //speakerIndex + 1;
-            //console.log("Speed: " + speed);
-            var tilt = Math.PI / 2; //0;//Math.pow(speakerIndex, 1 / 2);
-            //var distance = orbitRadius + 20 * j;
+        // if (firstTime) {
+        //     var speed = energy * 50; //speakerIndex + 1;
+        //     //console.log("Speed: " + speed);
+        //     var tilt = Math.PI / 2; //0;//Math.pow(speakerIndex, 1 / 2);
+        //     //var distance = orbitRadius + 20 * j;
 
-            var orbitContainer = new THREE.Object3D();
-            orbitContainer.rotation.z = tilt;
+        //     var orbitContainer = new THREE.Object3D();
+        //     orbitContainer.rotation.z = tilt;
 
-            var orbit = new THREE.Object3D();
+        //     var orbit = new THREE.Object3D();
 
-            orbit.add(instrSphere);
+        //     orbit.add(instrSphere);
 
-            var tween = new TWEEN.Tween(orbit.rotation).to({ z: '+' + (Math.PI * 2) }, 10000 / speed);
-            tween.onComplete(function() {
-                orbit.rotation.y = 0;
-                tween.start();
-            });
-            tween.start();
+        //     var tween = new TWEEN.Tween(orbit.rotation).to({ z: '+' + (Math.PI * 2) }, 10000 / speed);
+        //     tween.onComplete(function() {
+        //         orbit.rotation.y = 0;
+        //         tween.start();
+        //     });
+        //     tween.start();
 
-            orbitContainer.add(orbit);
-            scene.add(orbitContainer);
+        //     orbitContainer.add(orbit);
+        //     scene.add(orbitContainer);
 
-            instrumentsDict[j]["firstTime"] = false;
-            instrumentsDict[j]["tween"] = tween;
-            console.log("Started tween");
-        }
+        //     instrumentsDict[j]["firstTime"] = false;
+        //     instrumentsDict[j]["tween"] = tween;
+        //     console.log("Started tween");
+        // }
 
         // Ongoing instrument gets to go outside the frequency spectrum radius
         // if (ongoingInstrument) {
@@ -516,46 +556,37 @@ function particleRender() {
 
 
 
-        for (var j in instrumentsDict) {
-            //console.log(j);
-            var instrument = instrumentsDict[j];
-            var instrSphere = instrument["sphere"]; // sphere
-            var speakerIndex = instrument["speakerIndex"] // + 1; // speakerIndex
-            var firstTime = instrument["firstTime"];
+        // for (var j in instrumentsDict) {
+        //     //console.log(j);
+        //     var instrument = instrumentsDict[j];
+        //     var instrSphere = instrument["sphere"]; // sphere
+        //     var speakerIndex = instrument["speakerIndex"] // + 1; // speakerIndex
+        //     var firstTime = instrument["firstTime"];
 
-            // Previously created instruments that are now playing
-            var ongoing = instrumentToObjectDict[speakerIndex]["ongoing"];
-            if (ongoing) {
-                // Terminate
-                for (var i in instrumentsDict) {
-                    var instr = instrumentsDict[i];
-                    var tween = instr["tween"];
-                    //console.log(tween);
-                    if (instr["speakerIndex"] == speakerIndex) {
-                        ongoingInstrument = instrSphere;
-                        ongoingInstrument.material.color = sphereColor;
-                        //break;
+        //     // Previously created instruments that are now playing
+        //     var ongoing = instrumentToObjectDict[speakerIndex]["ongoing"];
+        //     if (ongoing) {
+        //         // Terminate
+        //         for (var i in instrumentsDict) {
+        //             var instr = instrumentsDict[i];
+        //             var tween = instr["tween"];
+        //             //console.log(tween);
+        //             if (instr["speakerIndex"] == speakerIndex) {
+        //                 ongoingInstrument = instrSphere;
+        //                 ongoingInstrument.material.color = sphereColor;
+        //                 //break;
 
 
-                    } else {
+        //             } else {
 
-                        instrSphere.material.color = new THREE.Color(genreColor);
+        //                 instrSphere.material.color = new THREE.Color(genreColor);
 
-                        // Shrink orbit radii of the non ongoing instruments
+        //                 // Shrink orbit radii of the non ongoing instruments
+        //             }
+        //         }
 
-                        // If it was outside the frequency radius, move it back inside the radius
-                        // if (Math.abs(instrSphere.position.x) >= 0.5 * originalOrbitRadius) {
-                        //     instrSphere.position.x -= dist; // SCALE
-                        // }
-
-                        // if (Math.abs(instrSphere.position.y) >= 0.5 * originalOrbitRadius) {
-                        //     instrSphere.position.y -= dist; // SCALE
-                        // }
-                    }
-                }
-
-            }
-        }
+        //     }
+        // }
     }
 
     renderer.render(scene, camera);
@@ -584,12 +615,43 @@ function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = spectralEntropy * 50;
     let rad = zcr * 900;
     var sphere = createCenterSphere(rad, segments, new THREE.Color(color));
-    instrumentsDict.push({ "speakerIndex": speakerIndex, "sphere": sphere, "firstTime": true });
-    instrumentToObjectDict[speakerIndex] = { "sphere": sphere, "ongoing": true };
+    //var sphere = geom;
     scene.add(sphere);
-    console.log("Done creating new instrument");
 
-    // TODO: set the others ongoing to false
+    ongoingInstrument = sphere;
+    ongoingInstrumentGeometry = sphere.geometry;
+
+    instrumentsDict.push({ "speakerIndex": speakerIndex, "sphere": sphere, "firstTime": true });
+    //instrumentToObjectDict[speakerIndex] = { "sphere": sphere, "ongoing": true };
+
+    // Create/add to orbit
+    var speed = energy * 50; //speakerIndex + 1;
+    console.log("Speed: " + speed);
+    var tilt = Math.PI / 2; //0;//Math.pow(speakerIndex, 1 / 2);
+
+    var orbitContainer = new THREE.Object3D();
+    orbitContainer.rotation.z = tilt;
+
+    var orbit = new THREE.Object3D();
+
+    orbit.add(sphere);
+
+    var tween = new TWEEN.Tween(orbit.rotation).to({ z: '+' + (Math.PI * 2) }, 10000 / speed);
+    tween.onComplete(function() {
+        orbit.rotation.y = 0;
+        tween.start();
+    });
+    tween.start();
+
+    console.log(tween);
+    console.log("Tween started")
+
+    orbitContainer.add(orbit);
+    scene.add(orbitContainer);
+
+    //instrumentsDict[j]["firstTime"] = false;
+    //instrumentsDict[j]["tween"] = tween;
+    console.log("Started tween");
 
 }
 

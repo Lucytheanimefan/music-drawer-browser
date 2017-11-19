@@ -168,7 +168,7 @@ function playMusic() {
                 var instrumentTime = instruments[instrUpdateCount][0];
                 //console.log(Math.round(currentTime) + "vs" + instrumentTime);
                 if (Math.round(currentTime) >= instrumentTime) {
-                    console.log(Math.round(currentTime) + "vs" + instrumentTime);
+                    console.log(Math.round(currentTime) + " vs. " + instrumentTime);
 
 
                     if (instrUpdateCount > 0) {
@@ -184,30 +184,41 @@ function playMusic() {
                                 newInstrumentIsUnique += 1;
                             }
                         }
-                        if (newInstrumentIsUnique >= usedInstruments.length) {
-                            console.log("Create new instrument!");
-                            // Unique instrument!
-                            usedInstruments.push(index);
-                            // Only create a new instrument if it's a new speaker
-                            // createNew3DInstrument(speakerIndex = 0, color) 
-                            createNew3DInstrument(index, chunkedGenres[i]);
-                        } else {
-                            // New instrument isn't unique, we should still do something to show the change in instruments/speakers
-                            // 
-                            // Find the instrument
-                            console.log("Current instrument: " + index);
-                            for (var key in instrumentToObjectDict){
-                                if (key == index){
-                                    instrumentToObjectDict[key]["ongoing"] = true;
-                                }
-                                else{
-                                    instrumentToObjectDict[key]["ongoing"] = false;
-                                }
-                            }
-                            
-                            console.log("instrumentToObjectDict:");
-                            console.log(instrumentToObjectDict);
+
+                        if (ongoingInstrument != null && ongoingInstrument != undefined){
+                            // explode the previous instrument
+                            console.log("Explode previous instrument");
+                            prepareExplosion();
+                            //explode(2); 
                         }
+
+                        // Make a new instrument
+                        createNew3DInstrument(index, chunkedGenres[i]);
+
+                        // if (newInstrumentIsUnique >= usedInstruments.length) {
+                        //     console.log("Create new instrument!");
+                        //     // Unique instrument!
+                        //     usedInstruments.push(index);
+                        //     // Only create a new instrument if it's a new speaker
+                        //     // createNew3DInstrument(speakerIndex = 0, color) 
+                        //     createNew3DInstrument(index, chunkedGenres[i]);
+                        // } else {
+                        //     // New instrument isn't unique, we should still do something to show the change in instruments/speakers
+                        //     // 
+                        //     // Find the instrument
+                        //     console.log("Current instrument: " + index);
+                        //     for (var key in instrumentToObjectDict){
+                        //         if (key == index){
+                        //             instrumentToObjectDict[key]["ongoing"] = true;
+                        //         }
+                        //         else{
+                        //             instrumentToObjectDict[key]["ongoing"] = false;
+                        //         }
+                        //     }
+                            
+                        //     console.log("instrumentToObjectDict:");
+                        //     console.log(instrumentToObjectDict);
+                        // }
 
                     }
 
