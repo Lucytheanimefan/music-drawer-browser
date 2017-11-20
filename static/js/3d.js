@@ -110,7 +110,7 @@ function init3d() {
 function createCenterSphere(radius, segments, color = 0x56a0d3, wireframe = true) {
     var geometry = new THREE.SphereGeometry(radius, segments, segments); //.BoxGeometry(200, 200, 200, 10, 10, 10);
 
-
+    console.log("Wireframe: "+ wireframe);
     var material = new THREE.MeshBasicMaterial({ color: color, wireframe: wireframe });
     let geom = new THREE.Mesh(geometry, material);
     geom.receiveShadow = true;
@@ -465,15 +465,16 @@ function particleRender() {
         
         var instrument = instrumentsDict[j];
         var instrSphere = instrument["sphere"]; // sphere
-        var speakerIndex = instrument["speakerIndex"] // + 1; // speakerIndex
+        var speakerIndex = instrument["speakerIndex"]; // + 1; // speakerIndex
 
+        instrSphere.material.wireframe = false;
         var geometry = instrSphere.geometry;
 
         var explodeScale = energy * 100;// * (Math.random() > 0.5 ? 1 : -1);//energy * 100; //* (Math.random() > 0.5 ? 1 : -1);
 
-        console.log("Explode scale: " + explodeScale);
+        //console.log("Explode scale: " + explodeScale);
 
-        instrSphere.material.color = new THREE.Color(genreColor);
+        //instrSphere.material.color = new THREE.Color(genreColor);
         //console.log("Explode!");
         //console.log(instrSphere);
         var count = 0;
@@ -525,7 +526,9 @@ function particleUpdate() {
 function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = (spectralEntropy * 50) + 5;
     let rad = zcr * 900;
-    var sphere = createCenterSphere(rad, segments, new THREE.Color(color), false);
+    var sphere = createCenterSphere(rad, segments, new THREE.Color(color));//, false);
+    sphere.receiveShadow = true;
+    sphere.castShadow = true;
     //var sphere = geom;
     scene.add(sphere);
 
