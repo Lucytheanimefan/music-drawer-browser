@@ -479,9 +479,9 @@ function particleRender() {
         var count = 0;
         for (var i = 0; i < geometry.vertices.length - 4; i += 2) {
             //console.log("Explode vertex: " + i);
-            geometry.vertices[i].x += count;//explodeScale * 0.005;
-            geometry.vertices[i].y += count;//explodeScale * 0.005;
-            geometry.vertices[i].z += count;//explodeScale * 0.005;
+            geometry.vertices[i].x += count * 0.005;//explodeScale * 0.005;
+            geometry.vertices[i].y += count * 0.0005;//explodeScale * 0.005;
+            geometry.vertices[i].z += count * 0.00005;//explodeScale * 0.005;
             
             geometry.verticesNeedUpdate = true;
 
@@ -491,7 +491,7 @@ function particleRender() {
             var D = geometry.vertices[i + 3];
 
             //var scale = 1 + Math.random() * 0.05;
-            var scale = (geometry.vertices.length - count) / (geometry.vertices.length);//Math.random();
+            var scale = (geometry.vertices.length) / (geometry.vertices.length - i);//Math.random();
             A.multiplyScalar(scale);
             B.multiplyScalar(scale);
             C.multiplyScalar(scale);
@@ -523,7 +523,7 @@ function particleUpdate() {
 }
 
 function createNew3DInstrument(speakerIndex = 0, color) {
-    let segments = spectralEntropy * 50;
+    let segments = (spectralEntropy * 50) + 5;
     let rad = zcr * 900;
     var sphere = createCenterSphere(rad, segments, new THREE.Color(color), false);
     //var sphere = geom;
