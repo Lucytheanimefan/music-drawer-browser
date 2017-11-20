@@ -188,7 +188,7 @@ function playMusic() {
                         if (ongoingInstrument != null && ongoingInstrument != undefined){
                             // explode the previous instrument
                             console.log("Explode previous instrument");
-                            prepareExplosion();
+                            //prepareExplosion();
                             //explode(2); 
                         }
 
