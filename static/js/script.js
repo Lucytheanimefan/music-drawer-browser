@@ -42,7 +42,7 @@ var genres;
 var useChunkedGenres = false; //true;
 var genreColors;
 var genreColor = "#ffffff";
-var genreColorArr;
+//var genreColorArr;
 var chunkedGenres;
 
 var red = "#ff0000";
@@ -69,13 +69,13 @@ var AudioContext = window.AudioContext // Default
     false;
 
 function generalSetup() {
-    if (useChunkedGenres) {
-        genres = chunkedGenres = $("#musicCanvas").data("genre");
-        chunkedGenres = $("#musicCanvas").data("singlegenre");
-    } else {
+    // if (useChunkedGenres) {
+    //     genres = chunkedGenres = $("#musicCanvas").data("genre");
+    //     chunkedGenres = $("#musicCanvas").data("singlegenre");
+    // } else {
         genres = $("#musicCanvas").data("singlegenre");
         chunkedGenres = $("#musicCanvas").data("genre"); //$("#musicCanvas").data("singlegenre");
-    }
+    //}
     genreColors = generateColorBasedOnGenre(genres);
     chunkedGenres = generateColorBasedOnGenre(chunkedGenres, true);
     genreColor = genreColors[0];
@@ -151,10 +151,10 @@ function playMusic() {
             if (Math.abs(oldTime - currentTime) >= chunkIntervalSeconds) {
 
                 // Set the color
-                if (useChunkedGenres) {
+                //if (useChunkedGenres) {
                     genreColor = genreColors[i];
-                    genreColorArr = genres[i][1];
-                }
+                    //genreColorArr = genres[i][1];
+                //}
 
                 i += 1;
                 oldTime = audio.currentTime;

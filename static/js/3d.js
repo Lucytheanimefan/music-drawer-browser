@@ -247,15 +247,6 @@ function animate3d() {
                         sphere.scale.x = v;
                         sphere.scale.y = v;
                         sphere.scale.z = v;
-                        if (genreColorArr != undefined) {
-                            //console.log(genreColorArr);
-                            let factor = i / bufferLength;
-                            let newCol = rgbToString([genreColorArr[0] * factor, genreColorArr[1] * factor, genreColorArr[2] * factor]);
-                            //console.log(newCol);
-                            var color = new THREE.Color(newCol);
-                            //console.log(color);
-                            sphere.material.color = color;
-                        }
                     }
                     prevNum = rounded;
 
@@ -362,7 +353,7 @@ function initParticles() {
     // Time domain orbit
     //--------------
 
-    let rad = Math.pow(centerShapeRadius, 0.75);
+    let rad = Math.pow(centerShapeRadius, 0.5);
     timeDomainOrbitRad = Math.pow(overallMusicFeatDict["ZCR"] * 100, 2.5) + 2 * centerShapeRadius;
     //originalOrbitRadius = orbitRadius;
     console.log("Time domain rad: " + rad);
@@ -370,6 +361,7 @@ function initParticles() {
     var timeDomainCoords = generateCircleCoordinates(Math.round(timeDomainfftSize / centerShapeRadius), timeDomainOrbitRad, 0, 0); // TODO: don't use timeDomainfftSize
     timeDomainParent = generateParticles(timeDomainCoords, rad, seg, seg);
     timeDomainParent.rotateX(Math.PI / 2);
+    // Don't add the time domain parent - it's pretty distracting :( )
     scene.add(timeDomainParent);
 
     console.log("Time domain parent: ");
@@ -444,7 +436,8 @@ function particleRender() {
 
     // Instruments
     if (ongoingInstrument != null) {
-        ongoingInstrument.material.color = sphereColor;
+
+        //ongoingInstrument.material.color.set(genreColor);//sphereColor;
 
         var expansionFactor = zcr * 10;
         var dist = overallMusicFeatDict["spectralCentroid"] * 10;
@@ -474,9 +467,6 @@ function particleRender() {
 
         //console.log("Explode scale: " + explodeScale);
 
-        //instrSphere.material.color = new THREE.Color(genreColor);
-        //console.log("Explode!");
-        //console.log(instrSphere);
         var count = 0;
         for (var i = 0; i < geometry.vertices.length - 4; i += 2) {
             //console.log("Explode vertex: " + i);
@@ -525,10 +515,13 @@ function particleUpdate() {
 
 function createNew3DInstrument(speakerIndex = 0, color) {
     let segments = (spectralEntropy * 50) + 5;
-    let rad = zcr * 900;
+    
+    let rad = zcr * 700;//Math.pow(overallMusicFeatDict["ZCR"] * (speakerIndex + 1)*50, 2);//Math.pow((speakerIndex + 1),2) * 10;//zcr * 800;
+    console.log("Instrument rad: " + rad);
     var sphere = createCenterSphere(rad, segments, new THREE.Color(color));//, false);
     sphere.receiveShadow = true;
     sphere.castShadow = true;
+    //sphere.material.color.set(color);
     //var sphere = geom;
     scene.add(sphere);
 
