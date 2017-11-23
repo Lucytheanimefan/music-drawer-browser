@@ -1065,9 +1065,9 @@ if __name__ == '__main__':
     folder = " /Users/lucyzhang/Github/music-drawer-browser/"
     genre_models = ["svmMusicGenre3", "svmMusicGenre6"]
     songs = ["Heavy_mono.wav","sakura_mono.wav", "Shelter_mono.wav", "ZenZenZense_mono.wav"]
-    #speakerDiarization('data/mono/shigatsu_short.wav', -1, PLOT=True)
-    [Fs, x] = audioBasicIO.readAudioFile('data/mono/sakura_mono.wav')
-    [A1, A2, B1, B2, S] = musicThumbnailing(x, Fs)
+    speakerDiarization('data/mono/shigatsu_short.wav', -1, PLOT=True)
+    #[Fs, x] = audioBasicIO.readAudioFile('data/mono/sakura_mono.wav')
+    #[A1, A2, B1, B2, S] = musicThumbnailing(x, Fs)
     #musicThumbnailing(x, Fs, shortTermSize=1.0, shortTermStep=0.5, thumbnailSize=10.0, Limit1 = 0, Limit2 = 1)
     #print get_speakers('data/angel_beats_short.wav')
     #mtFileClassification("data/mono/" + songs[0], "data/" + genre_models[0], "svm", True)
