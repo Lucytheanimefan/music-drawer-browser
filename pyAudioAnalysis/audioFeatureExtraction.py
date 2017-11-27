@@ -502,15 +502,35 @@ def stSpectogram(signal, Fs, Win, Step, PLOT=False):
 
     print(__file__ + ': Specgram dimensions: ')
     print(specgram.shape)
-    print(specgram)
+    #print(specgram)
+
     # Median filter
     # TODO: try with different kernel sizes (2nd argument to medfilt)
     filteredh = scipy.signal.medfilt(specgram)
     filteredp = scipy.signal.medfilt(specgram.T)
+    
     print('Med filtered dimensions: ')
-    print(filteredh)
-    print(filteredp)
 
+    # Binary mask (there must be some fancy list comprehension way to do this)
+    #items = [(i, j) for i, j in zip(list1, list2) if i >= 1]
+    #tuple1, tuple2 = zip(*items)
+    '''
+    rowsh, colsh = filteredh.shape
+    rowsp, colsp = filteredp.shape
+    Mh = [[0 for x in range(rowsh)] for y in range(colsh)] 
+    Mp = [[0 for x in range(rowsp)] for y in range(colsp)] 
+    for j in range(colsh):
+        for i in range(rowsh):
+            if filteredh[i][j] >= filteredp[i][j]:
+                Mh[i][j] = 1
+                Mp[i][j] = 0
+            else:
+                Mp[i][j] = 1
+                Mh[i][j] = 0
+
+    print Mh
+    print Mp
+    '''
     filtered = [filteredh, filteredp]
 
     for i, specgram in enumerate(filtered):
