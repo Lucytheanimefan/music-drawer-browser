@@ -7,12 +7,13 @@ import cPickle
 import aifc
 import math
 from numpy import NaN, Inf, arange, isscalar, array
+import scipy
 from scipy.fftpack import rfft
 from scipy.fftpack import fft
 from scipy.fftpack.realtransforms import dct
 from scipy.signal import fftconvolve
 from matplotlib.mlab import find
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from scipy import linalg as la
 import audioTrainTest as aT
 import audioBasicIO
@@ -499,29 +500,46 @@ def stSpectogram(signal, Fs, Win, Step, PLOT=False):
         else:
             specgram = numpy.vstack((specgram, X))
 
-    FreqAxis = [((f + 1) * Fs) / (2 * nfft) for f in range(specgram.shape[1])]
-    TimeAxis = [(t * Step) / Fs for t in range(specgram.shape[0])]
+    print(__file__ + ': Specgram dimensions: ')
+    print(specgram.shape)
+    print(specgram)
+    # Median filter
+    # TODO: try with different kernel sizes (2nd argument to medfilt)
+    filteredh = scipy.signal.medfilt(specgram)
+    filteredp = scipy.signal.medfilt(specgram.T)
+    print('Med filtered dimensions: ')
+    print(filteredh)
+    print(filteredp)
 
-    '''
-    if (PLOT):
-        fig, ax = plt.subplots()
-        imgplot = plt.imshow(specgram.transpose()[::-1, :])
-        Fstep = int(nfft / 5.0)
-        FreqTicks = range(0, int(nfft) + Fstep, Fstep)
-        FreqTicksLabels = [str(Fs / 2 - int((f * Fs) / (2 * nfft))) for f in FreqTicks]
-        ax.set_yticks(FreqTicks)
-        ax.set_yticklabels(FreqTicksLabels)
-        TStep = countFrames/3
-        TimeTicks = range(0, countFrames, TStep)
-        TimeTicksLabels = ['%.2f' % (float(t * Step) / Fs) for t in TimeTicks]
-        ax.set_xticks(TimeTicks)
-        ax.set_xticklabels(TimeTicksLabels)
-        ax.set_xlabel('time (secs)')
-        ax.set_ylabel('freq (Hz)')
-        imgplot.set_cmap('jet')
-        plt.colorbar()
-        plt.show()
-    '''
+    filtered = [filteredh, filteredp]
+
+    for i, specgram in enumerate(filtered):
+        #specgram = filtered
+        sub = 211 + i
+        ax = plt.subplot(sub)
+        FreqAxis = [((f + 1) * Fs) / (2 * nfft) for f in range(specgram.shape[1])]
+        TimeAxis = [(t * Step) / Fs for t in range(specgram.shape[0])]
+        
+        if (PLOT):
+            #fig, ax = plt.subplots()
+            imgplot = plt.imshow(specgram.transpose()[::-1, :])
+            Fstep = int(nfft / 5.0)
+            FreqTicks = range(0, int(nfft) + Fstep, Fstep)
+            FreqTicksLabels = [str(Fs / 2 - int((f * Fs) / (2 * nfft))) for f in FreqTicks]
+            ax.set_yticks(FreqTicks)
+            ax.set_yticklabels(FreqTicksLabels)
+            TStep = countFrames/3
+            TimeTicks = range(0, countFrames, TStep)
+            TimeTicksLabels = ['%.2f' % (float(t * Step) / Fs) for t in TimeTicks]
+            ax.set_xticks(TimeTicks)
+            ax.set_xticklabels(TimeTicksLabels)
+            ax.set_xlabel('time (secs)')
+            ax.set_ylabel('freq (Hz)')
+            plt.title('Spectogram ' + str(i))
+            imgplot.set_cmap('jet')
+            plt.colorbar()
+
+    plt.show()
 
     return (specgram, TimeAxis, FreqAxis)
 
